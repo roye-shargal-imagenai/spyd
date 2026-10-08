@@ -420,6 +420,18 @@ export const createTerminalRouter = () => {
 		 * optional: a board pane knows the conversation id it launched with but not
 		 * the directory Claude filed it under, so the id alone has to be enough.
 		 */
+		/**
+		 * What a waiting session wants: its last tool call with no result yet
+		 * (a command, an edit, a question). Home and the sidebar show it so you
+		 * can answer without opening the session.
+		 */
+		pendingTool: publicProcedure
+			.input(z.object({ sessionId: z.string() }))
+			.query(async ({ input }) => {
+				const { readPendingTool } = await import("main/lib/claude-sessions");
+				return readPendingTool(input);
+			}),
+
 		readClaudeTranscript: publicProcedure
 			.input(
 				z.object({ project: z.string().optional(), sessionId: z.string() }),

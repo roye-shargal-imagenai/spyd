@@ -13,6 +13,7 @@ import { getProject, getWorkspaceWithRelations } from "../utils/db-helpers";
 import { listBranches } from "../utils/git";
 import { resolveWorktreePath } from "../utils/resolve-worktree-path";
 import { loadSetupConfig } from "../utils/setup";
+import { execWithShellEnv } from "../utils/shell-env";
 import { initializeWorkspaceWorktree } from "../utils/workspace-init";
 
 type WorkspaceRelations = NonNullable<
@@ -186,6 +187,49 @@ export const createInitProcedures = () => {
 			.input(z.object({ workspaceId: z.string() }))
 			.query(({ input }) => {
 				return workspaceInitManager.getProgress(input.workspaceId) ?? null;
+			}),
+
+		/**
+		 * spyd: run a new worktree's setup commands (the repo's setup config -
+		 * install deps, copy .env) before its agent starts, the way Superset
+		 * readies a workspace. One login shell per command, in the worktree;
+		 * stops at the first failure and says which, with its output tail.
+		 */
+		runSetup: publicProcedure
+			.input(z.object({ workspaceId: z.string() }))
+			.mutation(async ({ input }) => {
+				const relations = getWorkspaceWithRelations(input.workspaceId);
+				const project = relations
+					? getProject(relations.workspace.projectId)
+					: null;
+				const cwd = relations?.worktree?.path;
+				if (!relations || !project || !cwd) return { ran: 0 };
+				const commands =
+					loadSetupConfig({
+						mainRepoPath: project.mainRepoPath,
+						worktreePath: cwd,
+						projectId: project.id,
+					})?.setup ?? [];
+				for (const [i, command] of commands.entries()) {
+					try {
+						await execWithShellEnv("/bin/zsh", ["-lc", command], {
+							cwd,
+							timeout: 10 * 60_000,
+							maxBuffer: 16 * 1024 * 1024,
+						});
+					} catch (error) {
+						const output =
+							error && typeof error === "object" && "stderr" in error
+								? String((error as { stderr: unknown }).stderr)
+								: String(error);
+						return {
+							ran: i,
+							failed: command,
+							output: output.trim().split("\n").slice(-6).join("\n"),
+						};
+					}
+				}
+				return { ran: commands.length };
 			}),
 
 		getSetupCommands: publicProcedure

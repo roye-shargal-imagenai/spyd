@@ -331,7 +331,7 @@ function AllFeedPage() {
 				{sessions.length > 0 && (
 					<span
 						className={cn(
-							"shrink-0 rounded-[10px] px-1.5 py-[1px] text-[11px] font-semibold",
+							"shrink-0 rounded-[6px] px-1.5 py-[1px] text-[11px] font-semibold",
 							PILL.working,
 						)}
 					>
@@ -439,7 +439,7 @@ function AllFeedPage() {
 							>
 								<span className="size-1.5 animate-pulse rounded-full bg-current" />
 								Live sessions
-								<span className="rounded-[10px] bg-working/12 px-1.5 font-medium">
+								<span className="rounded-[6px] bg-working/12 px-1.5 font-medium">
 									{sessions.length}
 								</span>
 								<span className="text-muted-foreground">
@@ -787,7 +787,7 @@ function DetailsPanel({
 					type="button"
 					onClick={onClose}
 					aria-label="Close details"
-					className="ml-auto rounded-[7px] px-2 py-0.5 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground"
+					className="ml-auto rounded-[6px] px-2 py-0.5 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground"
 				>
 					✕
 				</button>
@@ -899,7 +899,7 @@ function DoneList({
 							type="button"
 							onClick={() => onUndo(row)}
 							title="Put it back in the queue"
-							className="shrink-0 rounded-[7px] px-2 py-1 text-[12px] font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+							className="shrink-0 rounded-[6px] px-2 py-1 text-[12px] font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 						>
 							Undo
 						</button>

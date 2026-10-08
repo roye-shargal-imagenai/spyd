@@ -96,7 +96,7 @@ export function TaskBox({
 		<div className="flex h-full min-h-0 flex-col gap-1.5">
 			{/* grow, not flex-1: the basis stays the rows=2 height, so inline use is
 			    unchanged and only a resized dialog hands it extra room. */}
-			<div className="flex min-h-0 grow flex-col overflow-hidden rounded-[10px] border border-border bg-card focus-within:border-primary">
+			<div className="flex min-h-0 grow flex-col overflow-hidden rounded-[6px] border border-border bg-card focus-within:border-primary">
 				<input
 					value={title}
 					placeholder={placeholder ?? "Name it"}
@@ -310,7 +310,7 @@ function SkillSelect({
 			{at && matches.length > 0 && (
 				<div
 					style={{ left: at.left, top: at.top }}
-					className="fixed z-50 w-[340px] overflow-hidden rounded-[7px] border border-border bg-card shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+					className="fixed z-50 w-[340px] overflow-hidden rounded-[6px] border border-border bg-card shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
 				>
 					{matches.map((skill, index) => (
 						<button
@@ -465,7 +465,7 @@ export function SkillChip({ skill }: { skill: string }) {
 export function BuiltinChip() {
 	return (
 		<span
-			title="Odin ships with this one. Edit it, retime it, pause it or delete it like any other - deleting is final, it won't come back."
+			title="spyd ships with this one. Edit it, retime it, pause it or delete it like any other - deleting is final, it won't come back."
 			className={cn(
 				"inline-flex items-center gap-1 rounded-[5px] px-[7px] py-[1px] font-semibold",
 				PILL.brand,
@@ -638,7 +638,7 @@ export function QuickAddTask({ onClose }: { onClose: () => void }) {
 				aria-modal="true"
 				aria-label="New task"
 				// ponytail: CSS `resize` - Chromium draws the corner grip for free.
-				className="fixed left-1/2 top-[12vh] z-50 flex h-[190px] max-h-[80vh] w-[520px] min-w-[320px] max-w-[92vw] -translate-x-1/2 resize flex-col overflow-hidden rounded-[10px] border border-border bg-popover p-3.5 shadow-[0_18px_60px_rgba(0,0,0,0.6)]"
+				className="fixed left-1/2 top-[12vh] z-50 flex h-[190px] max-h-[80vh] w-[520px] min-w-[320px] max-w-[92vw] -translate-x-1/2 resize flex-col overflow-hidden rounded-[6px] border border-border bg-popover p-3.5 shadow-[0_18px_60px_rgba(0,0,0,0.6)]"
 			>
 				{/* The button sits in the header, not under the fields: the dialog's
 				    height is fixed and the fields row is already full at 520px. */}

@@ -248,7 +248,7 @@ app.on("before-quit", async (event) => {
 				buttons: ["Quit", "Cancel"],
 				defaultId: 0,
 				cancelId: 1,
-				title: "Quit Odin",
+				title: "Quit spyd",
 				message: "Are you sure you want to quit?",
 			});
 
@@ -380,7 +380,7 @@ if (!gotTheLock) {
 	app.exit(0);
 } else if (!uiLock.ok) {
 	dialog.showErrorBox(
-		"Another Odin is already running",
+		"Another spyd is already running",
 		uiLock.holder
 			? `"${uiLock.holder.app}" (pid ${uiLock.holder.pid}) is using ${ODIN_HOME_DIR}. ` +
 					"Quit it before starting this one - two UIs on one home directory " +

@@ -87,7 +87,7 @@ export function PermissionsSettings({
 			<div className="mb-8">
 				<h2 className="text-xl font-semibold">Permissions</h2>
 				<p className="text-sm text-muted-foreground mt-1">
-					Grant the OS permissions Odin needs.
+					Grant the OS permissions spyd needs.
 				</p>
 			</div>
 

@@ -741,6 +741,66 @@ export async function readTranscript({
 	};
 }
 
+/** A tool call the agent made that has no result yet - what it's waiting on. */
+export interface PendingTool {
+	name: string;
+	input: Record<string, unknown>;
+}
+
+/**
+ * The last tool call in a transcript that never got a result: while a
+ * session waits on you, that's the command it wants to run, the file it
+ * wants to edit, or the question it asked. Null when nothing is open.
+ */
+export function pendingToolOf(jsonl: string): PendingTool | null {
+	const open = new Map<string, PendingTool>();
+	let last: string | null = null;
+	for (const line of jsonl.split("\n")) {
+		if (!line) continue;
+		let entry: {
+			type?: string;
+			message?: { content?: unknown };
+		};
+		try {
+			entry = JSON.parse(line);
+		} catch {
+			continue;
+		}
+		const content = entry.message?.content;
+		if (!Array.isArray(content)) continue;
+		for (const block of content as {
+			type?: string;
+			id?: string;
+			tool_use_id?: string;
+			name?: string;
+			input?: Record<string, unknown>;
+		}[]) {
+			if (block.type === "tool_use" && block.id && block.name) {
+				open.set(block.id, { name: block.name, input: block.input ?? {} });
+				last = block.id;
+			} else if (block.type === "tool_result" && block.tool_use_id) {
+				open.delete(block.tool_use_id);
+			}
+		}
+	}
+	return last ? (open.get(last) ?? null) : null;
+}
+
+export async function readPendingTool({
+	sessionId,
+	root = projectsRoot(),
+}: {
+	sessionId: string;
+	root?: string;
+}): Promise<PendingTool | null> {
+	if (!isSafeSegment(sessionId))
+		throw new Error("Invalid transcript reference");
+	const dir = await projectOf(sessionId, root);
+	if (!dir) return null;
+	const jsonl = await readFile(join(root, dir, `${sessionId}.jsonl`), "utf-8");
+	return pendingToolOf(jsonl);
+}
+
 export interface RuleFiring {
 	/** The rule as the agent read it - "When …: …". */
 	rule: string;

@@ -162,7 +162,7 @@ export function GettingStarted({
 	};
 
 	return (
-		<div className="absolute right-4 bottom-4 z-30 w-[320px] overflow-hidden rounded-[12px] border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,.45),0_0_24px_-8px_color-mix(in_oklab,var(--primary)_45%,transparent)]">
+		<div className="absolute right-4 bottom-4 z-30 w-[320px] overflow-hidden rounded-[6px] border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,.45),0_0_24px_-8px_color-mix(in_oklab,var(--primary)_45%,transparent)]">
 			<div className="flex items-center gap-2 px-3.5 pt-3 pb-2.5">
 				<button
 					type="button"
@@ -170,7 +170,7 @@ export function GettingStarted({
 					className="flex min-w-0 flex-1 items-center gap-2 text-left"
 					aria-expanded={!progress.collapsed}
 				>
-					<span className="bg-gradient-to-r from-primary-ink to-primary bg-clip-text text-[13px] font-bold text-transparent">
+					<span className="text-[13px] font-bold text-foreground">
 						{next ? "Get started" : "You're set up"}
 					</span>
 					<span className="truncate text-[11px] text-muted-foreground">
@@ -204,7 +204,7 @@ export function GettingStarted({
 
 			<div className="mx-3.5 h-1 overflow-hidden rounded-full bg-secondary">
 				<div
-					className="h-full rounded-full bg-gradient-to-r from-primary to-working transition-[width] duration-500"
+					className="h-full rounded-full bg-primary transition-[width] duration-500"
 					style={{ width: `${(done.length / STEPS.length) * 100}%` }}
 				/>
 			</div>
@@ -219,7 +219,7 @@ export function GettingStarted({
 							<li
 								key={step}
 								className={cn(
-									"flex gap-2.5 rounded-[8px] px-1.5 py-1.5",
+									"flex gap-2.5 rounded-[6px] px-1.5 py-1.5",
 									isNext && "bg-primary/8",
 								)}
 							>
@@ -255,7 +255,7 @@ export function GettingStarted({
 										type="button"
 										onClick={run[step]}
 										className={cn(
-											"h-6 shrink-0 self-center rounded-[7px] px-2.5 text-[11px] font-semibold",
+											"h-6 shrink-0 self-center rounded-[6px] px-2.5 text-[11px] font-semibold",
 											isNext ? BUTTON.primary : BUTTON.secondary,
 										)}
 									>
@@ -274,7 +274,7 @@ export function GettingStarted({
 						type="button"
 						onClick={close}
 						className={cn(
-							"h-7 rounded-[7px] px-3 text-[11px] font-semibold",
+							"h-7 rounded-[6px] px-3 text-[11px] font-semibold",
 							BUTTON.done,
 						)}
 					>

@@ -1,21 +1,23 @@
 import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { emojify } from "renderer/lib/emoji";
 import { openUrl } from "renderer/stores/in-app-browser";
-import { useTabsStore } from "renderer/stores/tabs/store";
-import type { Pane } from "renderer/stores/tabs/types";
-import { boardColumn } from "shared/board-column";
-import { profileOf } from "shared/odin-profile";
 import { typeIntoClaude } from "../board/ChatView";
-import { cardBody, untruncatedTitle } from "../components/OdinPromptDialog";
+import { InlineAsk } from "../components/InlineAsk";
+import { cardBody } from "../components/OdinPromptDialog";
 import { BUTTON, PILL } from "../components/pill";
+import { WebCorner } from "../components/SpiderMark";
 import { endSession } from "../hooks/useDone";
-import { useOdinProfile } from "../hooks/useOdinProfile";
 import { usePaneMeta } from "../hooks/usePaneMeta";
 import { usePendingFocus } from "../hooks/usePendingFocus";
+import {
+	type SessionEntry,
+	type SessionSection,
+	useSessionSections,
+} from "../hooks/useSessionSections";
 
 export const Route = createFileRoute("/_authenticated/_odin/home/")({
 	component: HomePage,
@@ -28,6 +30,7 @@ export const Route = createFileRoute("/_authenticated/_odin/home/")({
  * it is. Three sections, each only when it has something in it:
  *
  *  - Needs you: a live session waiting on a permission, a question or a fix.
+ *  - From Slack: what your :robot_face: reaction started, together.
  *  - Last night: what the Night Agent ran, to approve, send back or drop -
  *    the morning triage. It stays here until you decide, whatever its column.
  *  - Working: what's in flight, so you can leave it alone.
@@ -36,82 +39,37 @@ export const Route = createFileRoute("/_authenticated/_odin/home/")({
  * lands on its session there.
  */
 
-type Section = "needsYou" | "night" | "working";
-
-interface HomeCard {
-	pane: Pane;
-	section: Section;
-	column: ReturnType<typeof boardColumn>;
-}
+type HomeCard = SessionEntry;
 
 function HomePage() {
-	const panes = useTabsStore((s) => s.panes);
-	const titleByPane = usePaneMeta((s) => s.titleByPane);
-	const { activeId, isLoading: isProfileLoading } = useOdinProfile();
-	// The board's poll - shared query cache, so it costs nothing extra. A dead
-	// session can't be working or waiting on you, whatever its status froze at.
-	const { data: daemonSessions } =
-		electronTrpc.terminal.listDaemonSessions.useQuery(undefined, {
-			refetchInterval: 5_000,
-		});
-
-	const cards = useMemo(() => {
-		if (daemonSessions === undefined || isProfileLoading) return [];
-		const alive = new Set(
-			daemonSessions.sessions
-				.filter((session) => session.isAlive)
-				.map((session) => session.sessionId),
-		);
-		const out: HomeCard[] = [];
-		for (const pane of Object.values(panes)) {
-			if (pane.type !== "terminal" || pane.completed) continue;
-			if (!pane.odinTaskTitle && !titleByPane[pane.id]) continue;
-			if (profileOf(pane.odinProfile) !== activeId) continue;
-			const column = boardColumn(
-				pane.status ?? "idle",
-				alive.has(pane.id),
-				pane.odinParked ?? false,
-				false,
-				pane.odinClosedIn,
-			);
-			// The overnight run's work waits for your verdict even once it's
-			// finished or its PTY is gone - that is the whole point of triage.
-			if (pane.odinTags?.includes("off-hours"))
-				out.push({ pane, section: "night", column });
-			else if (column === "permission")
-				out.push({ pane, section: "needsYou", column });
-			else if (column === "working")
-				out.push({ pane, section: "working", column });
-		}
-		// Oldest first inside a section: the one that's waited longest goes first.
-		return out.sort(
-			(a, b) => (a.pane.odinStatusAt ?? 0) - (b.pane.odinStatusAt ?? 0),
-		);
-	}, [panes, titleByPane, daemonSessions, activeId, isProfileLoading]);
-
-	const of = (section: Section) => cards.filter((c) => c.section === section);
+	const { entries: cards, ready } = useSessionSections();
+	const of = (section: SessionSection) =>
+		cards.filter((c) => c.section === section);
 	const needsYou = of("needsYou");
+	const slack = of("slack");
 	const night = of("night");
 	const working = of("working");
 
 	const summary = [
 		needsYou.length > 0 && `${needsYou.length} need you`,
+		slack.length > 0 && `${slack.length} from Slack`,
 		night.length > 0 && `${night.length} from last night`,
 		working.length > 0 && `${working.length} working`,
 	].filter(Boolean);
 
 	return (
-		<div className="h-full overflow-y-auto">
+		<div className="relative h-full overflow-y-auto">
+			<WebCorner className="pointer-events-none absolute top-0 right-0 size-[280px] text-foreground opacity-[0.05]" />
 			<div className="mx-auto flex max-w-[1100px] flex-col gap-9 px-8 pb-12 pt-8">
 				<header>
 					<div className="text-[11px] font-semibold uppercase tracking-wide text-faint-foreground">
-						Today in Odin
+						Today in spyd
 					</div>
 					<h1 className="mt-1 text-[22px] font-semibold">{greeting()}</h1>
 					<p className="mt-1 text-[14px] text-muted-foreground">
 						{summary.length > 0
 							? `${summary.join(" · ")}.`
-							: daemonSessions === undefined
+							: !ready
 								? "Looking at your sessions…"
 								: "Nothing is waiting on you. Start something from the Dev Board or Tasks."}
 					</p>
@@ -121,6 +79,11 @@ function HomePage() {
 					title="Needs you"
 					hint="Waiting on an answer, a permission or a fix."
 					cards={needsYou}
+				/>
+				<HomeSection
+					title="From Slack"
+					hint="Started by your robot reaction while you were elsewhere."
+					cards={slack}
 				/>
 				<HomeSection
 					title="Last night"
@@ -182,16 +145,10 @@ const STATUS: Record<string, { label: string; pill: string }> = {
 function SessionCard({ card }: { card: HomeCard }) {
 	const navigate = useNavigate();
 	const { pane } = card;
-	const titleByPane = usePaneMeta((s) => s.titleByPane);
 	const briefByPane = usePaneMeta((s) => s.briefByPane);
 	const sessionIdByPane = usePaneMeta((s) => s.sessionIdByPane);
 	const brief = pane.odinBrief ?? briefByPane[pane.id] ?? null;
-	const title = emojify(
-		untruncatedTitle(
-			pane.odinTaskTitle ?? titleByPane[pane.id] ?? pane.name ?? "Session",
-			brief,
-		),
-	);
+	const { title } = card;
 	const body = cardBody(title, brief);
 	const sessionId = pane.claudeSessionId ?? sessionIdByPane[pane.id] ?? null;
 	const { data: work } = electronTrpc.repos.workingRepoName.useQuery(
@@ -199,7 +156,8 @@ function SessionCard({ card }: { card: HomeCard }) {
 		{ enabled: !!sessionId, retry: false, staleTime: 60_000 },
 	);
 	const status = STATUS[card.column] ?? STATUS.idle;
-	const isNight = card.section === "night";
+	// Last night's and Slack's runs were started without you: both get a verdict.
+	const isNight = card.section === "night" || card.section === "slack";
 	const isLive = card.column === "working" || card.column === "permission";
 	const write = electronTrpc.terminal.write.useMutation();
 	const [revising, setRevising] = useState(false);
@@ -230,7 +188,7 @@ function SessionCard({ card }: { card: HomeCard }) {
 	};
 
 	return (
-		<article className="flex min-h-[170px] flex-col gap-3 rounded-[14px] border border-border bg-card p-5 shadow-[0_1px_0_rgb(255_255_255/0.03)_inset]">
+		<article className="flex min-h-[170px] flex-col gap-3 rounded-[6px] border border-border bg-card p-5 shadow-[0_1px_0_rgb(255_255_255/0.03)_inset]">
 			<div className="flex items-center gap-2">
 				<span
 					className={cn(
@@ -274,6 +232,10 @@ function SessionCard({ card }: { card: HomeCard }) {
 				</div>
 			)}
 
+			{card.column === "permission" && sessionId && !revising && (
+				<InlineAsk paneId={pane.id} sessionId={sessionId} />
+			)}
+
 			{revising && (
 				<textarea
 					// biome-ignore lint/a11y/noAutofocus: opened by a click on Revise
@@ -285,7 +247,7 @@ function SessionCard({ card }: { card: HomeCard }) {
 						if (e.key === "Escape") setRevising(false);
 					}}
 					placeholder="What should it change? (⌘↵ to send)"
-					className="min-h-[72px] resize-none rounded-[10px] border border-border bg-background px-3 py-2 text-[13px] outline-none focus:border-primary"
+					className="min-h-[72px] resize-none rounded-[6px] border border-border bg-background px-3 py-2 text-[13px] outline-none focus:border-primary"
 				/>
 			)}
 

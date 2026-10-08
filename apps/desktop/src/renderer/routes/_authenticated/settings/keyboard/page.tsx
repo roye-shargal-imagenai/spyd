@@ -35,6 +35,8 @@ import {
  * this shell has no UI for them, so showing them here was noise.
  */
 const LISTED_HOTKEYS: HotkeyId[] = [
+	"ODIN_PALETTE",
+	"ODIN_NEXT_NEEDS_YOU",
 	"ODIN_HOME",
 	"ODIN_BOARD",
 	"ODIN_BOARD_SEARCH",
@@ -49,6 +51,7 @@ const LISTED_HOTKEYS: HotkeyId[] = [
 	"ODIN_SESSIONS",
 	"ODIN_INSIGHTS",
 	"ODIN_NEW_TASK",
+	"NEW_WORKSPACE",
 	"ODIN_QUICK_QUESTION",
 	"ODIN_COPY_LINK",
 	"OPEN_SETTINGS",
@@ -130,14 +133,14 @@ function DoubleTapRow() {
 
 	return (
 		<SettingRow
-			label="Double-tap to show or hide Odin"
+			label="Double-tap to show or hide spyd"
 			description={
 				error ? (
 					<span className="select-text cursor-text text-destructive">
 						{error.message}
 					</span>
 				) : (
-					"Tap a modifier twice, from any app or keyboard (Synergy too): Odin comes forward, or hides if it's already in front."
+					"Tap a modifier twice, from any app or keyboard (Synergy too): spyd comes forward, or hides if it's already in front."
 				)
 			}
 		>

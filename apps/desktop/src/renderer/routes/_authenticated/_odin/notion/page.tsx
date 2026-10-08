@@ -220,7 +220,7 @@ function NotionPage() {
 				{config && !config.hasToken && (
 					<ConnectNotice
 						provider="notion"
-						text="Notion isn't connected - sign in and pick the databases Odin may read."
+						text="Notion isn't connected - sign in and pick the databases spyd may read."
 					/>
 				)}
 				<FeedError error={rowsQuery.error} />
@@ -232,7 +232,7 @@ function NotionPage() {
 					<div className="px-2 py-8 text-center text-xs text-muted-foreground">
 						{databaseId
 							? "This database has no rows."
-							: "Nothing assigned to you or mentioning you on the pages Odin was given. Pick a teamspace's top-level pages when connecting Notion; their subpages come with them."}
+							: "Nothing assigned to you or mentioning you on the pages spyd was given. Pick a teamspace's top-level pages when connecting Notion; their subpages come with them."}
 					</div>
 				)}
 				{needle && rows.length > 0 && shown.length === 0 && (
@@ -251,7 +251,7 @@ function NotionPage() {
 								)}
 							/>
 							{status}
-							<span className="rounded-[10px] bg-secondary px-1.5 font-medium text-muted-foreground">
+							<span className="rounded-[6px] bg-secondary px-1.5 font-medium text-muted-foreground">
 								{group.length}
 							</span>
 						</div>
@@ -346,7 +346,7 @@ function NotionPage() {
 				))}
 				{config?.hasToken && mentions && (
 					<div className="px-2 py-4 text-center text-[11px] text-muted-foreground">
-						Odin only sees the Notion pages you shared with it. To add a
+						spyd only sees the Notion pages you shared with it. To add a
 						teamspace, open its top page in Notion → ••• → Connections → Odin;
 						its subpages come along.
 					</div>

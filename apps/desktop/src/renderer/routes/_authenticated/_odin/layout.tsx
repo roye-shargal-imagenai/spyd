@@ -1,3 +1,4 @@
+import { toast } from "@odin/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@odin/ui/tooltip";
 import { cn } from "@odin/ui/utils";
 import {
@@ -15,6 +16,7 @@ import {
 	HiOutlineClock,
 	HiOutlineCog6Tooth,
 	HiOutlineHome,
+	HiOutlineMagnifyingGlass,
 	HiOutlineMoon,
 	HiOutlineScale,
 	HiOutlineViewColumns,
@@ -37,17 +39,27 @@ import {
 	machineLoad,
 } from "shared/machine-load";
 import { ClaudeSignInBanner } from "./components/ClaudeSignInBanner";
+import { CommandPalette, useCommandPalette } from "./components/CommandPalette";
 import { FEED_TABS } from "./components/feed-counts";
 import { GettingStarted } from "./components/GettingStarted";
 import { InAppBrowser } from "./components/InAppBrowser";
+import { useNewWorkspaceDialog } from "./components/NewWorkspaceDialog";
 import { OdinPromptDialog } from "./components/OdinPromptDialog";
-import { BUTTON, PILL } from "./components/pill";
+import { PILL } from "./components/pill";
 import {
 	type UpstreamDue,
 	useDueReminders,
 	useReminders,
 } from "./components/Reminders";
+import { RepoSidebarSection } from "./components/RepoSidebarSection";
 import { SessionContextDialog } from "./components/SessionContextDialog";
+import {
+	SessionList,
+	useOpenSession,
+	useSidebarSessions,
+} from "./components/SessionList";
+import { SpiderMark } from "./components/SpiderMark";
+import { SupersetImport } from "./components/SupersetImport";
 import { QuickAddTask } from "./components/TaskBox";
 import { UpdateBanner } from "./components/UpdateBanner";
 import { useAutomationRunner } from "./hooks/useAutomationRunner";
@@ -332,6 +344,8 @@ function OdinShell() {
 	// by default, and whatever
 	// Settings → Keyboard shortcuts says after that. The returned display drives
 	// each rail tooltip, so the hint can't drift from the binding.
+	// ⌘N: New workspace, on the repo you used last.
+	useHotkey("NEW_WORKSPACE", () => useNewWorkspaceDialog.getState().open());
 	const railHotkeys = {
 		ODIN_HOME: useHotkey(
 			"ODIN_HOME",
@@ -425,34 +439,29 @@ function OdinShell() {
 		const isFeeds = to === "/all";
 		const isActive = isFeeds ? isFeedRoute : !!matchRoute({ to, fuzzy: true });
 		const keys = railHotkeys[hotkey].text;
-		const hint = keys ? `${label} (${keys})` : label;
 		return (
-			<Tooltip key={to} delayDuration={300}>
-				<TooltipTrigger asChild>
-					<button
-						type="button"
-						aria-label={label}
-						aria-current={isActive ? "page" : undefined}
-						onClick={() => navigate({ to })}
-						className={cn(
-							"flex size-9 items-center justify-center rounded-[9px] transition-colors",
-							isActive
-								? BUTTON.selected
-								: "text-muted-foreground hover:text-foreground",
-						)}
-					>
-						<Icon className="size-[17px]" />
-					</button>
-				</TooltipTrigger>
-				<TooltipContent side="right">{hint}</TooltipContent>
-			</Tooltip>
+			<button
+				key={to}
+				type="button"
+				aria-label={label}
+				aria-current={isActive ? "page" : undefined}
+				title={keys ? `${label} (${keys})` : label}
+				onClick={() => navigate({ to })}
+				className={cn(
+					"flex h-7 w-full items-center gap-2.5 rounded-[6px] px-2.5 text-[13px] transition-colors",
+					isActive
+						? "bg-accent text-foreground"
+						: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+				)}
+			>
+				<Icon className="size-[15px] shrink-0 opacity-80" />
+				<span className="min-w-0 flex-1 truncate text-left">{label}</span>
+			</button>
 		);
 	};
 
 	return (
-		// The faint violet light over the top-left of every page is the shell's
-		// - it's what keeps a dark, mostly-neutral app from reading as grey.
-		<div className="flex h-full w-full flex-col bg-background bg-[radial-gradient(1200px_420px_at_18%_-160px,color-mix(in_oklab,var(--primary)_13%,transparent),transparent_70%)] text-foreground">
+		<div className="flex h-full w-full flex-col bg-background text-foreground">
 			{/* top bar - left pad clears macOS traffic lights; empty areas drag.
 			    The traffic lights are native and DON'T scale with page zoom, so the
 			    bar height and their inset are counter-scaled by 1/zoomFactor to stay
@@ -467,8 +476,9 @@ function OdinShell() {
 					style={{ width: isMac ? `${84 / zoomFactor}px` : "16px" }}
 				/>
 				<ZoomStable enabled={isMac}>
-					<span className="bg-gradient-to-r from-primary-ink to-primary bg-clip-text text-xs font-bold text-transparent">
-						{workConfig?.isDev ? "Odin Dev" : "Odin"}
+					<span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+						<SpiderMark className="size-4" />
+						{workConfig?.isDev ? "spyd Dev" : "spyd"}
 					</span>
 				</ZoomStable>
 				{/* Which set of accounts is live. Next to the app name because it
@@ -481,7 +491,7 @@ function OdinShell() {
 					<ZoomStable enabled={isMac}>
 						<select
 							aria-label="Profile"
-							title="The accounts Odin is reading - its Slack, Jira, GitHub, sessions and tasks"
+							title="The accounts spyd is reading - its Slack, Jira, GitHub, sessions and tasks"
 							value={activeProfileId}
 							disabled={isSwitchingProfile}
 							onChange={(event) => switchProfile(event.target.value)}
@@ -600,15 +610,34 @@ function OdinShell() {
 			<ClaudeSignInBanner />
 
 			<div className="flex min-h-0 flex-1">
-				{/* icon rail */}
-				<div className="flex w-[52px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-tertiary/70 py-2.5">
-					{RAIL_ITEMS.map(renderRailItem)}
-					<div className="flex-1" />
-					<NightAgentRailButton />
-					{renderRailItem(INSIGHTS_ITEM)}
-					{renderRailItem(HISTORY_ITEM)}
-					{renderRailItem(SETTINGS_ITEM)}
-				</div>
+				{/* The sidebar, always open, Superset-style: where to go on top,
+				    your sessions in the middle divided by what they want from
+				    you, the app's own corners at the foot. */}
+				<nav
+					aria-label="Sidebar"
+					className="flex w-[264px] shrink-0 flex-col border-r border-border bg-tertiary"
+				>
+					<div className="flex flex-col gap-0.5 px-2 pt-2.5 pb-1">
+						{/* The way into everything, where you'd look for it. */}
+						<button
+							type="button"
+							onClick={() => useCommandPalette.getState().setOpen(true)}
+							className="mb-1.5 flex h-8 w-full items-center gap-2 rounded-[6px] border border-border bg-background/60 px-2.5 text-[12px] text-faint-foreground transition-colors hover:border-input hover:text-muted-foreground"
+						>
+							<HiOutlineMagnifyingGlass className="size-[14px] shrink-0" />
+							<span className="flex-1 text-left">Search or jump to…</span>
+							<kbd className="font-sans text-[11px]">⌘K</kbd>
+						</button>
+						{RAIL_ITEMS.map(renderRailItem)}
+					</div>
+					<SidebarSessions />
+					<div className="flex flex-col gap-0.5 px-2 pt-2 pb-2.5">
+						<NightAgentRailButton />
+						{renderRailItem(INSIGHTS_ITEM)}
+						{renderRailItem(HISTORY_ITEM)}
+						{renderRailItem(SETTINGS_ITEM)}
+					</div>
+				</nav>
 
 				{/* `relative`: the page drawers anchor to this area, not the viewport,
 				    so they can't slide under the native traffic lights. */}
@@ -625,6 +654,9 @@ function OdinShell() {
 			</div>
 
 			<SessionContextDialog />
+			<SessionHotkeys />
+			<CommandPalette />
+			<SupersetImport />
 			{isQuickAddOpen && (
 				<QuickAddTask onClose={() => setIsQuickAddOpen(false)} />
 			)}
@@ -665,8 +697,8 @@ function OdinShell() {
 }
 
 /**
- * Night Agent on the rail: a moon that says whether it's on, and lights up
- * with tonight's count while its window is open. The switch itself lives in
+ * Night Agent in the sidebar: says whether it's on and when it starts, and
+ * lights up with tonight's count while its window is open. The switch itself lives in
  * Settings → Backlog, next to the window and ceiling it runs by, so a click
  * goes there rather than flipping it blind.
  */
@@ -689,30 +721,86 @@ function NightAgentRailButton() {
 			? `Night Agent - running until ${offHours.end}, ${started} of ${offHours.maxSessions} started tonight`
 			: `Night Agent - on, ${hours}`;
 	return (
-		<Tooltip delayDuration={300}>
-			<TooltipTrigger asChild>
-				<button
-					type="button"
-					aria-label="Night Agent"
-					onClick={() => navigate({ to: "/settings/backlog" })}
-					className={cn(
-						"relative flex size-9 items-center justify-center rounded-[9px] transition-colors",
-						isRunning
-							? PILL.brand
-							: offHours.enabled
-								? "text-primary-ink hover:text-foreground"
-								: "text-muted-foreground hover:text-foreground",
-					)}
-				>
-					<HiOutlineMoon className="size-[17px]" />
-					{isRunning && started > 0 && (
-						<span className="absolute -right-0.5 -top-0.5 min-w-[15px] rounded-full bg-primary px-1 text-[9px] font-bold leading-[15px] text-primary-foreground tabular-nums">
-							{started}
-						</span>
-					)}
-				</button>
-			</TooltipTrigger>
-			<TooltipContent side="right">{hint}</TooltipContent>
-		</Tooltip>
+		<button
+			type="button"
+			aria-label="Night Agent"
+			title={hint}
+			onClick={() => navigate({ to: "/settings/backlog" })}
+			className={cn(
+				"flex h-8 w-full items-center gap-2.5 rounded-[6px] px-2.5 text-[13px] font-medium transition-colors",
+				isRunning
+					? PILL.brand
+					: offHours.enabled
+						? "text-primary-ink hover:bg-accent/60"
+						: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+			)}
+		>
+			<HiOutlineMoon className="size-4 shrink-0" />
+			<span className="min-w-0 flex-1 truncate text-left">Night Agent</span>
+			<span className="shrink-0 text-[11px] tabular-nums text-faint-foreground">
+				{!offHours.enabled
+					? "off"
+					: isRunning
+						? `${started}/${offHours.maxSessions}`
+						: offHours.start}
+			</span>
+		</button>
 	);
+}
+
+/**
+ * The sessions, always in view, divided by section with a heading each -
+ * the same split Home uses (useSessionSections), so the two never disagree.
+ * A handful of sessions, not thirty: every one gets its own line. Click one
+ * to open it on the Dev Board.
+ */
+function SidebarSessions() {
+	const { sessions } = useSidebarSessions();
+	return (
+		<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2 py-3">
+			<RepoSidebarSection entries={sessions} />
+			<SessionList />
+		</div>
+	);
+}
+
+/**
+ * The keyboard way around: ⌘K for anything, ⌘J for whatever has waited on
+ * you longest, ⌘1-9 for the sidebar's first nine. None of them fire while
+ * you're typing - in a terminal ⌘K still clears it and ⌘J still focuses chat.
+ */
+function SessionHotkeys() {
+	const { sessions } = useSidebarSessions();
+	const open = useOpenSession();
+	const nth = (i: number) => () => {
+		const entry = sessions[i];
+		if (entry) open(entry.pane.id);
+	};
+	useHotkey(
+		"ODIN_PALETTE",
+		() => {
+			const palette = useCommandPalette.getState();
+			palette.setOpen(!palette.isOpen);
+		},
+		NAV_HOTKEY_OPTIONS,
+	);
+	useHotkey(
+		"ODIN_NEXT_NEEDS_YOU",
+		() => {
+			const next = sessions.find((s) => s.column === "permission");
+			if (next) open(next.pane.id);
+			else toast("Nothing is waiting on you");
+		},
+		NAV_HOTKEY_OPTIONS,
+	);
+	useHotkey("JUMP_TO_WORKSPACE_1", nth(0), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_2", nth(1), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_3", nth(2), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_4", nth(3), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_5", nth(4), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_6", nth(5), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_7", nth(6), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_8", nth(7), NAV_HOTKEY_OPTIONS);
+	useHotkey("JUMP_TO_WORKSPACE_9", nth(8), NAV_HOTKEY_OPTIONS);
+	return null;
 }

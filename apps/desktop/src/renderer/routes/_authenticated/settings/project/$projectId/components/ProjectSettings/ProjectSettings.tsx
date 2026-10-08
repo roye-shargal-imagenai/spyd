@@ -492,7 +492,7 @@ export function ProjectSettings({
 														{importableExternalWorktrees.length === 1
 															? ""
 															: "s"}{" "}
-														into Odin as workspaces. Each worktree on disk will
+														into spyd as workspaces. Each worktree on disk will
 														be tracked and appear in your sidebar. No files will
 														be modified.
 													</AlertDialogDescription>

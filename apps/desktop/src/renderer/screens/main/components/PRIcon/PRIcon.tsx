@@ -15,7 +15,7 @@ interface PRIconProps {
 
 const stateStyles: Record<PRState, string> = {
 	open: "text-success",
-	merged: "text-primary",
+	merged: "text-primary-ink",
 	closed: "text-danger",
 	draft: "text-muted-foreground",
 	queued: "text-attention",

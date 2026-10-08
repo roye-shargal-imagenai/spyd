@@ -173,6 +173,14 @@ export const Route = createFileRoute("/_authenticated/_odin/board/")({
 
 // ponytail: "permission" (blocked on a prompt) and "failed" are the same call
 // to action - one column. "review" is not: it finished and wants nothing.
+/** What an empty column says - its own line, not a generic "Nothing here". */
+const EMPTY_COLUMN: Record<string, string> = {
+	working: "No agents running",
+	permission: "All clear - nothing needs you",
+	review: "Nothing to review",
+	idle: "Drag a card here to park it",
+};
+
 const COLUMNS: { status: PaneStatus }[] = [
 	{ status: "working" },
 	{ status: "permission" },
@@ -499,7 +507,7 @@ function CatchUpCard({
 				onClick={onShowSession}
 				title="Leave Catch up and open this session"
 				className={cn(
-					"mt-auto self-start rounded-[7px] px-3 py-1.5 text-xs font-semibold",
+					"mt-auto self-start rounded-[6px] px-3 py-1.5 text-xs font-semibold",
 					BUTTON.secondary,
 				)}
 			>
@@ -721,7 +729,7 @@ function ShellsDot({ live, dead }: { live: string[]; dead: number }) {
 			]
 		: dead
 			? [
-					`${dead} Odin shell${dead === 1 ? "" : "s"} left here whose process has died`,
+					`${dead} spyd shell${dead === 1 ? "" : "s"} left here whose process has died`,
 					"disconnected",
 					"bg-danger",
 				]
@@ -915,7 +923,7 @@ function ShellPlaceMenu({ card, shell }: { card: BoardCard; shell: Pane }) {
 						onSelect={() => cd(target.dir)}
 						className="flex items-center gap-2 text-xs"
 					>
-						<span className="w-3 text-primary">
+						<span className="w-3 text-primary-ink">
 							{target === current ? "✓" : ""}
 						</span>
 						<span className="w-12 shrink-0 font-semibold tabular-nums">
@@ -1026,7 +1034,7 @@ function JustDonePill({
 	if (left <= 0) return null;
 	return (
 		<span
-			title="Its turn ended in the last 10 minutes you had Odin open"
+			title="Its turn ended in the last 10 minutes you had spyd open"
 			className={cn(
 				"inline-flex items-center rounded-[5px] px-[7px] text-[11px] font-medium",
 				PILL.success,
@@ -1309,7 +1317,7 @@ function TagMenu({
 		<div
 			ref={ref}
 			style={{ left, top }}
-			className="fixed z-[60] w-[220px] rounded-[10px] border border-border bg-card p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)]"
+			className="fixed z-[60] w-[220px] rounded-[6px] border border-border bg-card p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)]"
 		>
 			<button
 				type="button"
@@ -1350,7 +1358,7 @@ function TagMenu({
 								className={cn(
 									"flex flex-1 items-center gap-2 rounded-md px-1.5 py-1 text-left text-[12px] transition-colors",
 									on
-										? "text-primary"
+										? "text-primary-ink"
 										: "text-muted-foreground hover:text-foreground",
 								)}
 							>
@@ -3470,7 +3478,7 @@ function DevBoardPage() {
 				/>
 			)}
 
-			<div className="flex min-h-0 flex-1 gap-3 overflow-x-auto px-[18px] pb-[18px] pt-1">
+			<div className="flex min-h-0 flex-1 gap-3 overflow-x-auto bg-[radial-gradient(color-mix(in_oklab,var(--foreground)_9%,transparent)_1px,transparent_1.2px)] bg-size-[18px_18px] px-[18px] pb-[18px] pt-1">
 				{COLUMNS.map((column) => {
 					const cards = cardsByStatus.get(column.status) ?? [];
 					// ponytail: re-sorted on the board's next render, not on the
@@ -3529,7 +3537,12 @@ function DevBoardPage() {
 								// The column wears its status: a hairline of the hue along the
 								// top and a wash that fades out under the header. The cards
 								// stay neutral - the colour says where they are, not what.
-								"relative flex min-w-[240px] flex-1 flex-col overflow-hidden rounded-xl border bg-tertiary/85 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--col)_9%,transparent),transparent_160px)]",
+								// An empty column steps back - narrower, so the ones with
+								// work in them get the room.
+								"relative flex flex-col overflow-hidden rounded-[10px] border bg-card/80 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--col)_16%,transparent),transparent_200px)] shadow-[0_8px_24px_-16px_rgb(0_0_0/0.6)] transition-[flex-grow] duration-300",
+								cards.length === 0
+									? "min-w-[170px] flex-[0.45]"
+									: "min-w-[240px] flex-1",
 								isDropTarget && dragOverIdle
 									? "border-primary bg-primary/15"
 									: "border-border",
@@ -3540,7 +3553,7 @@ function DevBoardPage() {
 						>
 							<span
 								aria-hidden
-								className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-(--col) via-(--col)/40 to-transparent"
+								className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-(--col)"
 							/>
 							<div className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold uppercase tracking-[.4px] text-soft-foreground">
 								<span className="size-2 rounded-full bg-(--col) shadow-[0_0_8px_var(--col)]" />
@@ -3557,10 +3570,7 @@ function DevBoardPage() {
 										// Solid, with a play icon: the dim pill read as a tag beside
 										// the count, not as something to press. Wears the column's hue.
 										className={cn(
-											"ml-auto flex items-center gap-1 rounded-md bg-gradient-to-b to-(--col) px-2.5 py-1 text-[11px] font-semibold normal-case tracking-normal text-background shadow-[0_2px_10px_-3px_color-mix(in_oklab,var(--col)_75%,transparent)] hover:brightness-110",
-											column.status === "review"
-												? "from-success-ink"
-												: "from-attention-ink",
+											"ml-auto flex items-center gap-1 rounded-md bg-(--col) px-2.5 py-1 text-[11px] font-semibold normal-case tracking-normal text-background hover:brightness-110",
 										)}
 									>
 										<LuPlay className="size-2.5 fill-current" />
@@ -3569,7 +3579,7 @@ function DevBoardPage() {
 								)}
 								<span
 									className={cn(
-										"rounded-[10px] bg-secondary px-2 font-medium",
+										"rounded-[6px] bg-secondary px-2 font-medium",
 										!canCatchUp && "ml-auto",
 									)}
 								>
@@ -3578,8 +3588,11 @@ function DevBoardPage() {
 							</div>
 							<div className="flex flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5">
 								{cards.length === 0 ? (
-									<div className="px-2 py-6 text-center text-xs text-muted-foreground">
-										Nothing here
+									<div className="flex flex-col items-center gap-1.5 px-3 py-10 text-center">
+										<span className="size-6 rounded-full border border-dashed border-(--col)/50" />
+										<span className="text-[12px] text-muted-foreground">
+											{EMPTY_COLUMN[column.status]}
+										</span>
 									</div>
 								) : (
 									sections.map(([section, group]) => {
@@ -3635,7 +3648,10 @@ function DevBoardPage() {
 																	// that only fades in: background, border and shadow can't
 																	// animate on the compositor, so they repainted every frame
 																	// and stuttered whenever the board was busy rendering.
-																	"group relative isolate cursor-pointer rounded-[10px] border bg-card px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate] duration-200 ease-out hover:-translate-y-px",
+																	// A stripe of the column's hue down the left edge says
+																	// where the card sits at a glance.
+																	"before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-(--col)",
+																	"group relative isolate cursor-pointer rounded-[6px] border bg-secondary/70 px-3 py-2.5 pl-3.5 text-left shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate] duration-200 ease-out hover:-translate-y-px",
 																	"after:pointer-events-none after:absolute after:-inset-px after:-z-10 after:rounded-[inherit] after:border after:border-primary/40 after:bg-secondary after:opacity-0 after:shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_10px_24px_-12px_color-mix(in_oklab,var(--primary)_55%,transparent)] after:transition-opacity after:duration-200 after:ease-out hover:after:opacity-100",
 																	// Cards are neutral - the column header already says the
 																	// status. Only a failure earns its red edge.
@@ -3873,7 +3889,7 @@ function DevBoardPage() {
 																					void resumeCard(card);
 																				}}
 																				className={cn(
-																					"ml-auto shrink-0 whitespace-nowrap rounded-[7px] px-2.5 py-1 text-xs font-semibold",
+																					"ml-auto shrink-0 whitespace-nowrap rounded-[6px] px-2.5 py-1 text-xs font-semibold",
 																					BUTTON.secondary,
 																				)}
 																			>
@@ -3908,7 +3924,7 @@ function DevBoardPage() {
 																					void resumeCard(card);
 																				}}
 																				className={cn(
-																					"rounded-[7px] px-2.5 py-1 text-xs font-semibold",
+																					"rounded-[6px] px-2.5 py-1 text-xs font-semibold",
 																					BUTTON.secondary,
 																				)}
 																			>
@@ -4049,7 +4065,7 @@ function DevBoardPage() {
 										type="button"
 										title="Click to rename this session"
 										onClick={() => setRenameDraft(cardTitle(drawerCard))}
-										className="min-w-0 flex-1 truncate text-left text-sm font-semibold hover:text-primary"
+										className="min-w-0 flex-1 truncate text-left text-sm font-semibold hover:text-primary-ink"
 									>
 										{cardTitle(drawerCard)}
 									</button>
@@ -4079,7 +4095,7 @@ function DevBoardPage() {
 										className={cn(
 											"shrink-0 rounded-md px-2 py-1 text-xs font-semibold",
 											isDiffOpen
-												? "bg-primary/15 text-primary"
+												? "bg-primary/15 text-primary-ink"
 												: "bg-secondary text-muted-foreground hover:text-foreground",
 										)}
 									>
@@ -4110,7 +4126,7 @@ function DevBoardPage() {
 													? "rounded-l-md"
 													: "rounded-md",
 												isShellOpen
-													? "bg-primary/15 text-primary"
+													? "bg-primary/15 text-primary-ink"
 													: "bg-secondary text-muted-foreground hover:text-foreground",
 											)}
 										>
@@ -4136,7 +4152,7 @@ function DevBoardPage() {
 										className={cn(
 											"shrink-0 rounded-md px-2 py-1 text-xs font-semibold",
 											isBriefOpen
-												? "bg-primary/15 text-primary"
+												? "bg-primary/15 text-primary-ink"
 												: "bg-secondary text-muted-foreground hover:text-foreground",
 										)}
 									>
@@ -4317,7 +4333,7 @@ function DevBoardPage() {
 														: "Reopen this conversation at an idle prompt (claude --resume)"
 									}
 									className={cn(
-										"rounded-[7px] px-3 py-1.5 text-xs font-semibold",
+										"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
 										BUTTON.primary,
 										// The gradient is a background-image, so it has to go before
 										// bg-secondary can show - otherwise disabled stays violet.
@@ -4356,7 +4372,7 @@ function DevBoardPage() {
 									}
 									onClick={() => interruptPane(drawerCard.pane.id)}
 									className={cn(
-										"rounded-[7px] px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50",
+										"rounded-[6px] px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50",
 										BUTTON.secondary,
 									)}
 								>
@@ -4374,7 +4390,7 @@ function DevBoardPage() {
 											chatView ? setTerminalPaneId(null) : setChatView(true)
 										}
 										className={cn(
-											"flex items-center gap-1.5 rounded-[7px] px-3 py-1.5 text-xs font-semibold",
+											"flex items-center gap-1.5 rounded-[6px] px-3 py-1.5 text-xs font-semibold",
 											BUTTON.secondary,
 										)}
 									>
@@ -4392,7 +4408,7 @@ function DevBoardPage() {
 									onClick={() => markDone(drawerCard)}
 									title="Done - end the session and remove it from the board"
 									className={cn(
-										"rounded-[7px] px-3 py-1.5 text-xs font-semibold",
+										"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
 										BUTTON.done,
 									)}
 								>
@@ -4403,7 +4419,7 @@ function DevBoardPage() {
 								onPick={(day) => remindMe(drawerCard, day)}
 								label="Remind me"
 								className={cn(
-									"rounded-[7px] px-3 py-1.5 text-xs font-semibold",
+									"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
 									BUTTON.remind,
 								)}
 							/>
@@ -4412,7 +4428,7 @@ function DevBoardPage() {
 									type="button"
 									onClick={() => setDrawerCard(null)}
 									className={cn(
-										"rounded-[7px] px-3 py-1.5 text-xs font-semibold",
+										"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
 										BUTTON.secondary,
 									)}
 								>

@@ -10,7 +10,7 @@ interface IssueIconProps {
 
 const stateStyles: Record<IssueState, string> = {
 	open: "text-success",
-	closed: "text-primary",
+	closed: "text-primary-ink",
 };
 
 /**

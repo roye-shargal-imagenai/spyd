@@ -966,9 +966,9 @@ export class HostServiceCoordinator extends EventEmitter {
 		void dialog.showMessageBox({
 			type: "error",
 			title: "Host service crashed",
-			message: `The Odin host service${orgName ? ` for ${orgName}` : ""} stopped unexpectedly (${cause}) and could not be restarted automatically.`,
+			message: `The spyd host service${orgName ? ` for ${orgName}` : ""} stopped unexpectedly (${cause}) and could not be restarted automatically.`,
 			detail:
-				"Its workspaces and terminals are unavailable until it restarts - use the Odin tray menu > Host Service > Restart.",
+				"Its workspaces and terminals are unavailable until it restarts - use the spyd tray menu > Host Service > Restart.",
 		});
 	}
 

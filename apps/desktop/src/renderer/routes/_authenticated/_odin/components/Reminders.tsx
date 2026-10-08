@@ -326,9 +326,9 @@ export function DueChip({
 				type="button"
 				title={
 					reminder
-						? `Due ${reminder.due} - set in Odin`
+						? `Due ${reminder.due} - set in spyd`
 						: upstream
-							? `Due ${upstream} - from Jira. Setting one here overrides it in Odin only.`
+							? `Due ${upstream} - from Jira. Setting one here overrides it in spyd only.`
 							: "Set a due date"
 				}
 				// A board card is itself a button - without this, dating a session
@@ -403,12 +403,12 @@ export function useDueReminders(upstream: UpstreamDue[]): void {
 			// own heading, several become a list.
 			const note = new Notification(
 				firing.length > 1
-					? `${firing.length} reminders in Odin`
+					? `${firing.length} reminders in spyd`
 					: only?.resume
-						? "Reminder from Odin"
+						? "Reminder from spyd"
 						: (only?.due ?? "") < today
-							? "Overdue in Odin"
-							: "Due today in Odin",
+							? "Overdue in spyd"
+							: "Due today in spyd",
 				{ body: firing.map((r) => r.title).join("\n") },
 			);
 			// Session reminders wait on the board; bring Odin forward.

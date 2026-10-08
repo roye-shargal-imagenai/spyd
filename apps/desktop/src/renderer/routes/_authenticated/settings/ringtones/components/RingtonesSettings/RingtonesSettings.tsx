@@ -46,17 +46,17 @@ export function RingtonesSettings() {
 	return (
 		<SettingsPage
 			title="Notifications"
-			description="How Odin gets your attention: when a session finishes, and when a reminder or due date comes up."
+			description="How spyd gets your attention: when a session finishes, and when a reminder or due date comes up."
 		>
 			<SettingsSection
 				title="When a session finishes"
 				description="A banner and a sound each time an agent session completes."
 			>
 				{/* Banners live in macOS: it keys the banner style, the icon and the
-				    app name to the Odin bundle, so there is nothing to toggle here. */}
+				    app name to the spyd bundle, so there is nothing to toggle here. */}
 				<SettingRow
 					label="Desktop banners"
-					description="macOS decides whether banners appear, and shows them under Odin's icon and name."
+					description="macOS decides whether banners appear, and shows them under spyd's icon and name."
 				>
 					<Button
 						type="button"

@@ -44,7 +44,7 @@ export function Highlight({ text, terms }: { text: string; terms: string[] }) {
 					<mark
 						// biome-ignore lint/suspicious/noArrayIndexKey: split() output is positional
 						key={index}
-						className="rounded-[3px] bg-primary/30 px-[1px] text-primary"
+						className="rounded-[3px] bg-primary/30 px-[1px] text-primary-ink"
 					>
 						{part}
 					</mark>
@@ -104,14 +104,14 @@ export function TranscriptView({
 						key={`${index}-${turn.at ?? ""}`}
 						className={cn(
 							turn.role === "user" &&
-								"ml-auto max-w-[85%] rounded-[12px] border border-primary/20 bg-primary/8 px-3.5 py-2.5",
+								"ml-auto max-w-[85%] rounded-[6px] border border-primary/20 bg-primary/8 px-3.5 py-2.5",
 						)}
 					>
 						<div className="mb-1.5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.4px]">
 							<span
 								className={
 									turn.role === "user"
-										? "text-primary"
+										? "text-primary-ink"
 										: "text-muted-foreground"
 								}
 							>

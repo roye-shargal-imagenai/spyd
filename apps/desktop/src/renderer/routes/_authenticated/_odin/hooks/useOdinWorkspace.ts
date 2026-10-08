@@ -62,7 +62,7 @@ export function useOdinWorkspace() {
 			if (
 				!askForFolder ||
 				!window.confirm(
-					"Pick the folder your sessions start in. Odin keeps it as the default - change it later in Settings → Sessions.",
+					"Pick the folder your sessions start in. spyd keeps it as the default - change it later in Settings → Sessions.",
 				)
 			) {
 				return fallback("No folder picked - sessions need one to start in.");

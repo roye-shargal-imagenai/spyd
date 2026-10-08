@@ -450,7 +450,7 @@ function CompareBaseBranchPickerInline({
 										{/* Show checkmark for selected base branch when not hovering */}
 										{!hasExistingWorkspace &&
 											effectiveCompareBaseBranch === branch.name && (
-												<HiCheck className="size-4 text-primary group-data-[selected=true]:hidden" />
+												<HiCheck className="size-4 text-primary-ink group-data-[selected=true]:hidden" />
 											)}
 
 										{/* Action buttons - show on hover/select */}

@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="apps/desktop/src/resources/build/icons/icon.png" alt="Odin logo" width="140">
+  <img src="apps/desktop/src/resources/build/icons/icon.png" alt="spyd logo - a spider hanging from its thread" width="140">
 </p>
-<h1 align="center">Odin</h1>
+<h1 align="center">spyd</h1>
 
 <p align="center">
-  <b>A personal work console for delegating to coding agents.</b>
-  <br><sub><b>O</b>rchestrator for <b>D</b>elegating <b>I</b>nbound <b>N</b>oise</sub>
+  <b>A calm control room for the coding agents you run in parallel.</b>
+  <br><sub>Workspaces per repo, one place for what needs you, and an agent that works the night shift.</sub>
+  <br><sub>Forked from <a href="https://github.com/danlinenberg/odin">Odin</a>.</sub>
 </p>
 
 <p align="center">
   <a href="LICENSE.md"><img alt="License: Elastic 2.0" src="https://img.shields.io/badge/license-Elastic%202.0-1d212c"></a>
   <a href="#install"><img alt="macOS, Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-1d212c"></a>
   <a href="#windows"><img alt="Windows x64" src="https://img.shields.io/badge/Windows-x64-1d212c"></a>
-  <a href="https://github.com/danlinenberg/odin/actions/workflows/release.yml"><img alt="Release" src="https://github.com/danlinenberg/odin/actions/workflows/release.yml/badge.svg"></a>
-</p>
+  </p>
 
 <p align="center">
   <a href="#install">Install</a> ·

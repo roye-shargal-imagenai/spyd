@@ -24,7 +24,7 @@ export function getPreviewPrompt(preset: ResolvedAgentConfig): string {
 
 export function getPreviewNoPromptCommand(preset: ResolvedAgentConfig): string {
 	if (preset.kind !== "terminal") {
-		return "Odin opens a chat pane without a shell command.";
+		return "spyd opens a chat pane without a shell command.";
 	}
 
 	return preset.command.trim() || "No command configured.";
@@ -33,8 +33,8 @@ export function getPreviewNoPromptCommand(preset: ResolvedAgentConfig): string {
 export function getPreviewTaskCommand(preset: ResolvedAgentConfig): string {
 	if (preset.kind !== "terminal") {
 		return preset.model
-			? `Odin opens with model ${preset.model}.`
-			: "Odin opens with the rendered task prompt.";
+			? `spyd opens with model ${preset.model}.`
+			: "spyd opens with the rendered task prompt.";
 	}
 
 	return (

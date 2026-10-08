@@ -68,7 +68,7 @@ async function check(): Promise<void> {
 			process.kill(pid, "SIGKILL");
 		} catch {}
 		new Notification({
-			title: "Odin killed a runaway process",
+			title: "spyd killed a runaway process",
 			body: `${name} (pid ${pid}) was using ${gb} GB.`,
 		}).show();
 	}

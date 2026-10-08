@@ -28,6 +28,7 @@ import { createResourceMetricsRouter } from "./resource-metrics";
 import { createSettingsRouter } from "./settings";
 import { createSkillsRouter } from "./skills";
 import { createSlackRouter } from "./slack";
+import { createSupersetRouter } from "./superset";
 import { createSystemRouter } from "./system";
 import { createTerminalRouter } from "./terminal";
 import { createUiStateRouter } from "./ui-state";
@@ -53,6 +54,7 @@ export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 		notifications: createNotificationsRouter(getWindow),
 		notion: createNotionRouter(),
 		slack: createSlackRouter(),
+		superset: createSupersetRouter(),
 		backlogReview: createBacklogReviewRouter(),
 		connections: createConnectionsRouter(),
 		work: createWorkRouter(),

@@ -345,9 +345,9 @@ async function offerUpdate(version: string): Promise<void> {
 	const { response } = await dialog.showMessageBox({
 		type: "info",
 		title: "Update Available",
-		message: `Odin ${version} is available.`,
+		message: `spyd ${version} is available.`,
 		detail:
-			"Odin will download it, quit, swap itself out and reopen. Open terminal sessions survive.",
+			"spyd will download it, quit, swap itself out and reopen. Open terminal sessions survive.",
 		buttons: ["Update Now", "Later"],
 		defaultId: 0,
 		cancelId: 1,

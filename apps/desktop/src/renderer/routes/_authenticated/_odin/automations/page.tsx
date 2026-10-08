@@ -242,7 +242,7 @@ function ScheduleFields({
 										className={cn(
 											"rounded-[5px] px-[5px] py-[3px] text-[11px] font-semibold transition-colors",
 											on
-												? "bg-primary/15 text-primary ring-1 ring-inset ring-primary/30"
+												? "bg-primary/15 text-primary-ink ring-1 ring-inset ring-primary/30"
 												: // muted, not faint: an unpicked day still has to be
 													// readable (odin-palette-contrast).
 													"bg-secondary text-muted-foreground hover:text-foreground",
@@ -487,7 +487,7 @@ function RuleRow({ rule }: { rule: OdinRule }) {
 						: "Pause - keep it, stop handing it out"
 				}
 				onClick={() => update(rule.id, { paused: !rule.paused })}
-				className="shrink-0 rounded-[7px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+				className="shrink-0 rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 			>
 				{rule.paused ? "Resume" : "Pause"}
 			</button>
@@ -496,7 +496,7 @@ function RuleRow({ rule }: { rule: OdinRule }) {
 					type="button"
 					title="Delete this rule"
 					onClick={() => remove(rule.id)}
-					className="rounded-[7px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+					className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 				>
 					✕
 				</button>
@@ -560,7 +560,7 @@ function RulesPanel() {
 			<div className={FEED_LIST}>
 				{rules.length === 0 && (
 					<div className="px-2 py-8 text-center text-xs text-muted-foreground">
-						No rules. Say what should happen when - every session Odin starts
+						No rules. Say what should happen when - every session spyd starts
 						gets told.
 					</div>
 				)}
@@ -597,7 +597,7 @@ function AutomationsPage() {
 				    to look clickable too, or it reads as a caption. */}
 				<div
 					role="tablist"
-					className="flex items-center gap-[2px] rounded-[8px] border border-border bg-background p-[2px]"
+					className="flex items-center gap-[2px] rounded-[6px] border border-border bg-background p-[2px]"
 				>
 					{(
 						[
@@ -625,9 +625,9 @@ function AutomationsPage() {
 				</div>
 				<span className="text-[12px] text-muted-foreground">
 					{view === "schedules"
-						? "tasks that start themselves, on a cron - while Odin is open"
+						? "tasks that start themselves, on a cron - while spyd is open"
 						: view === "rules"
-							? "what every session Odin starts should do when something comes up"
+							? "what every session spyd starts should do when something comes up"
 							: "every reminder you set - snoozed sessions and dated feed rows, soonest first"}
 				</span>
 			</div>
@@ -754,13 +754,13 @@ function RemindersPanel() {
 											)
 										: setDue(key, day, r.title)
 								}
-								className="rounded-[7px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+								className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 							/>
 							<button
 								type="button"
 								title="Drop this reminder"
 								onClick={() => clear(key)}
-								className="rounded-[7px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+								className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 							>
 								✕
 							</button>
@@ -862,7 +862,7 @@ function SchedulesPanel() {
 			<div className={FEED_LIST}>
 				{automations.length === 0 && (
 					<div className="px-2 py-8 text-center text-xs text-muted-foreground">
-						Nothing scheduled. Write the job above, give it a cron, and Odin
+						Nothing scheduled. Write the job above, give it a cron, and spyd
 						starts the session for you.
 					</div>
 				)}
@@ -998,7 +998,7 @@ function SchedulesPanel() {
 												: "Pause - keep it, stop running it"
 										}
 										onClick={() => setPaused(task.id, !task.paused)}
-										className="shrink-0 rounded-[7px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+										className="shrink-0 rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 									>
 										{task.paused ? "Resume" : "Pause"}
 									</button>
@@ -1007,7 +1007,7 @@ function SchedulesPanel() {
 											type="button"
 											title="Delete this automation"
 											onClick={() => remove(task.id)}
-											className="rounded-[7px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+											className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 										>
 											✕
 										</button>

@@ -1,4 +1,4 @@
-import { BUTTON } from "./pill";
+import { BUTTON, ROW_REVEAL } from "./pill";
 
 /**
  * Per-row Done, the same green pill on every feed and always visible: it's the
@@ -20,7 +20,7 @@ export function DoneButton({
 			onClick={onClick}
 			disabled={disabled}
 			title={done ? "Move back to the queue" : "Mark done"}
-			className={`shrink-0 whitespace-nowrap rounded-[7px] px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-40 ${BUTTON.done}`}
+			className={`${ROW_REVEAL} shrink-0 whitespace-nowrap rounded-[6px] px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-40 ${BUTTON.done}`}
 		>
 			{done ? "↺ Undo" : "✓ Done"}
 		</button>

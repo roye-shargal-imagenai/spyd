@@ -203,7 +203,7 @@ export function createApplicationMenu() {
 				{ type: "separator" },
 				{ role: "quit" },
 				{
-					label: "Quit Odin Completely",
+					label: "Quit spyd Completely",
 					click: () => {
 						void confirmAndQuitCompletely();
 					},

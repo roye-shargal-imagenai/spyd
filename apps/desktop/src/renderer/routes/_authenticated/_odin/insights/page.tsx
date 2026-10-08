@@ -81,7 +81,7 @@ function Section({
 
 function Card({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="rounded-[10px] border border-border bg-card p-4">
+		<div className="rounded-[6px] border border-border bg-card p-4">
 			{children}
 		</div>
 	);
@@ -97,7 +97,7 @@ function Stat({
 	hint?: string;
 }) {
 	return (
-		<div className="flex min-w-[112px] flex-1 flex-col gap-1 rounded-[10px] border border-border bg-card px-3.5 py-3">
+		<div className="flex min-w-[112px] flex-1 flex-col gap-1 rounded-[6px] border border-border bg-card px-3.5 py-3">
 			<div className="text-[22px] font-semibold leading-none text-foreground">
 				{value}
 			</div>
@@ -766,7 +766,7 @@ function Step({
 }
 
 const METHOD = [
-	"Your time: while a session's pane was open in a focused Odin with you active in the last 2 min, plus the gap before each prompt you typed (up to 5 min) - the only record before pane time was logged.",
+	"Your time: while a session's pane was open in a focused spyd with you active in the last 2 min, plus the gap before each prompt you typed (up to 5 min) - the only record before pane time was logged.",
 	"Agent work: each session's active time less yours, plus subagents; parallel agents counted each.",
 	"Before pane time was logged, your time is a floor, so the gain is a ceiling.",
 ].join("\n");

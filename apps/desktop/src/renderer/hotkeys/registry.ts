@@ -53,6 +53,18 @@ export const HOTKEYS_REGISTRY = {
 		description:
 			"Open Home - what needs you, last night's runs, what's working",
 	},
+	ODIN_PALETTE: {
+		key: { mac: L("meta+k"), windows: L("ctrl+k"), linux: L("ctrl+k") },
+		label: "Command Palette",
+		category: "Navigation",
+		description: "Search sessions, repositories and screens",
+	},
+	ODIN_NEXT_NEEDS_YOU: {
+		key: { mac: L("meta+j"), windows: L("ctrl+j"), linux: L("ctrl+j") },
+		label: "Next Session Needing You",
+		category: "Navigation",
+		description: "Open the session that has waited on you longest",
+	},
 	ODIN_BOARD: {
 		key: { mac: L("d"), windows: L("d"), linux: L("d") },
 		label: "Dev Board",

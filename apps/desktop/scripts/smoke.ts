@@ -254,7 +254,7 @@ async function waitForText(needle: string, present = true, ms = 15_000) {
 }
 async function expectHealthy() {
 	const body = await page<string>(`document.body?.innerText ?? ""`);
-	for (const crash of ["Something went wrong", "Odin failed to start"]) {
+	for (const crash of ["Something went wrong", "spyd failed to start"]) {
 		if (body.includes(crash))
 			throw new Error(`"${crash}": ${body.slice(0, 400)}`);
 	}
@@ -326,7 +326,7 @@ async function step(name: string, flow: () => Promise<void>) {
 }
 
 await step("boots straight onto Home, no sign-in", async () => {
-	await waitForText("today in odin", true, 60_000);
+	await waitForText("today in spyd", true, 60_000);
 	const hash = await page<string>("location.hash");
 	if (!hash.startsWith("#/home")) throw new Error(`landed on ${hash}`);
 });
@@ -340,12 +340,12 @@ await step("Dev Board shows its columns", async () => {
 
 // Each rail entry and a line only its screen prints.
 const SCREENS: [string, string][] = [
-	["Home", "today in odin"],
+	["Home", "today in spyd"],
 	["Tasks", "waiting on you"],
 	["Review", "sweep now"],
 	["Automations", "add automation"],
 	["Insights", "who asks"],
-	["Session History", "every session odin launched"],
+	["Session History", "every session spyd launched"],
 	["Dev Board", "next in line"],
 ];
 for (const [label, line] of SCREENS) {
@@ -383,7 +383,7 @@ await step("Tasks: every feed tab opens", async () => {
 for (const [label, line] of [
 	["Tasks", "waiting on you"],
 	["Dev Board", "next in line"],
-	["Session History", "every session odin launched"],
+	["Session History", "every session spyd launched"],
 ]) {
 	await step(`⌘F focuses the search box on ${label}`, async () => {
 		await rail(label);

@@ -194,7 +194,7 @@ async function updateTrayMenu(): Promise<void> {
 		},
 		{ type: "separator" },
 		{
-			label: "Open Odin",
+			label: "Open spyd",
 			click: focusMainWindow,
 		},
 		{
@@ -211,12 +211,12 @@ async function updateTrayMenu(): Promise<void> {
 		},
 		{ type: "separator" },
 		{
-			label: "Close Odin",
+			label: "Close spyd",
 			click: () => quitApp(),
 		},
 		{ type: "separator" },
 		{
-			label: "Quit Odin Completely",
+			label: "Quit spyd Completely",
 			click: () => {
 				void confirmAndQuitCompletely();
 			},
@@ -253,7 +253,7 @@ export function initTray(): void {
 		}
 
 		tray = new Tray(icon);
-		tray.setToolTip("Odin");
+		tray.setToolTip("spyd");
 
 		void updateTrayMenu();
 

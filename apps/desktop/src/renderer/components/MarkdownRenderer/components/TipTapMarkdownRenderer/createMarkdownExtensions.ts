@@ -199,7 +199,7 @@ export function createMarkdownExtensions({
 			openOnClick: !editable,
 			HTMLAttributes: {
 				class:
-					"text-primary underline underline-offset-2 hover:text-primary/80",
+					"text-primary-ink underline underline-offset-2 hover:text-primary-ink/80",
 				target: "_blank",
 				rel: "noopener noreferrer",
 			},

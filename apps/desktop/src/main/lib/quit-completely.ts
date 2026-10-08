@@ -8,10 +8,10 @@ export async function confirmAndQuitCompletely(): Promise<void> {
 			buttons: ["Quit Completely", "Cancel"],
 			defaultId: 1,
 			cancelId: 1,
-			title: "Quit Odin Completely",
-			message: "Quit Odin and stop all background services?",
+			title: "Quit spyd Completely",
+			message: "Quit spyd and stop all background services?",
 			detail:
-				"All open terminal sessions will be killed and any running host-services will be stopped. Use “Close Odin” instead if you want services to keep running for the next launch.",
+				"All open terminal sessions will be killed and any running host-services will be stopped. Use “Close spyd” instead if you want services to keep running for the next launch.",
 		});
 		if (response === 0) {
 			quitAppCompletely();

@@ -204,7 +204,7 @@ function SessionsPage() {
 			<div className="flex items-center gap-3 px-[18px] pb-2.5 pt-3.5">
 				<h1 className="text-[15px] font-semibold">Session History</h1>
 				<span className="text-xs text-muted-foreground">
-					every session Odin launched · search what was said, read it, resume it
+					every session spyd launched · search what was said, read it, resume it
 				</span>
 			</div>
 
@@ -262,16 +262,16 @@ function SessionsPage() {
 					<div className="px-2 py-8 text-center text-xs text-muted-foreground">
 						{/* A search that failed is not a machine with no history -
 						    saying so sent this page's one real outage ("cannot find
-						    module ./chunks/…", a rebuild under a running Odin) looking
+						    module ./chunks/…", a rebuild under a running spyd) looking
 						    like an empty store for hours. */}
 						{error ? (
 							<span className="text-danger">
 								Couldn't read the session store - {error.message}
 							</span>
 						) : query ? (
-							`No Odin session mentions ${terms.map((term) => `"${term}"`).join(" or ")}, or came from anyone by that name.`
+							`No spyd session mentions ${terms.map((term) => `"${term}"`).join(" or ")}, or came from anyone by that name.`
 						) : (
-							"Odin hasn't launched any sessions on this machine yet."
+							"spyd hasn't launched any sessions on this machine yet."
 						)}
 					</div>
 				)}
@@ -279,7 +279,7 @@ function SessionsPage() {
 					{rows.map((row) => (
 						<div
 							key={`${row.project}/${row.sessionId}`}
-							className="flex items-start gap-3 rounded-[10px] border border-border bg-card px-3 py-2.5 transition-colors hover:border-input"
+							className="flex items-start gap-3 rounded-[6px] border border-border bg-card px-3 py-2.5 transition-colors hover:border-input"
 						>
 							<button
 								type="button"
@@ -308,7 +308,7 @@ function SessionsPage() {
 									<span className="text-muted-foreground">·</span>
 									<span>{row.messages} msgs</span>
 									{row.matches > 0 && (
-										<span className="text-primary">
+										<span className="text-primary-ink">
 											{row.matches} match{row.matches === 1 ? "" : "es"}
 										</span>
 									)}
@@ -324,7 +324,7 @@ function SessionsPage() {
 													className={cn(
 														"mr-1.5 text-[10px] font-semibold uppercase",
 														snippet.role === "user"
-															? "text-primary"
+															? "text-primary-ink"
 															: "text-muted-foreground",
 													)}
 												>
@@ -388,7 +388,7 @@ function SessionsPage() {
 							<div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
 								{openRow.person && <PersonChip name={openRow.person} />}
 								{openRow.cwd && (
-									<span className="select-text cursor-text rounded-[5px] bg-secondary px-[7px] text-primary">
+									<span className="select-text cursor-text rounded-[5px] bg-secondary px-[7px] text-primary-ink">
 										{openRow.cwd}
 									</span>
 								)}
@@ -409,7 +409,7 @@ function SessionsPage() {
 								disabled={isLaunching}
 								onClick={() => void resume(openRow)}
 								className={cn(
-									"rounded-[7px] px-3 py-1.5 text-xs font-semibold disabled:opacity-50",
+									"rounded-[6px] px-3 py-1.5 text-xs font-semibold disabled:opacity-50",
 									BUTTON.primary,
 								)}
 							>
@@ -418,7 +418,7 @@ function SessionsPage() {
 							<button
 								type="button"
 								onClick={() => setOpenRow(null)}
-								className="ml-auto rounded-[7px] bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+								className="ml-auto rounded-[6px] bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground"
 							>
 								Close
 							</button>

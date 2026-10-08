@@ -119,7 +119,7 @@ export function SettingsSidebar() {
 									className={cn(
 										"mt-0.5 size-4 shrink-0",
 										isActive
-											? "text-primary"
+											? "text-primary-ink"
 											: "text-muted-foreground group-hover:text-foreground",
 									)}
 								/>

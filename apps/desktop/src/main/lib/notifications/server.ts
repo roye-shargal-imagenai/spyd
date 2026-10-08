@@ -153,9 +153,9 @@ app.post("/shell/run", express.urlencoded({ extended: false }), (req, res) => {
 	}
 	const request: RunInShellRequest = { paneId, command };
 	if (!notificationsEmitter.emit(NOTIFICATION_EVENTS.RUN_IN_SHELL, request)) {
-		return res.status(503).send("Odin's window isn't open.\n");
+		return res.status(503).send("spyd's window isn't open.\n");
 	}
-	res.send("Running in this session's Shell in Odin.\n");
+	res.send("Running in this session's Shell in spyd.\n");
 });
 
 // Health check

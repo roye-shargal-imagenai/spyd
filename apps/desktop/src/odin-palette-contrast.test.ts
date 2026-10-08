@@ -17,7 +17,8 @@ const TEXT: Record<string, number> = {
 	foreground: AA,
 	"soft-foreground": AA,
 	"muted-foreground": AA,
-	primary: AA,
+	// primary is a fill (buttons, selection) - dark red under white text.
+	// Text in the brand colour uses primary-ink, which is lifted toward white.
 	working: AA,
 	attention: AA,
 	success: AA,

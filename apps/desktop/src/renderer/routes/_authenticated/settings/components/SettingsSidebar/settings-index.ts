@@ -105,7 +105,7 @@ export const SETTINGS_INDEX: SettingEntry[] = [
 		keywords: "account sign in connect email mail unread",
 	},
 	{
-		label: "Open links inside Odin",
+		label: "Open links inside spyd",
 		to: "/settings/connections",
 		section: "Links",
 		keywords: "in-app browser default external chrome safari always",
@@ -243,7 +243,7 @@ export const SETTINGS_INDEX: SettingEntry[] = [
 		keywords: "keyboard hotkey keys rebind",
 	},
 	{
-		label: "Double-tap to show or hide Odin",
+		label: "Double-tap to show or hide spyd",
 		to: "/settings/keyboard",
 		section: "From any app",
 		keywords:

@@ -131,14 +131,14 @@ export function DiffView({
 							? "Long lines wrap - click to keep them on one line and scroll sideways"
 							: "Long lines run on - click to wrap them"
 					}
-					className={`ml-auto normal-case tracking-normal hover:underline ${wrap ? "text-primary" : "text-muted-foreground"}`}
+					className={`ml-auto normal-case tracking-normal hover:underline ${wrap ? "text-primary-ink" : "text-muted-foreground"}`}
 				>
 					{wrap ? "↵ wrap on" : "→ wrap off"}
 				</button>
 				<button
 					type="button"
 					onClick={() => void refetch()}
-					className="normal-case tracking-normal text-primary hover:underline"
+					className="normal-case tracking-normal text-primary-ink hover:underline"
 				>
 					{isFetching ? "reading…" : "↻ refresh"}
 				</button>

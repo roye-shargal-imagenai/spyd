@@ -130,7 +130,7 @@ function ScriptTextarea({
 				/>
 				{isDragOver && (
 					<div className="absolute inset-0 flex items-center justify-center bg-primary/10 rounded-lg pointer-events-none">
-						<div className="flex items-center gap-2 text-primary text-sm font-medium">
+						<div className="flex items-center gap-2 text-primary-ink text-sm font-medium">
 							<HiDocumentArrowUp className="h-5 w-5" />
 							Drop to import
 						</div>

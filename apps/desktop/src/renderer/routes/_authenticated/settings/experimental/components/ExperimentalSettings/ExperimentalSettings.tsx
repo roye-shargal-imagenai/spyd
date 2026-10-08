@@ -73,7 +73,7 @@ export function ExperimentalSettings({
 					<div className="flex items-center justify-between gap-6">
 						<div className="min-w-0 flex-1 space-y-0.5">
 							<Label htmlFor="odin-v2" className="text-sm font-medium">
-								Try Odin v2
+								Try spyd v2
 							</Label>
 							<p className="text-xs text-muted-foreground">
 								Use the new workspace experience.

@@ -2,9 +2,12 @@ export { BEAT_MS, readAttention, recordBeat } from "./attention";
 export {
 	firstPrompt,
 	listTranscripts,
+	type PendingTool,
 	parseTranscript,
+	pendingToolOf,
 	projectsRoot,
 	queryTerms,
+	readPendingTool,
 	readTranscript,
 	repoNameOf,
 	repoOfDir,

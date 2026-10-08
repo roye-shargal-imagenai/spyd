@@ -263,7 +263,7 @@ export function ThemeSection() {
 			name: "My Custom Theme",
 			type: baseTheme.type,
 			author: "You",
-			description: "Custom Odin theme",
+			description: "Custom spyd theme",
 			ui: baseTheme.ui,
 			terminal: getTerminalColors(baseTheme),
 		};

@@ -76,7 +76,7 @@ const META: Record<
 		name: "Notion",
 		icon: <SiNotion className="size-5" />,
 		description: "Rows from a Notion database, in the Notion tab.",
-		help: "Odin reads only the Notion pages you share with it, plus their subpages. To add a teamspace, open its top page in Notion → ••• → Connections → Odin. Pages assigned to you and comments that tag you only show up from shared pages.",
+		help: "spyd reads only the Notion pages you share with it, plus their subpages. To add a teamspace, open its top page in Notion → ••• → Connections → Odin. Pages assigned to you and comments that tag you only show up from shared pages.",
 	},
 	gmail: {
 		name: "Gmail",
@@ -108,11 +108,11 @@ function ConnectionsSettings() {
 	return (
 		<SettingsPage
 			title="Connections"
-			description="The accounts Odin reads your work from. You sign in to each one; the credentials stay on this Mac and never leave it."
+			description="The accounts spyd reads your work from. You sign in to each one; the credentials stay on this Mac and never leave it."
 		>
 			<SettingsSection
 				title="Profiles"
-				description="Each profile has its own accounts - and its own board sessions, Slack queue and tasks. Only the active one shows anywhere in Odin."
+				description="Each profile has its own accounts - and its own board sessions, Slack queue and tasks. Only the active one shows anywhere in spyd."
 			>
 				<Profiles onSwitched={() => void status.refetch()} />
 			</SettingsSection>
@@ -257,7 +257,7 @@ function BackupRow() {
 						<div className="text-xs text-muted-foreground mt-1 max-w-[70ch]">
 							{data?.available === false
 								? "iCloud Drive is off, so nothing is copied. Turn it on in System Settings → Apple Account → iCloud."
-								: "Keeps 14 days in iCloud Drive → Odin Backups. To restore, quit Odin and copy a day's files back into ~/.odin."}
+								: "Keeps 14 days in iCloud Drive → Odin Backups. To restore, quit spyd and copy a day's files back into ~/.odin."}
 						</div>
 					</div>
 				</div>
@@ -571,7 +571,7 @@ function OpenLinksInOdinRow() {
 	const external = useInAppBrowser((state) => state.external);
 	return (
 		<SettingRow
-			label="Open links inside Odin"
+			label="Open links inside spyd"
 			htmlFor="open-links-in-odin"
 			description="Slack, Jira, GitHub, Notion and Gmail links open in a panel over the page instead of another app; other links always go to your default browser. Off sends them all there."
 		>

@@ -72,9 +72,9 @@ export function cardBody(title: string, source: string | null): string | null {
  * and the Dev Board's "New Session" (default repo).
  */
 export function OdinPromptDialog({
-	heading = "Work on Odin",
+	heading = "Work on spyd",
 	note,
-	placeholder = "What should the agent do in Odin?",
+	placeholder = "What should the agent do in spyd?",
 	defaultPrompt = "",
 	repoPicker = false,
 	submitLabel = "Start session",
@@ -178,7 +178,7 @@ export function OdinPromptDialog({
 				role="dialog"
 				aria-modal="true"
 				aria-label={heading}
-				className="fixed left-1/2 top-[12vh] z-50 w-[620px] max-w-[92vw] -translate-x-1/2 rounded-[10px] border border-border bg-popover p-3.5 shadow-[0_18px_60px_rgba(0,0,0,0.6)]"
+				className="fixed left-1/2 top-[12vh] z-50 w-[620px] max-w-[92vw] -translate-x-1/2 rounded-[6px] border border-border bg-popover p-3.5 shadow-[0_18px_60px_rgba(0,0,0,0.6)]"
 				onDragOver={(event) => {
 					event.preventDefault();
 					setIsDropping(true);
@@ -251,12 +251,12 @@ export function OdinPromptDialog({
 					}}
 					rows={7}
 					placeholder={placeholder}
-					className={`w-full resize-y rounded-[7px] border bg-card px-2.5 py-2 text-[12.5px] leading-[1.5] text-foreground outline-none placeholder:text-muted-foreground ${
+					className={`w-full resize-y rounded-[6px] border bg-card px-2.5 py-2 text-[12.5px] leading-[1.5] text-foreground outline-none placeholder:text-muted-foreground ${
 						isDropping ? "border-primary" : "border-border focus:border-primary"
 					}`}
 				/>
 				{matches.length > 0 && (
-					<div className="mt-1.5 rounded-[7px] border border-border bg-card">
+					<div className="mt-1.5 rounded-[6px] border border-border bg-card">
 						<div className="max-h-[190px] overflow-y-auto py-1">
 							{matches.map((skill, index) => (
 								<button

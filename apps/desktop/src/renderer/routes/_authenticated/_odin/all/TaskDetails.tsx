@@ -118,7 +118,7 @@ export function TaskDetails({
 			{item.mention && (
 				<div className="rounded-md border-l-2 border-primary bg-primary/8 px-2 py-1.5 text-soft-foreground">
 					{item.mention.author && (
-						<div className="text-[11px] font-medium text-primary">
+						<div className="text-[11px] font-medium text-primary-ink">
 							{item.mention.author}
 						</div>
 					)}

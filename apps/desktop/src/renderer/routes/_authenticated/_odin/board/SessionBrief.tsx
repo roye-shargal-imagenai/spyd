@@ -817,7 +817,7 @@ export function SessionBrief({
 			<div className="flex items-center gap-2 border-b border-border px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[.4px] text-muted-foreground">
 				What's going on
 				{isWriting && !written && (
-					<span className="ml-auto normal-case tracking-normal text-primary">
+					<span className="ml-auto normal-case tracking-normal text-primary-ink">
 						writing…
 					</span>
 				)}
@@ -837,7 +837,19 @@ export function SessionBrief({
 							</div>
 						)}
 						{error ? (
-							<div className="text-[12px] text-danger">{error.message}</div>
+							// A session that hasn't written its transcript yet isn't
+							// broken - say so quietly; only a real failure is red.
+							String(error.message).includes(
+								"No transcript on this machine",
+							) ? (
+								<div className="text-[12px] text-muted-foreground">
+									Nothing written yet - this fills in once the agent gets going.
+								</div>
+							) : (
+								<div className="cursor-text select-text text-[12px] text-danger">
+									{error.message}
+								</div>
+							)
 						) : written ? (
 							<>
 								{/* What it's for, then yours to do, then where it stands. A
@@ -974,7 +986,7 @@ export function SessionBrief({
 							if (parsed.length) setDraftLink("");
 						}}
 						placeholder="Add a link (+ a name), Enter"
-						className="rounded-[7px] border border-border bg-background px-2 py-1 text-[12px] text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
+						className="rounded-[6px] border border-border bg-background px-2 py-1 text-[12px] text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
 					/>
 				</div>
 				<div className="flex flex-col gap-1 pt-2">
@@ -986,7 +998,7 @@ export function SessionBrief({
 						onChange={(event) => setNotes(paneId, event.target.value)}
 						placeholder="Notes to yourself - saved as you type."
 						rows={4}
-						className="resize-y rounded-[7px] border border-border bg-background px-2 py-1.5 text-[12.5px] leading-relaxed text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
+						className="resize-y rounded-[6px] border border-border bg-background px-2 py-1.5 text-[12.5px] leading-relaxed text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
 					/>
 				</div>
 			</div>

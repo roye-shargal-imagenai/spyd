@@ -44,7 +44,7 @@ function SessionsSettingsPage() {
 					id="launch-limit-host"
 					field="hostCpuPercent"
 					label="Hold new sessions when this Mac is"
-					description="Total CPU load - Odin's sessions, builds, Docker, anything. Lower it if the Mac feels slow before sessions start queueing."
+					description="Total CPU load - spyd's sessions, builds, Docker, anything. Lower it if the Mac feels slow before sessions start queueing."
 					min={1}
 					max={100}
 					step={1}
