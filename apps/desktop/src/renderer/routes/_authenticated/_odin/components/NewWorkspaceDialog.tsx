@@ -4,12 +4,19 @@ import {
 	deriveWorkspaceBranchFromPrompt,
 	sanitizeBranchNameWithMaxLength,
 } from "@odin/shared/workspace-launch";
+import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { HiOutlineFolder, HiOutlineXMark } from "react-icons/hi2";
+import {
+	HiOutlineFolder,
+	HiOutlineMoon,
+	HiOutlineXMark,
+} from "react-icons/hi2";
 import { LuGitBranch } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { create } from "zustand";
+import { useOdinProfile } from "../hooks/useOdinProfile";
+import { useOdinTasks } from "../hooks/useOdinTasks";
 import { useStartWorkspace } from "../hooks/useStartWorkspace";
 import type { PromptImage } from "./OdinPromptDialog";
 import { BUTTON } from "./pill";
@@ -132,6 +139,36 @@ function DialogBody({
 		setBranchEdit(null);
 	};
 
+	const { activeId } = useOdinProfile();
+	/**
+	 * Not now - tonight. Lands as a task marked for the Night Agent, in this
+	 * repo, with the mode's brief; it starts it first once off-hours begin.
+	 */
+	const queueTonight = () => {
+		const text = prompt.trim();
+		if (!text) return;
+		const [title = "", ...rest] = text.split("\n");
+		const notes = [rest.join("\n").trim(), withMode(mode, "").trim()]
+			.filter(Boolean)
+			.join("\n\n");
+		useOdinTasks
+			.getState()
+			.add(
+				`${title} #tonight${notes ? `\n${notes}` : ""}`,
+				activeId,
+				undefined,
+				project.mainRepoPath,
+			);
+		toast.success(`Queued for tonight - ${title.slice(0, 50)}`, {
+			description:
+				images.length > 0
+					? "Pasted images aren't kept on a queued task."
+					: undefined,
+		});
+		setDraft(project.id, "");
+		useNewWorkspaceDialog.setState({ lastProjectId: project.id });
+		close();
+	};
 	const submit = () => {
 		// The branch is named from what you typed, not the mode's brief.
 		start({ project, prompt: withMode(mode, prompt), images, branch });
@@ -243,7 +280,9 @@ function DialogBody({
 							!e.nativeEvent.isComposing
 						) {
 							e.preventDefault();
-							submit();
+							// ⌥↵ queues it for tonight instead of starting it now.
+							if (e.altKey) queueTonight();
+							else submit();
 						}
 					}}
 					onPaste={async (e) => {
@@ -328,13 +367,26 @@ function DialogBody({
 						</span>
 					)}
 					<span>
-						<kbd className="font-mono text-soft-foreground">esc</kbd> close
+						<kbd className="font-mono text-soft-foreground">⌥↵</kbd> tonight
 					</span>
+					<button
+						type="button"
+						disabled={!prompt.trim()}
+						onClick={queueTonight}
+						title="Don't start it now - the Night Agent runs it first tonight (⌥↵)"
+						className={cn(
+							"ml-auto flex h-[34px] items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium disabled:opacity-40",
+							BUTTON.secondary,
+						)}
+					>
+						<HiOutlineMoon className="size-4" aria-hidden />
+						Tonight
+					</button>
 					<button
 						type="button"
 						onClick={submit}
 						className={cn(
-							"ml-auto h-[34px] rounded-full px-4 text-[13px] font-semibold",
+							"h-[34px] rounded-full px-4 text-[13px] font-semibold",
 							BUTTON.primary,
 						)}
 					>

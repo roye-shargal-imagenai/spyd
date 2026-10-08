@@ -7,15 +7,20 @@ import {
 	CommandList,
 	CommandShortcut,
 } from "@odin/ui/command";
+import { toast } from "@odin/ui/sonner";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import {
 	HiOutlineArrowDownTray,
 	HiOutlineArrowRight,
 	HiOutlineFolderPlus,
+	HiOutlineMoon,
 	HiOutlinePlus,
 } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { create } from "zustand";
+import { useOdinProfile } from "../hooks/useOdinProfile";
+import { useOdinTasks } from "../hooks/useOdinTasks";
 import { useStartWorkspace } from "../hooks/useStartWorkspace";
 import { useNewWorkspaceDialog } from "./NewWorkspaceDialog";
 import { StatusGlyph, useOpenSession, useSidebarSessions } from "./SessionList";
@@ -32,6 +37,7 @@ export const useCommandPalette = create<{
 /** Every screen, by the name you'd type. */
 const PLACES = [
 	{ label: "Home", to: "/home" },
+	{ label: "Your web", to: "/web" },
 	{ label: "Dev Board", to: "/board" },
 	{ label: "Tasks", to: "/all" },
 	{ label: "Review", to: "/review" },
@@ -65,6 +71,9 @@ export function CommandPalette() {
 		onSuccess: () => void utils.projects.getRecents.invalidate(),
 	});
 	const { start } = useStartWorkspace();
+	const [search, setSearch] = useState("");
+	const { activeId } = useOdinProfile();
+	const tonightText = search.trim();
 
 	const run = (action: () => void) => {
 		setOpen(false);
@@ -80,9 +89,40 @@ export function CommandPalette() {
 			showCloseButton={false}
 			className="top-[18vh] max-w-[600px] translate-y-0 rounded-[12px] border-border bg-popover sm:max-w-[600px]"
 		>
-			<CommandInput placeholder="Search sessions, repositories, screens…" />
+			<CommandInput
+				value={search}
+				onValueChange={setSearch}
+				placeholder="Search, or type a task to run tonight…"
+			/>
 			<CommandList className="max-h-[420px]">
 				<CommandEmpty>Nothing matches.</CommandEmpty>
+
+				{/* Whatever you typed, as a task for the Night Agent - the quickest
+				    way to hand it something on the way out. */}
+				{tonightText.length > 2 && (
+					<CommandGroup heading="Tonight">
+						<CommandItem
+							value={`tonight night agent ${tonightText}`}
+							onSelect={() =>
+								run(() => {
+									useOdinTasks
+										.getState()
+										.add(`${tonightText} #tonight`, activeId);
+									setSearch("");
+									toast.success(
+										`Queued for tonight - ${tonightText.slice(0, 50)}`,
+									);
+								})
+							}
+							className={ITEM}
+						>
+							<HiOutlineMoon />
+							<span className="min-w-0 flex-1 truncate">
+								Run tonight: <span className="font-medium">{tonightText}</span>
+							</span>
+						</CommandItem>
+					</CommandGroup>
+				)}
 
 				{sessions.length > 0 && (
 					<CommandGroup heading="Sessions">

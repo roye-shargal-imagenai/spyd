@@ -40,6 +40,7 @@ import {
 	useReminders,
 } from "../components/Reminders";
 import { PriorityLabelChip } from "../components/TaskBox";
+import { TonightToggle } from "../components/TonightToggle";
 import { useActiveSessions } from "../hooks/useActiveSessions";
 import { useDone } from "../hooks/useDone";
 import { useOdinFeeds } from "../hooks/useOdinFeeds";
@@ -696,14 +697,17 @@ function AllFeedPage() {
 												</button>
 											)}
 										</span>
-										<button
-											type="button"
-											onClick={() => markReading(item)}
-											title="Nothing to do, but keep it - moves it to Reading material"
-											className={ROW_LINK_BUTTON}
-										>
-											Read later
-										</button>
+										<span className="flex items-center gap-1">
+											<TonightToggle itemKey={item.key} />
+											<button
+												type="button"
+												onClick={() => markReading(item)}
+												title="Nothing to do, but keep it - moves it to Reading material"
+												className={ROW_LINK_BUTTON}
+											>
+												Read later
+											</button>
+										</span>
 										<DoneButton onClick={() => markDone(item)} />
 										{/* Same preview the Jira feed shows: a mention row is there
 								    because of one comment. Column 2 keeps it under the title. */}

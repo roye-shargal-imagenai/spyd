@@ -7,6 +7,7 @@ import {
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { useNextInLineQueue } from "../board/NextInLine";
 import { useOdinFeeds } from "./useOdinFeeds";
+import { useOdinTasks } from "./useOdinTasks";
 
 const TICK_MS = 60_000;
 
@@ -121,7 +122,11 @@ export function useNightAgentRunner() {
 				const { order, hidden } = night.current as NightRanking;
 				const { pinned, unpinned, start, duplicateFor } = latest.current;
 				const rank = (key: string) => order.get(key) ?? order.size;
-				const asked = (key: string) => nightKeys.current.has(key);
+				// Asked for tonight: a 🌙 on the Slack message, or a Tonight mark
+				// on any row. These go first and skip the ranking's rule-outs.
+				const marked = new Set(useOdinTasks.getState().tonight ?? []);
+				const asked = (key: string) =>
+					nightKeys.current.has(key) || marked.has(key);
 				const item = [
 					...[...pinned, ...unpinned].filter((row) => asked(row.key)),
 					...pinned,
@@ -136,6 +141,7 @@ export function useNightAgentRunner() {
 				tried.current.add(item.key);
 				setOffHoursStarted(offHoursStarted + 1);
 				await start(item, { instructions: offHours.instructions });
+				useOdinTasks.getState().setTonight(item.key, false);
 			} catch (error) {
 				console.warn("[night-agent] ranking failed, starting nothing:", error);
 			} finally {

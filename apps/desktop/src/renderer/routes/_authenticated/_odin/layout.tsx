@@ -70,6 +70,7 @@ import {
 import { useNightAgentRunner } from "./hooks/useNightAgentRunner";
 import { useOdinFeeds } from "./hooks/useOdinFeeds";
 import { useOdinProfile } from "./hooks/useOdinProfile";
+import { useOdinTasks } from "./hooks/useOdinTasks";
 import { usePendingFocus } from "./hooks/usePendingFocus";
 import {
 	questionPane,
@@ -751,8 +752,11 @@ function NightAgentRailButton() {
 	const isRunning =
 		offHours.enabled && inOffHours(now, offHours.start, offHours.end);
 	const hours = `${offHours.start}-${offHours.end}`;
+	const queued = useOdinTasks((s) => (s.tonight ?? []).length);
 	const hint = !offHours.enabled
-		? "Night Agent - off"
+		? queued > 0
+			? `Night Agent - off, so the ${queued} marked for tonight won't run. Click to turn it on.`
+			: "Night Agent - off"
 		: isRunning
 			? `Night Agent - running until ${offHours.end}, ${started} of ${offHours.maxSessions} started tonight`
 			: `Night Agent - on, ${hours}`;
@@ -773,6 +777,18 @@ function NightAgentRailButton() {
 		>
 			<HiOutlineMoon className="size-4 shrink-0" />
 			<span className="min-w-0 flex-1 truncate text-left">Night Agent</span>
+			{queued > 0 && (
+				<span
+					className={cn(
+						"shrink-0 rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+						offHours.enabled
+							? "bg-primary/15 text-primary-ink"
+							: "bg-attention/15 text-attention-ink",
+					)}
+				>
+					{queued} tonight
+				</span>
+			)}
 			<span className="shrink-0 text-[11px] tabular-nums text-faint-foreground">
 				{!offHours.enabled
 					? "off"

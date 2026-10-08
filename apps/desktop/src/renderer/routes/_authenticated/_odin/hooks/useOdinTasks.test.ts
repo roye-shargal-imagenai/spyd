@@ -11,7 +11,7 @@ import {
 	withSkill,
 } from "./useOdinTasks";
 
-beforeEach(() => useOdinTasks.setState({ tasks: [] }));
+beforeEach(() => useOdinTasks.setState({ tasks: [], tonight: [] }));
 
 describe("add", () => {
 	it("splits the first line off as the title and keeps the rest as notes", () => {
@@ -178,5 +178,42 @@ describe("the skill on a task", () => {
 		const id = useOdinTasks.getState().tasks[0]?.id ?? "";
 		useOdinTasks.getState().edit(id, "Purge the account");
 		expect(useOdinTasks.getState().tasks[0]?.skill).toBeUndefined();
+	});
+});
+
+describe("tonight", () => {
+	it("reads #tonight or a moon off the first line and keeps it out of the title", () => {
+		expect(parseTask("Fix the flaky test #tonight")).toMatchObject({
+			title: "Fix the flaky test",
+			tonight: true,
+		});
+		expect(parseTask("🌙 !! Bump the SDK\nnotes")).toMatchObject({
+			title: "Bump the SDK",
+			priority: 2,
+			notes: "notes",
+			tonight: true,
+		});
+		expect(parseTask("Read #tonightly docs").tonight).toBe(false);
+		// A moon in the notes is just a moon.
+		expect(parseTask("Plain\nsee 🌙").tonight).toBe(false);
+	});
+
+	it("marks a task added with #tonight, and drops the mark when it's removed", () => {
+		useOdinTasks.getState().add("Clean the logs #tonight");
+		const task = useOdinTasks.getState().tasks[0];
+		if (!task) throw new Error("task was not added");
+		expect(useOdinTasks.getState().tonight).toEqual([`task:${task.id}`]);
+		useOdinTasks.getState().remove(task.id);
+		expect(useOdinTasks.getState().tonight).toEqual([]);
+	});
+
+	it("toggles any row's key and keeps each key once", () => {
+		const { setTonight } = useOdinTasks.getState();
+		setTonight("jira:RND-1", true);
+		setTonight("jira:RND-1", true);
+		setTonight("pr:7", true);
+		expect(useOdinTasks.getState().tonight).toEqual(["pr:7", "jira:RND-1"]);
+		setTonight("jira:RND-1", false);
+		expect(useOdinTasks.getState().tonight).toEqual(["pr:7"]);
 	});
 });

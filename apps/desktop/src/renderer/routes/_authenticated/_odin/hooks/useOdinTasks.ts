@@ -115,15 +115,26 @@ const joinFirstLine = (parts: {
 		.filter(Boolean)
 		.join(" ");
 
+/**
+ * "Run this tonight", written into the task itself: `#tonight` or a 🌙 on the
+ * first line. Taken out of the title, so the card reads as the work.
+ */
+const TONIGHT_MARK = /(^|\s)(#tonight|🌙|:crescent_moon:)(?=\s|$)/giu;
+
 export function parseTask(text: string): {
 	title: string;
 	notes: string;
 	priority: number;
 	skill: string;
+	tonight: boolean;
 } {
-	const [first = "", ...rest] = text.trim().split("\n");
+	const [raw = "", ...rest] = text.trim().split("\n");
+	const tonight = TONIGHT_MARK.test(raw);
+	TONIGHT_MARK.lastIndex = 0;
+	const first = raw.replace(TONIGHT_MARK, " ").replace(/\s+/g, " ").trim();
 	const { bangs, skill, title } = splitFirstLine(first);
 	return {
+		tonight,
 		// "/ship-status" on its own is a task - the skill names it, so the card
 		// isn't blank and `add` doesn't reject it as titleless.
 		title: title || skill,
@@ -164,6 +175,14 @@ export const useOdinTasks = create<{
 	 * rather than imported, so the store stays the plain thing the built-ins are
 	 * defined against and not the other way round.
 	 */
+	/**
+	 * Feed rows (any `AllItem.key` - task:, jira:, pr:, slack:, ...) marked to
+	 * run tonight. The Night Agent starts these before anything it would pick
+	 * itself, and a key leaves the list the moment its session starts. Capped,
+	 * so a mark on something that never runs can't grow it forever.
+	 */
+	tonight: string[];
+	setTonight: (key: string, on: boolean) => void;
 	installBuiltins: (
 		profileId: string,
 		builtins: { id: string; title: string; notes: string; cron: string }[],
@@ -173,14 +192,24 @@ export const useOdinTasks = create<{
 		(set) => ({
 			tasks: [],
 			seeded: [],
+			tonight: [],
+			setTonight: (key, on) =>
+				set((s) => {
+					const rest = (s.tonight ?? []).filter((k) => k !== key);
+					return { tonight: on ? [key, ...rest].slice(0, 100) : rest };
+				}),
 			add: (text, profileId, cron, repo) =>
 				set((s) => {
-					const { title, notes, priority, skill } = parseTask(text);
+					const { title, notes, priority, skill, tonight } = parseTask(text);
 					if (!title) return s;
+					const id = crypto.randomUUID();
 					return {
+						...(tonight
+							? { tonight: [`task:${id}`, ...(s.tonight ?? [])].slice(0, 100) }
+							: {}),
 						tasks: [
 							{
-								id: crypto.randomUUID(),
+								id,
 								title,
 								notes,
 								priority,
@@ -196,10 +225,19 @@ export const useOdinTasks = create<{
 				}),
 			edit: (id, text, repo) =>
 				set((s) => {
-					const { title, notes, priority, skill } = parseTask(text);
+					const { title, notes, priority, skill, tonight } = parseTask(text);
+					const marked = tonight
+						? {
+								tonight: [
+									`task:${id}`,
+									...(s.tonight ?? []).filter((k) => k !== `task:${id}`),
+								].slice(0, 100),
+							}
+						: {};
 					// Editing a task to nothing means deleting it - one fewer button.
 					if (!title) return { tasks: s.tasks.filter((t) => t.id !== id) };
 					return {
+						...marked,
 						tasks: s.tasks.map((t) =>
 							// skill is written on every edit, so clearing it in the box
 							// clears it on the task rather than leaving the old one.
@@ -217,7 +255,10 @@ export const useOdinTasks = create<{
 					};
 				}),
 			remove: (id) =>
-				set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+				set((s) => ({
+					tasks: s.tasks.filter((t) => t.id !== id),
+					tonight: (s.tonight ?? []).filter((k) => k !== `task:${id}`),
+				})),
 			setPane: (id, paneId) =>
 				set((s) => ({
 					tasks: s.tasks.map((t) => (t.id === id ? { ...t, paneId } : t)),
