@@ -6,7 +6,7 @@ import {
 } from "@odin/shared/workspace-launch";
 import { cn } from "@odin/ui/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { HiOutlineXMark } from "react-icons/hi2";
+import { HiOutlineFolder, HiOutlineXMark } from "react-icons/hi2";
 import { LuGitBranch } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { create } from "zustand";
@@ -146,12 +146,12 @@ function DialogBody({
 				type="button"
 				aria-label="Close"
 				onClick={close}
-				className="fade-in fixed inset-0 z-40 animate-in cursor-default bg-black/50 duration-150"
+				className="fade-in fixed inset-0 z-40 animate-in cursor-default bg-[rgba(4,7,16,0.6)] duration-200"
 			/>
 			<div
 				role="dialog"
 				aria-label="New workspace"
-				className="fade-in zoom-in-95 slide-in-from-top-2 fixed top-[18vh] left-1/2 z-50 flex w-[600px] max-w-[calc(100vw-32px)] -translate-x-1/2 animate-in flex-col overflow-hidden rounded-[12px] border border-border bg-popover shadow-2xl duration-150"
+				className="fade-in zoom-in-95 slide-in-from-top-2 fixed top-[18vh] left-1/2 z-50 flex w-[640px] max-w-[calc(100vw-32px)] -translate-x-1/2 animate-in flex-col overflow-hidden rounded-[28px] bg-card shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-inset ring-input duration-200 ease-spyd"
 				onKeyDown={(e) => {
 					if (e.key === "Escape") {
 						e.preventDefault();
@@ -174,29 +174,31 @@ function DialogBody({
 				}}
 			>
 				{/* Mode: how the agent should go at it. ⌘1-4 from the prompt. */}
-				<div className="flex items-center gap-1 px-4 pt-3">
-					{MODES.map((m, i) => (
-						<button
-							key={m.id}
-							type="button"
-							title={`${m.hint} (⌘${i + 1})`}
-							onClick={() => useNewWorkspaceDialog.setState({ mode: m.id })}
-							className={cn(
-								"rounded-full px-3 py-1 text-[12px] font-semibold transition-colors",
-								m.id === mode
-									? "bg-foreground text-background"
-									: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
-							)}
-						>
-							{m.label}
-						</button>
-					))}
-					<span className="ml-2 truncate text-[11px] text-faint-foreground">
-						{MODES.find((m) => m.id === mode)?.hint}
-					</span>
+				<div className="flex items-center gap-3 px-[22px] pt-5">
+					<h2 className="font-display text-[20px] font-bold tracking-[-0.02em]">
+						New workspace
+					</h2>
+					<div className="ml-auto flex gap-0.5 rounded-full bg-tertiary p-[3px]">
+						{MODES.map((m, i) => (
+							<button
+								key={m.id}
+								type="button"
+								title={`${m.hint} (⌘${i + 1})`}
+								onClick={() => useNewWorkspaceDialog.setState({ mode: m.id })}
+								className={cn(
+									"h-[26px] rounded-full px-3 text-[13px] transition-colors",
+									m.id === mode
+										? "bg-input font-medium text-foreground"
+										: "text-muted-foreground hover:text-foreground",
+								)}
+							>
+								{m.label}
+							</button>
+						))}
+					</div>
 				</div>
 				{/* Repo chips: the few you keep, one click (or ⌥←→) apart. */}
-				<div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 pt-3 pb-2.5">
+				<div className="flex flex-wrap items-center gap-1.5 px-[22px] pt-4">
 					{projects.map((p) => (
 						<button
 							key={p.id}
@@ -207,18 +209,27 @@ function DialogBody({
 								setBranchEdit(null);
 							}}
 							className={cn(
-								"rounded-full px-2 py-1 text-[12px] font-medium transition-colors",
+								"flex h-[30px] items-center gap-1.5 rounded-full px-[11px] text-[12.5px] transition-colors",
 								p.id === project.id
-									? BUTTON.selected
-									: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+									? "bg-primary font-semibold text-primary-foreground"
+									: "bg-secondary text-soft-foreground hover:bg-input hover:text-foreground",
 							)}
 						>
+							<HiOutlineFolder className="size-[13px] shrink-0" />
 							{p.name}
 						</button>
 					))}
 				</div>
 
+				<label
+					htmlFor="new-workspace-prompt"
+					className="px-[22px] pt-[18px] text-[12px] text-faint-foreground"
+				>
+					{MODES.find((m) => m.id === mode)?.hint ??
+						"What should the agent do?"}
+				</label>
 				<textarea
+					id="new-workspace-prompt"
 					ref={textarea}
 					// biome-ignore lint/a11y/noAutofocus: the box exists to be typed in
 					autoFocus
@@ -245,11 +256,11 @@ function DialogBody({
 						setImages((current) => [...current, ...read]);
 					}}
 					placeholder={`What should the agent do in ${project.name}?`}
-					className="min-h-[84px] resize-none bg-transparent px-4 py-3.5 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-faint-foreground"
+					className="min-h-[96px] resize-none bg-transparent px-[22px] pt-2 pb-2 text-[16px] leading-[1.55] text-foreground outline-none placeholder:text-faint-foreground"
 				/>
 
 				{images.length > 0 && (
-					<div className="flex flex-wrap gap-1.5 px-4 pb-2">
+					<div className="flex flex-wrap gap-1.5 px-[22px] pb-2">
 						{images.map((image, i) => (
 							<span
 								key={`${image.name}-${i}`}
@@ -262,7 +273,7 @@ function DialogBody({
 									onClick={() =>
 										setImages((current) => current.filter((_, j) => j !== i))
 									}
-									className="rounded-[4px] p-0.5 hover:bg-accent"
+									className="rounded-full p-0.5 hover:bg-accent"
 								>
 									<HiOutlineXMark className="size-3" />
 								</button>
@@ -272,7 +283,7 @@ function DialogBody({
 				)}
 
 				{/* The branch it'll make, from where - live, and renamable. */}
-				<div className="flex items-center gap-2 px-4 pb-3 text-[12px] text-muted-foreground">
+				<div className="flex items-center gap-2 px-[22px] pt-1.5 pb-4 text-[12px] text-muted-foreground">
 					<LuGitBranch className="size-3.5 shrink-0 text-faint-foreground" />
 					{branchEdit !== null ? (
 						<input
@@ -287,14 +298,14 @@ function DialogBody({
 								}
 							}}
 							aria-label="Branch name"
-							className="min-w-0 flex-1 rounded-[4px] bg-secondary px-1.5 py-0.5 font-mono text-[12px] text-foreground outline-none"
+							className="min-w-0 flex-1 rounded-[10px] bg-tertiary px-2 py-[3px] font-mono text-[12px] text-foreground outline-none ring-1 ring-primary"
 						/>
 					) : (
 						<button
 							type="button"
 							title="Rename the branch"
 							onClick={() => setBranchEdit(branch)}
-							className="min-w-0 truncate rounded-[4px] px-1 py-0.5 font-mono text-soft-foreground hover:bg-accent/60 hover:text-foreground"
+							className="min-w-0 truncate rounded-[10px] bg-tertiary px-2 py-[3px] font-mono text-foreground hover:ring-1 hover:ring-input"
 						>
 							{branch || "a fresh branch"}
 						</button>
@@ -304,26 +315,26 @@ function DialogBody({
 					</span>
 				</div>
 
-				<div className="flex items-center gap-3 border-t border-border bg-tertiary px-4 py-2.5 text-[11px] text-faint-foreground">
+				<div className="flex items-center gap-3.5 border-t border-secondary bg-tertiary/60 py-3 pr-4 pl-[22px] text-[12px] text-faint-foreground">
 					<span>
-						<kbd className="font-sans text-muted-foreground">↵</kbd> create
+						<kbd className="font-mono text-soft-foreground">↵</kbd> create
 					</span>
 					<span>
-						<kbd className="font-sans text-muted-foreground">⇧↵</kbd> new line
+						<kbd className="font-mono text-soft-foreground">⇧↵</kbd> new line
 					</span>
 					{projects.length > 1 && (
 						<span>
-							<kbd className="font-sans text-muted-foreground">⌥←→</kbd> repo
+							<kbd className="font-mono text-soft-foreground">⌥←→</kbd> repo
 						</span>
 					)}
 					<span>
-						<kbd className="font-sans text-muted-foreground">esc</kbd> close
+						<kbd className="font-mono text-soft-foreground">esc</kbd> close
 					</span>
 					<button
 						type="button"
 						onClick={submit}
 						className={cn(
-							"ml-auto rounded-full px-3 py-1.5 text-[12px] font-semibold",
+							"ml-auto h-[34px] rounded-full px-4 text-[13px] font-semibold",
 							BUTTON.primary,
 						)}
 					>

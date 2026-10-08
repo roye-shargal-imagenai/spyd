@@ -6,6 +6,8 @@ import { useState } from "react";
 import {
 	HiChevronRight,
 	HiOutlineArrowDownTray,
+	HiOutlineFolder,
+	HiOutlineFolderOpen,
 	HiOutlinePlus,
 } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
@@ -21,14 +23,14 @@ import {
 	NewWorkspaceDialog,
 	useNewWorkspaceDialog,
 } from "./NewWorkspaceDialog";
-import { RepoArt } from "./RepoArt";
+
 import { useSupersetImport } from "./SupersetImport";
 
 /** What a session's dot looks like, by the board column it's in. */
 export const SESSION_DOT: Record<string, string> = {
 	working: "bg-working animate-pulse",
-	permission: "bg-attention",
-	review: "bg-success",
+	permission: "bg-primary",
+	review: "border border-success",
 	idle: "bg-faint-foreground/60",
 };
 
@@ -108,24 +110,20 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 
 	return (
 		<div className="flex flex-col gap-0.5">
-			<div className="flex items-center justify-between px-2.5 pb-1.5 font-display text-[14px] font-bold text-soft-foreground">
+			<div className="group/head flex items-center justify-between px-2.5 pb-1.5 text-[12px] font-medium text-faint-foreground">
 				<button
 					type="button"
 					onClick={() => setCollapsed((c) => !c)}
-					className="flex items-center gap-1 hover:text-foreground"
+					className="flex items-center gap-1 hover:text-muted-foreground"
 				>
+					Repositories
 					<HiChevronRight
 						className={cn(
-							"size-3 transition-transform",
+							"size-3 opacity-0 transition-[transform,opacity] group-hover/head:opacity-100",
 							!collapsed && "rotate-90",
 						)}
 					/>
-					Repositories
-					{collapsed && (
-						<span className="font-sans text-[12px] font-medium text-faint-foreground">
-							{projects.length}
-						</span>
-					)}
+					{collapsed && <span className="tabular-nums">{projects.length}</span>}
 				</button>
 				<span className="flex items-center gap-0.5">
 					<button
@@ -133,7 +131,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 						aria-label="Import from Superset"
 						title="Pick up a workspace from Superset, with its conversation"
 						onClick={() => useSupersetImport.getState().setOpen(true)}
-						className="rounded-[4px] p-0.5 hover:bg-accent/60 hover:text-foreground"
+						className="flex size-[22px] items-center justify-center rounded-full hover:bg-accent/60 hover:text-foreground"
 					>
 						<HiOutlineArrowDownTray className="size-3.5" />
 					</button>
@@ -143,7 +141,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 						title="Add a repository from this computer"
 						disabled={openNew.isPending}
 						onClick={() => openNew.mutate()}
-						className="rounded-[4px] p-0.5 hover:bg-accent/60 hover:text-foreground disabled:opacity-50"
+						className="flex size-[22px] items-center justify-center rounded-full hover:bg-accent/60 hover:text-foreground disabled:opacity-50"
 					>
 						<HiOutlinePlus className="size-3.5" />
 					</button>
@@ -174,14 +172,29 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									type="button"
 									title={project.mainRepoPath}
 									onClick={() => toggle(project.id)}
-									className={cn(ROW, "min-w-0 flex-1 text-soft-foreground")}
+									className={cn(
+										ROW,
+										"h-[30px] min-w-0 flex-1 text-soft-foreground",
+										isOpen && "text-foreground",
+									)}
 								>
-									<RepoArt name={project.name} size={20} />
-									<span className="min-w-0 flex-1 truncate font-medium">
+									{isOpen ? (
+										<HiOutlineFolderOpen className="size-[15px] shrink-0 text-faint-foreground" />
+									) : (
+										<HiOutlineFolder className="size-[15px] shrink-0 text-faint-foreground" />
+									)}
+									<span className="min-w-0 flex-1 truncate">
 										{project.name}
 									</span>
+									{sessions.some((entry) => entry.column === "permission") && (
+										<span
+											role="img"
+											aria-label="A session needs you"
+											className="size-1.5 shrink-0 rounded-full bg-primary"
+										/>
+									)}
 									{sessions.length > 0 && (
-										<span className="shrink-0 text-[11px] tabular-nums text-faint-foreground">
+										<span className="min-w-2.5 shrink-0 text-right text-[12px] tabular-nums text-faint-foreground group-hover:invisible">
 											{sessions.length}
 										</span>
 									)}
@@ -191,13 +204,13 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									aria-label={`New workspace in ${project.name}`}
 									title={`New workspace in ${project.name} (⌥-click to describe it first)`}
 									onClick={(event) => newWorkspace(project, event)}
-									className="ml-0.5 flex size-7 shrink-0 items-center justify-center rounded-[12px] text-faint-foreground opacity-0 transition-[opacity,color] hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+									className="-ml-8 flex size-[26px] shrink-0 items-center justify-center rounded-full text-faint-foreground opacity-0 transition-[opacity,color] hover:bg-primary hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100"
 								>
 									<HiOutlinePlus className="size-3.5" />
 								</button>
 							</div>
 							{isOpen && (
-								<div className="ml-4 flex flex-col gap-0.5 border-l border-border pl-1.5">
+								<div className="flex flex-col gap-0.5 pb-1 pl-[25px]">
 									{making.map((item) => (
 										<PendingRow
 											key={item.id}
@@ -234,7 +247,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 											<span
 												aria-hidden
 												className={cn(
-													"size-1.5 shrink-0 rounded-full",
+													"size-[7px] shrink-0 rounded-full",
 													SESSION_DOT[entry.column] ?? SESSION_DOT.idle,
 												)}
 											/>

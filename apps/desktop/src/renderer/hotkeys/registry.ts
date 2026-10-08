@@ -67,9 +67,9 @@ export const HOTKEYS_REGISTRY = {
 	},
 	ODIN_BOARD: {
 		key: { mac: L("d"), windows: L("d"), linux: L("d") },
-		label: "Dev Board",
+		label: "Your web",
 		category: "Navigation",
-		description: "Open the Dev Board",
+		description: "Open Your web - every agent on one map",
 	},
 	ODIN_ALL: {
 		key: { mac: L("a"), windows: L("a"), linux: L("a") },
