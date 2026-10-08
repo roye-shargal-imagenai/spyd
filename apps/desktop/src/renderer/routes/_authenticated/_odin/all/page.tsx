@@ -468,7 +468,7 @@ function AllFeedPage() {
 													title="Open the session on the board"
 													onClick={() => {
 														usePendingFocus.getState().focus(session.paneId);
-														navigate({ to: "/board" });
+														navigate({ to: "/home" });
 													}}
 													className="min-w-0 flex-1 truncate bg-none text-left text-[13px] font-semibold text-foreground"
 												>
@@ -537,7 +537,7 @@ function AllFeedPage() {
 														type="button"
 														onClick={() => {
 															usePendingFocus.getState().focus(session.paneId);
-															navigate({ to: "/board" });
+															navigate({ to: "/home" });
 														}}
 														className={ROW_LIVE_BUTTON}
 													>
@@ -677,7 +677,7 @@ function AllFeedPage() {
 													type="button"
 													onClick={() => {
 														usePendingFocus.getState().focus(activePaneId);
-														navigate({ to: "/board" });
+														navigate({ to: "/home" });
 													}}
 													className={ROW_LIVE_BUTTON}
 												>
@@ -734,7 +734,7 @@ function AllFeedPage() {
 							onStart={() => void handleStart(openItem)}
 							onGoTo={(paneId) => {
 								usePendingFocus.getState().focus(paneId);
-								navigate({ to: "/board" });
+								navigate({ to: "/home" });
 							}}
 							onReadLater={() => markReading(openItem)}
 							onDone={() => markDone(openItem)}

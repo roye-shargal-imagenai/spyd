@@ -103,7 +103,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 		});
 	const openSession = (paneId: string) => {
 		usePendingFocus.getState().focus(paneId);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 
 	return (

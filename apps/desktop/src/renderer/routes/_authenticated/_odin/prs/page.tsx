@@ -175,7 +175,7 @@ function MyPullRequestsPage() {
 		});
 		if (result.ok) {
 			usePendingFocus.getState().focus(result.paneId);
-			navigate({ to: "/board" });
+			navigate({ to: "/home" });
 		} else {
 			toast.error(result.error);
 		}
@@ -307,7 +307,7 @@ function MyPullRequestsPage() {
 												type="button"
 												onClick={() => {
 													usePendingFocus.getState().focus(activePaneId);
-													navigate({ to: "/board" });
+													navigate({ to: "/home" });
 												}}
 												className={ROW_LIVE_BUTTON}
 											>

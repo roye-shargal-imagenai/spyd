@@ -196,7 +196,7 @@ function SessionsPage() {
 		}
 		usePendingFocus.getState().focus(result.paneId);
 		toast.success(`Resuming "${row.title}"`);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 
 	return (

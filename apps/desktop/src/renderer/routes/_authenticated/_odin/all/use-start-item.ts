@@ -77,7 +77,7 @@ export function useStartAllItem(onSlackStarted?: () => void) {
 		if (item.source === "Tasks") setPane(item.launch.key, result.paneId);
 		if (offHours) return;
 		usePendingFocus.getState().focus(result.paneId);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 
 	return { start, livePaneFor, isLaunching, launchingKey };

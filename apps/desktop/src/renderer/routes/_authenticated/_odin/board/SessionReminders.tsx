@@ -46,7 +46,7 @@ export function useResumeReminder() {
 		if (!result.ok) return void toast.error(result.error);
 		clear(key);
 		usePendingFocus.getState().focus(result.paneId);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 	return { resume, isLaunching };
 }
@@ -64,7 +64,7 @@ export function useOpenReminder() {
 	return (key: string) => {
 		if (key.startsWith("session:")) {
 			usePendingFocus.getState().focus(key.slice("session:".length));
-			return void navigate({ to: "/board" });
+			return void navigate({ to: "/home" });
 		}
 		const item = allItems({
 			tasks: [],
@@ -79,7 +79,7 @@ export function useOpenReminder() {
 			const paneId = livePaneFor(item);
 			if (!paneId) return void start(item);
 			usePendingFocus.getState().focus(paneId);
-			return void navigate({ to: "/board" });
+			return void navigate({ to: "/home" });
 		}
 		navigate({ to: "/all" });
 	};

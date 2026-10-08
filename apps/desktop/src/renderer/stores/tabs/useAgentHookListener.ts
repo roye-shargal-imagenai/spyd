@@ -203,7 +203,7 @@ export function useAgentHookListener() {
 				if (paneId) {
 					usePendingFocus.getState().focus(paneId);
 				}
-				void navigate({ to: "/board" });
+				void navigate({ to: "/home" });
 			}
 		},
 	});

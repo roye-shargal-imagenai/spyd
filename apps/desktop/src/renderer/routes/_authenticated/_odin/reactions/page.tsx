@@ -170,7 +170,7 @@ function ReactionsPage() {
 		const paneId = await start(row);
 		if (!paneId) return;
 		usePendingFocus.getState().focus(paneId);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 
 	return (
@@ -315,7 +315,7 @@ function ReactionsPage() {
 													type="button"
 													onClick={() => {
 														usePendingFocus.getState().focus(activePaneId);
-														navigate({ to: "/board" });
+														navigate({ to: "/home" });
 													}}
 													className={ROW_LIVE_BUTTON}
 												>

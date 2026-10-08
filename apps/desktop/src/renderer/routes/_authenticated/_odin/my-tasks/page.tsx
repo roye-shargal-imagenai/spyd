@@ -95,7 +95,7 @@ function MyTasksPage() {
 		// isn't finishing it, so it's still yours to ✕ when it's actually done.
 		setPane(task.id, result.paneId);
 		usePendingFocus.getState().focus(result.paneId);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 
 	return (
@@ -214,7 +214,7 @@ function MyTasksPage() {
 											type="button"
 											onClick={() => {
 												usePendingFocus.getState().focus(activePaneId);
-												navigate({ to: "/board" });
+												navigate({ to: "/home" });
 											}}
 											className={ROW_LIVE_BUTTON}
 										>

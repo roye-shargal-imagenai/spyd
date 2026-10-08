@@ -809,7 +809,7 @@ function SchedulesPanel() {
 		if (!result.ok) return toast.error(result.error);
 		setPane(task.id, result.paneId);
 		usePendingFocus.getState().focus(result.paneId);
-		navigate({ to: "/board" });
+		navigate({ to: "/home" });
 	};
 
 	const addAutomation = () => {
@@ -973,7 +973,7 @@ function SchedulesPanel() {
 											type="button"
 											onClick={() => {
 												usePendingFocus.getState().focus(activePaneId);
-												navigate({ to: "/board" });
+												navigate({ to: "/home" });
 											}}
 											className={ROW_LIVE_BUTTON}
 										>
