@@ -42,6 +42,7 @@ import { CommandPalette, useCommandPalette } from "./components/CommandPalette";
 import { FEED_TABS } from "./components/feed-counts";
 import { GettingStarted } from "./components/GettingStarted";
 import { InAppBrowser } from "./components/InAppBrowser";
+import { Moments } from "./components/Moments";
 import { useNewWorkspaceDialog } from "./components/NewWorkspaceDialog";
 import { OdinPromptDialog } from "./components/OdinPromptDialog";
 import { PILL } from "./components/pill";
@@ -693,6 +694,7 @@ function OdinShell() {
 			<SessionContextDialog />
 			<SessionHotkeys />
 			<CommandPalette />
+			<Moments />
 			<SupersetImport />
 			{isQuickAddOpen && (
 				<QuickAddTask onClose={() => setIsQuickAddOpen(false)} />

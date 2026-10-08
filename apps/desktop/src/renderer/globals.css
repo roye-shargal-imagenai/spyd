@@ -540,7 +540,59 @@
 	}
 }
 
+/* Moments: a card lowers in on its silk with a small overshoot, the thread
+   drawing down ahead of it; a waiting spider gives one twitch. */
+@keyframes spyd-drop {
+	0% {
+		opacity: 0;
+		transform: translateY(-26px) scale(0.97);
+	}
+	60% {
+		opacity: 1;
+		transform: translateY(4px) scale(1);
+	}
+	100% {
+		opacity: 1;
+		transform: none;
+	}
+}
+@keyframes spyd-silk {
+	from {
+		transform: scaleY(0);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+@keyframes spyd-wiggle {
+	0%,
+	100% {
+		transform: rotate(0);
+	}
+	25% {
+		transform: rotate(-9deg);
+	}
+	75% {
+		transform: rotate(9deg);
+	}
+}
+.moment-drop {
+	animation: spyd-drop 620ms var(--ease-spyd) both;
+}
+.moment-silk {
+	transform-origin: top;
+	animation: spyd-silk 380ms var(--ease-spyd) both;
+}
+.moment-wiggle {
+	animation: spyd-wiggle 420ms ease-in-out 600ms 2;
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.moment-drop,
+	.moment-silk,
+	.moment-wiggle {
+		animation: none;
+	}
 	.rise,
 	.lift {
 		animation: none;

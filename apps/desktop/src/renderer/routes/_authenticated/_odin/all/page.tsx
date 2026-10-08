@@ -21,7 +21,6 @@ import {
 	META_TAG,
 	META_TEXT,
 	ROW_LINK_BUTTON,
-	ROW_LINK_SLOT,
 	ROW_LIVE_BUTTON,
 	ROW_META,
 	ROW_PRIMARY_SLOT,
@@ -595,115 +594,127 @@ function AllFeedPage() {
 							    carries what its own feed would tell you: who it's from,
 							    where it stands, where it lives. A grid, not a flex row,
 							    so the mention below wraps inside the title's column. */}
-									<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto_auto] items-center gap-x-3">
-										<span
-											className={cn(
-												"flex w-[68px] shrink-0 items-center justify-center gap-1 rounded-[5px] px-[7px] py-[1px] text-[11px] font-semibold",
-												SOURCE_CHIP,
-											)}
-										>
-											<SourceIcon className="size-3 shrink-0" aria-hidden />
-											{item.source}
-										</span>
-										<FullTitle text={emojify(item.title)} detail={item.source}>
-											<button
-												type="button"
-												onClick={() =>
-													setOpenKey(item.key === openKey ? null : item.key)
-												}
-												className="min-w-0 flex-1 truncate bg-none text-left text-[13px] font-semibold text-foreground"
+									{/* Two lines, read top to bottom: what it is, then where it
+									    comes from and where it stands. Actions at the right edge. */}
+									<div className="flex items-start gap-3">
+										<div className="flex min-w-0 flex-1 flex-col gap-1.5">
+											<FullTitle
+												text={emojify(item.title)}
+												detail={item.source}
 											>
-												<OverdueMark
-													itemKey={item.key}
-													upstream={item.dueDate}
-												/>
-												{emojify(item.title)}
-											</button>
-										</FullTitle>
-										{/* The open row's meta is in the panel, and with the panel
-										    open the columns don't fit beside it - they squeezed the
-										    title to nothing and pushed Done past the row's edge. */}
-										<div
-											className={cn(
-												"flex shrink-0 items-center gap-2 text-[11px]",
-												openItem && "hidden",
-											)}
-										>
-											<span className={META_TAG}>
-												{item.priority && (
-													<PriorityLabelChip label={item.priority} />
-												)}
-											</span>
-											<span className={META_PERSON}>
-												{item.person && (
-													<PersonChip
-														name={item.person}
-														className="max-w-full truncate"
+												<button
+													type="button"
+													onClick={() =>
+														setOpenKey(item.key === openKey ? null : item.key)
+													}
+													className="line-clamp-2 bg-none text-left text-[14px] font-semibold leading-snug text-foreground [overflow-wrap:anywhere]"
+												>
+													<OverdueMark
+														itemKey={item.key}
+														upstream={item.dueDate}
 													/>
-												)}
-											</span>
-											<span className={META_STATUS}>
+													{emojify(item.title)}
+												</button>
+											</FullTitle>
+											<div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px]">
+												<span
+													className={cn(
+														"flex h-6 items-center gap-1.5 rounded-full px-2.5 font-semibold",
+														SOURCE_CHIP,
+													)}
+												>
+													<SourceIcon
+														className="size-3.5 shrink-0"
+														aria-hidden
+													/>
+													{item.source}
+												</span>
 												{item.status && (
-													<span className={cn(ROW_META, "truncate")}>
+													<span className="flex h-6 items-center rounded-full bg-secondary px-2.5 font-medium text-soft-foreground">
 														{item.status}
 													</span>
 												)}
-											</span>
-											<span className={META_TEXT}>{item.context}</span>
-											<span className={META_DATE}>
-												{item.at > 0 &&
-													new Date(item.at).toLocaleDateString(undefined, {
-														month: "short",
-														day: "numeric",
-													})}
-											</span>
-											<span className={META_DUE}>
+												{item.priority && (
+													<PriorityLabelChip label={item.priority} />
+												)}
+												{item.person && (
+													<PersonChip
+														name={item.person}
+														className="max-w-[170px] truncate"
+													/>
+												)}
+												{item.context && (
+													<span className="px-1 text-muted-foreground">
+														{item.context}
+													</span>
+												)}
+												{item.at > 0 && (
+													<span className="px-1 text-faint-foreground">
+														{new Date(item.at).toLocaleDateString(undefined, {
+															month: "short",
+															day: "numeric",
+														})}
+													</span>
+												)}
 												<DueChip
 													itemKey={item.key}
 													title={item.title}
 													upstream={item.dueDate}
 												/>
-											</span>
+												{url && (
+													<button
+														type="button"
+														title={url}
+														onClick={() => openUrl(url)}
+														className="px-1 text-link hover:underline"
+													>
+														Open ↗
+													</button>
+												)}
+											</div>
+											{/* A mention row is there because of one comment. */}
+											{item.mention && (
+												<div className="line-clamp-2 cursor-text select-text text-[12px] leading-relaxed text-muted-foreground">
+													<span className="font-semibold text-soft-foreground">
+														{item.mention.author ?? "Someone"}
+														{": "}
+													</span>
+													{item.mention.text}
+												</div>
+											)}
 										</div>
-										<span className={ROW_LINK_SLOT}>
-											{url && (
-												<button
-													type="button"
-													title={url}
-													onClick={() => openUrl(url)}
-													className={ROW_LINK_BUTTON}
-												>
-													Open ↗
-												</button>
+										<div
+											className={cn(
+												"flex shrink-0 items-center gap-1.5 pt-0.5",
+												openItem && "hidden",
 											)}
-										</span>
-										<span className={ROW_PRIMARY_SLOT}>
-											{activePaneId ? (
-												<button
-													type="button"
-													onClick={() => {
-														usePendingFocus.getState().focus(activePaneId);
-														navigate({ to: "/home" });
-													}}
-													className={ROW_LIVE_BUTTON}
-												>
-													Go to session →
-												</button>
-											) : (
-												<button
-													type="button"
-													disabled={isLaunching}
-													onClick={() => void handleStart(item)}
-													className={ROW_START_BUTTON}
-												>
-													{launchingKey === item.launch.key
-														? "Starting…"
-														: "Start session"}
-												</button>
-											)}
-										</span>
-										<span className="flex items-center gap-1">
+										>
 											<TonightToggle itemKey={item.key} />
+											<span className={ROW_PRIMARY_SLOT}>
+												{activePaneId ? (
+													<button
+														type="button"
+														onClick={() => {
+															usePendingFocus.getState().focus(activePaneId);
+															navigate({ to: "/home" });
+														}}
+														className={ROW_LIVE_BUTTON}
+													>
+														Go to session →
+													</button>
+												) : (
+													<button
+														type="button"
+														disabled={isLaunching}
+														onClick={() => void handleStart(item)}
+														className={ROW_START_BUTTON}
+													>
+														{launchingKey === item.launch.key
+															? "Starting…"
+															: "Start session"}
+													</button>
+												)}
+											</span>
 											<button
 												type="button"
 												onClick={() => markReading(item)}
@@ -712,19 +723,8 @@ function AllFeedPage() {
 											>
 												Read later
 											</button>
-										</span>
-										<DoneButton onClick={() => markDone(item)} />
-										{/* Same preview the Jira feed shows: a mention row is there
-								    because of one comment. Column 2 keeps it under the title. */}
-										{item.mention && (
-											<div className="col-start-2 mt-1.5 line-clamp-2 cursor-text select-text text-[11.5px] leading-relaxed text-muted-foreground">
-												<span className="font-semibold text-soft-foreground">
-													{item.mention.author ?? "Someone"}
-													{": "}
-												</span>
-												{item.mention.text}
-											</div>
-										)}
+											<DoneButton onClick={() => markDone(item)} />
+										</div>
 									</div>
 								</div>
 							);
