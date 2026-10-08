@@ -1,6 +1,6 @@
 import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MarkdownRenderer } from "renderer/components/MarkdownRenderer";
 import { electronTrpc } from "renderer/lib/electron-trpc";
@@ -12,6 +12,7 @@ import { useNewWorkspaceDialog } from "../components/NewWorkspaceDialog";
 import { cardBody } from "../components/OdinPromptDialog";
 import { BUTTON } from "../components/pill";
 import { StatusGlyph, useSidebarSessions } from "../components/SessionList";
+import { SessionPane, useHomeSelection } from "../components/SessionPane";
 import { COMPACT_MARKDOWN } from "../components/TranscriptView";
 import { endSession } from "../hooks/useDone";
 import { usePaneMeta } from "../hooks/usePaneMeta";
@@ -23,25 +24,45 @@ export const Route = createFileRoute("/_authenticated/_odin/home/")({
 });
 
 /**
- * Home - a mail client for your agents. The sessions on the left, most
- * urgent first; the one you pick, open on the right: what it wants from you,
- * the last thing it said, and what it was asked. No decoration - type,
- * spacing and one accent colour carry it. Up/Down move, Enter opens.
+ * Home - a mail client for your agents, and where you work with them. The
+ * sessions on the left, grouped by what they want from you (Needs you first,
+ * then Finished, Working, Idle); the one you pick on the right, either as a
+ * summary - what it wants, what it last said, what it was asked - or as the
+ * live session itself. No decoration: type, spacing and one accent colour.
+ * Up/Down move, Enter opens the session, Esc goes back to the summary.
  */
+
+const GROUPS: { column: string; title: string }[] = [
+	{ column: "permission", title: "Needs you" },
+	{ column: "review", title: "Finished" },
+	{ column: "working", title: "Working" },
+	{ column: "idle", title: "Idle" },
+];
+
 function HomePage() {
 	const { sessions, ready } = useSidebarSessions();
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const selectedId = useHomeSelection((s) => s.paneId);
+	const view = useHomeSelection((s) => s.view);
+	const { select, setView } = useHomeSelection.getState();
 	const selected =
 		sessions.find((s) => s.pane.id === selectedId) ?? sessions[0] ?? null;
 	const listRef = useRef<HTMLDivElement>(null);
-	const openSession = useOpenSessionOnBoard();
+
+	// Something elsewhere (Tasks, a toast) asked to open a session: open it here.
+	const pendingPaneId = usePendingFocus((s) => s.paneId);
+	useEffect(() => {
+		if (!pendingPaneId || !sessions.some((s) => s.pane.id === pendingPaneId))
+			return;
+		select(pendingPaneId, "session");
+		usePendingFocus.getState().clear();
+	}, [pendingPaneId, sessions, select]);
 
 	const move = (offset: number) => {
 		if (!selected) return;
 		const i = sessions.findIndex((s) => s.pane.id === selected.pane.id);
 		const next =
 			sessions[Math.min(Math.max(i + offset, 0), sessions.length - 1)];
-		if (next) setSelectedId(next.pane.id);
+		if (next) select(next.pane.id, view);
 	};
 
 	// Keep the selected row in view as the keyboard walks the list.
@@ -68,31 +89,73 @@ function HomePage() {
 						event.preventDefault();
 						move(-1);
 					} else if (event.key === "Enter" && selected) {
-						openSession(selected.pane.id);
+						setView("session");
+					} else if (event.key === "Escape") {
+						setView("summary");
 					}
 				}}
-				className="flex w-[340px] shrink-0 flex-col overflow-y-auto border-r border-border outline-none"
+				className="flex w-[320px] shrink-0 flex-col overflow-y-auto border-r border-border pb-4 outline-none"
 			>
-				<div className="sticky top-0 z-10 flex items-baseline justify-between border-b border-border bg-background/95 px-4 pt-4 pb-3 backdrop-blur">
-					<h1 className="text-[15px] font-semibold">Sessions</h1>
-					<span className="text-[12px] tabular-nums text-muted-foreground">
-						{sessions.length}
-					</span>
-				</div>
-				{sessions.map((entry) => (
-					<ListRow
-						key={entry.pane.id}
-						entry={entry}
-						selected={entry.pane.id === selected?.pane.id}
-						onSelect={() => setSelectedId(entry.pane.id)}
-						onOpen={() => openSession(entry.pane.id)}
-					/>
-				))}
+				{GROUPS.map((group) => {
+					const items = sessions.filter((s) => s.column === group.column);
+					if (items.length === 0) return null;
+					const urgent = group.column === "permission";
+					return (
+						<section key={group.column}>
+							<h2
+								className={cn(
+									"sticky top-0 z-10 flex items-baseline justify-between bg-background/95 px-4 pt-5 pb-2 text-[12px] font-semibold backdrop-blur",
+									urgent ? "text-primary-ink" : "text-muted-foreground",
+								)}
+							>
+								{group.title}
+								<span className="font-normal tabular-nums">{items.length}</span>
+							</h2>
+							{items.map((entry) => (
+								<ListRow
+									key={entry.pane.id}
+									entry={entry}
+									selected={entry.pane.id === selected?.pane.id}
+									onSelect={() => select(entry.pane.id, view)}
+									onOpen={() => select(entry.pane.id, "session")}
+								/>
+							))}
+						</section>
+					);
+				})}
 			</div>
 
-			<div className="min-w-0 flex-1 overflow-y-auto">
+			<div className="flex min-w-0 flex-1 flex-col">
 				{selected ? (
-					<Detail key={selected.pane.id} entry={selected} />
+					<>
+						<div className="flex shrink-0 items-center gap-1 border-b border-border px-4 py-2">
+							{(["summary", "session"] as const).map((mode) => (
+								<button
+									key={mode}
+									type="button"
+									onClick={() => setView(mode)}
+									className={cn(
+										"rounded-[6px] px-3 py-1 text-[13px] font-medium capitalize",
+										view === mode
+											? "bg-accent text-foreground"
+											: "text-muted-foreground hover:text-foreground",
+									)}
+								>
+									{mode}
+								</button>
+							))}
+							<span className="ml-2 min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
+								{selected.title}
+							</span>
+						</div>
+						<div className="min-h-0 flex-1 overflow-y-auto">
+							{view === "session" ? (
+								<SessionPane key={selected.pane.id} entry={selected} />
+							) : (
+								<Detail key={selected.pane.id} entry={selected} />
+							)}
+						</div>
+					</>
 				) : (
 					<div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
 						No session selected
@@ -101,14 +164,6 @@ function HomePage() {
 			</div>
 		</div>
 	);
-}
-
-function useOpenSessionOnBoard() {
-	const navigate = useNavigate();
-	return (paneId: string) => {
-		usePendingFocus.getState().focus(paneId);
-		navigate({ to: "/board" });
-	};
 }
 
 function ago(at: number | undefined): string {
@@ -246,7 +301,7 @@ function Detail({ entry }: { entry: SessionEntry }) {
 			)?.text ?? null,
 		[transcript],
 	);
-	const openSession = useOpenSessionOnBoard();
+	const openSession = () => useHomeSelection.getState().setView("session");
 	const write = electronTrpc.terminal.write.useMutation();
 	const [replying, setReplying] = useState(false);
 	const [showAll, setShowAll] = useState(false);
@@ -315,7 +370,7 @@ function Detail({ entry }: { entry: SessionEntry }) {
 					)}
 					<button
 						type="button"
-						onClick={() => openSession(pane.id)}
+						onClick={openSession}
 						className={cn(
 							"rounded-[6px] px-3 py-1.5 text-[13px] font-semibold",
 							BUTTON.primary,

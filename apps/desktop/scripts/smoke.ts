@@ -326,7 +326,7 @@ async function step(name: string, flow: () => Promise<void>) {
 }
 
 await step("boots straight onto Home, no sign-in", async () => {
-	await waitForText("today in spyd", true, 60_000);
+	await waitForText("no sessions", true, 60_000);
 	const hash = await page<string>("location.hash");
 	if (!hash.startsWith("#/home")) throw new Error(`landed on ${hash}`);
 });
@@ -340,7 +340,7 @@ await step("Dev Board shows its columns", async () => {
 
 // Each rail entry and a line only its screen prints.
 const SCREENS: [string, string][] = [
-	["Home", "today in spyd"],
+	["Home", "no sessions"],
 	["Tasks", "waiting on you"],
 	["Review", "sweep now"],
 	["Automations", "add automation"],

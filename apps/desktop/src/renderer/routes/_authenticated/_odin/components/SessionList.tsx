@@ -1,15 +1,14 @@
 import { cn } from "@odin/ui/utils";
-import { useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import type { PaneStatus } from "shared/tabs-types";
 import { usePaneMeta } from "../hooks/usePaneMeta";
-import { usePendingFocus } from "../hooks/usePendingFocus";
 import {
 	type SessionEntry,
 	useSessionSections,
 } from "../hooks/useSessionSections";
 import { describeTool } from "./InlineAsk";
+import { useOpenInHome } from "./SessionPane";
 
 /**
  * A session's state as a shape, so it reads without colour too:
@@ -74,13 +73,9 @@ export function useSidebarSessions(): {
 	return { sessions, ready };
 }
 
-/** Open a session: the Dev Board shows it in its drawer. */
+/** Open a session: Home shows it, live. */
 export function useOpenSession() {
-	const navigate = useNavigate();
-	return (paneId: string) => {
-		usePendingFocus.getState().focus(paneId);
-		navigate({ to: "/board" });
-	};
+	return useOpenInHome();
 }
 
 function ago(at: number | undefined): string {

@@ -105,12 +105,6 @@ const RAIL_ITEMS = [
 		Icon: HiOutlineHome,
 	},
 	{
-		to: "/board" as const,
-		hotkey: "ODIN_BOARD" as const,
-		label: "Dev Board",
-		Icon: HiOutlineViewColumns,
-	},
-	{
 		to: "/all" as const,
 		hotkey: "ODIN_ALL" as const,
 		label: "Tasks",
@@ -146,6 +140,17 @@ const SETTINGS_ITEM = {
 	hotkey: "OPEN_SETTINGS" as const,
 	label: "Settings",
 	Icon: HiOutlineCog6Tooth,
+};
+
+/**
+ * The kanban overview. Home is where sessions live now, so the board sits
+ * with the other look-back screens at the foot - still a click, D, or ⌘K away.
+ */
+const BOARD_ITEM = {
+	to: "/board" as const,
+	hotkey: "ODIN_BOARD" as const,
+	label: "Dev Board",
+	Icon: HiOutlineViewColumns,
 };
 
 /** Insights reads the logs rather than being one - it sits with History. */
@@ -431,6 +436,7 @@ function OdinShell() {
 		Icon,
 	}:
 		| (typeof RAIL_ITEMS)[number]
+		| typeof BOARD_ITEM
 		| typeof INSIGHTS_ITEM
 		| typeof HISTORY_ITEM
 		| typeof SETTINGS_ITEM) => {
@@ -633,6 +639,7 @@ function OdinShell() {
 					<SidebarSessions />
 					<div className="flex flex-col gap-0.5 px-2 pt-2 pb-2.5">
 						<NightAgentRailButton />
+						{renderRailItem(BOARD_ITEM)}
 						{renderRailItem(INSIGHTS_ITEM)}
 						{renderRailItem(HISTORY_ITEM)}
 						{renderRailItem(SETTINGS_ITEM)}

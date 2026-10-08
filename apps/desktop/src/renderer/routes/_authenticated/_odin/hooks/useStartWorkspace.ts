@@ -5,8 +5,8 @@ import { useLaunchTaskSession } from "renderer/hooks/useLaunchTaskSession";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { create } from "zustand";
 import { type PromptImage, sessionTitle } from "../components/OdinPromptDialog";
+import { useHomeSelection } from "../components/SessionPane";
 import { usePaneMeta } from "./usePaneMeta";
-import { usePendingFocus } from "./usePendingFocus";
 
 const READY_POLL_MS = 400;
 // `git worktree add` plus a fetch; a slow remote can take a while, but a
@@ -137,8 +137,8 @@ export function useStartWorkspace() {
 			usePaneMeta.getState().setSessionId(result.paneId, result.sessionId);
 			store.remove(id);
 			if (request.openWhenReady) {
-				usePendingFocus.getState().focus(result.paneId);
-				navigate({ to: "/board" });
+				useHomeSelection.getState().select(result.paneId, "session");
+				navigate({ to: "/home" });
 			} else {
 				toast.success(`${created.workspace.branch} is up in ${project.name}`);
 			}
