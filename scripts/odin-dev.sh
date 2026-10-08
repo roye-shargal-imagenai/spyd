@@ -21,6 +21,13 @@ set -uo pipefail
 # the `bun dev` at the bottom died with "env: bun: No such file or directory"
 # and the Raycast hotkey looked like it did nothing at all.
 export PATH="/opt/homebrew/bin:$PATH"
+# Same for bun's own installer (~/.bun/bin) and an nvm-managed Node.
+export PATH="$HOME/.bun/bin:$PATH"
+if [[ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]]; then
+  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  # shellcheck source=/dev/null
+  . "$NVM_DIR/nvm.sh" >/dev/null 2>&1 && nvm use --lts >/dev/null 2>&1
+fi
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

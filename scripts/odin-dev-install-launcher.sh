@@ -7,10 +7,16 @@ set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-MAIN="$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"
-MAIN="${MAIN%/.git}"
-if [[ -n "$MAIN" && -f "$MAIN/scripts/odin-dev-focus.sh" ]]; then
-  REPO="$MAIN"
+# SPYD_DEV_REPO pins the launcher to one checkout (a worktree you live in);
+# otherwise it follows the main checkout, which outlives any worktree.
+if [[ -n "${SPYD_DEV_REPO:-}" ]]; then
+  REPO="$SPYD_DEV_REPO"
+else
+  MAIN="$(git -C "$REPO" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"
+  MAIN="${MAIN%/.git}"
+  if [[ -n "$MAIN" && -f "$MAIN/scripts/odin-dev-focus.sh" ]]; then
+    REPO="$MAIN"
+  fi
 fi
 
 APP="/Applications/spyd Dev.app"
