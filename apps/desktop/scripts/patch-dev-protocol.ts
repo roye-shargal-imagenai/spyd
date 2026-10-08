@@ -301,10 +301,12 @@ const LSREGISTER =
 // Upstream names the dev bundle after the workspace so several concurrent dev
 // instances stay apart. Odin only ever runs one, and the workspace slug it
 // picked up read as "Odin (so-this-is-a-complex-project-i-w)" in the menu
-// bar. Match app.setName("Odin Dev") in main/index.ts instead - CFBundleName
-// is what macOS shows, setName alone doesn't reach it.
-export const DISPLAY_NAME = "Odin Dev";
-export const DEV_APP_BUNDLE_NAME = `${DISPLAY_NAME}.app`;
+// bar. Match app.setName in main/index.ts instead - CFBundleName is what
+// macOS shows (Dock, menu bar), setName alone doesn't reach it.
+// The bundle on disk keeps its old name: the terminal daemon and every live
+// session run its binary by path, so renaming it would orphan them.
+export const DISPLAY_NAME = "spyd Dev";
+export const DEV_APP_BUNDLE_NAME = "Odin Dev.app";
 
 /**
  * Register the patched bundle so odin-*:// deep links reach the dev app.
@@ -389,7 +391,7 @@ export function main() {
 		// Also check if the .app has been renamed and path.txt is updated
 		const isRenamed =
 			lstatSync(ELECTRON_APP_PATH).isSymbolicLink() &&
-			readlinkSync(ELECTRON_APP_PATH) === `${DISPLAY_NAME}.app`;
+			readlinkSync(ELECTRON_APP_PATH) === DEV_APP_BUNDLE_NAME;
 		const electronPkgCheck = resolve(
 			import.meta.dirname,
 			"../node_modules/electron",
@@ -399,7 +401,7 @@ export function main() {
 		try {
 			pathTxtCorrect =
 				readFileSync(pathTxtCheck, "utf-8").trim() ===
-				`${DISPLAY_NAME}.app/Contents/MacOS/Electron`;
+				`${DEV_APP_BUNDLE_NAME}/Contents/MacOS/Electron`;
 		} catch {}
 
 		// Regenerate the icon whenever the source PNG is newer, so editing

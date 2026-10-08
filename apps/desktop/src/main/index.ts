@@ -70,11 +70,14 @@ void applyShellEnvToProcess().catch((error) => {
 	console.error("[main] Failed to apply shell environment:", error);
 });
 
-// Dev mode: name it "Odin Dev" (it shares the prod icon, so the name is the tell)
+// Dev mode: name it "spyd Dev" (it shares the prod icon, so the name is the tell)
 // so a hot-reload window is never mistaken for the installed app - both share
-// ~/.odin, so knowing which one you're driving matters.
+// ~/.odin, so knowing which one you're driving matters. The browser profile
+// stays in "Odin Dev", where it has always been, so the rename keeps every
+// saved setting and window state.
 if (IS_DEV) {
-	app.setName("Odin Dev");
+	app.setPath("userData", path.join(app.getPath("appData"), "Odin Dev"));
+	app.setName("spyd Dev");
 }
 
 // Windows ties a taskbar button to its Start-menu shortcut (and that
