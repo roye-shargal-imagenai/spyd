@@ -2,7 +2,7 @@
 
 #   scripts/odin-dev-install-launcher.sh [--force]
 #
-# Installs /Applications/Odin Dev.app, an applet that runs odin-dev-focus.sh.
+# Installs /Applications/spyd Dev.app, an applet that runs odin-dev-focus.sh.
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -13,7 +13,7 @@ if [[ -n "$MAIN" && -f "$MAIN/scripts/odin-dev-focus.sh" ]]; then
   REPO="$MAIN"
 fi
 
-APP="/Applications/Odin Dev.app"
+APP="/Applications/spyd Dev.app"
 FOCUS="$REPO/scripts/odin-dev-focus.sh"
 BUNDLE_ID="com.dan.odin.dev.launcher"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
@@ -37,7 +37,7 @@ fi
 # Prod icon from the repo, so no release install is needed.
 cp "$REPO/apps/desktop/src/resources/build/icons/icon.icns" \
   "$APP/Contents/Resources/applet.icns"
-/usr/libexec/PlistBuddy -c "Set :CFBundleName Odin Dev" \
+/usr/libexec/PlistBuddy -c "Set :CFBundleName spyd Dev" \
   "$APP/Contents/Info.plist" >/dev/null 2>&1
 /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string $BUNDLE_ID" \
   "$APP/Contents/Info.plist" >/dev/null 2>&1 ||

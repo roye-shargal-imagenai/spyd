@@ -29,7 +29,7 @@ if ! command -v bun >/dev/null 2>&1; then
   exit 1
 fi
 
-[[ -d "/Applications/Odin Dev.app" ]] ||
+[[ -d "/Applications/spyd Dev.app" ]] ||
   "$REPO/scripts/odin-dev-install-launcher.sh" || true
 
 # shellcheck source=scripts/odin-procs.sh
