@@ -1,7 +1,8 @@
 import type { Theme } from "../types";
 
 /**
- * spyd's dark themes: one near-black, low-border base, and a single accent.
+ * spyd's dark themes: neutral greys with no tint (Spotify's ladder), a
+ * darker sidebar, and a single vivid accent.
  * The accent is "the next click" - the primary button, the selected row, a
  * session waiting on you - and nothing else, so it never has to compete.
  * The status hues (working, attention, success, danger) live in globals.css
@@ -33,50 +34,50 @@ function spydDark({
 		isBuiltIn: true,
 
 		ui: {
-			background: "#202024",
-			foreground: "#e8e8ea",
-			card: "#27272c",
-			cardForeground: "#e8e8ea",
-			popover: "#2c2c32",
-			popoverForeground: "#e8e8ea",
+			background: "#1f1f1f",
+			foreground: "#f2f2f2",
+			card: "#282828",
+			cardForeground: "#f2f2f2",
+			popover: "#2e2e2e",
+			popoverForeground: "#f2f2f2",
 
 			primary: accent,
 			primaryForeground: accentForeground,
 
 			// The raised neutral every quiet button and chip sits on.
-			secondary: "#2f2f35",
-			secondaryForeground: "#e8e8ea",
-			muted: "#2f2f35",
-			mutedForeground: "#a8a8b0",
+			secondary: "#313131",
+			secondaryForeground: "#f2f2f2",
+			muted: "#313131",
+			mutedForeground: "#b3b3b3",
 			// Hover fill for rows and menu items.
-			accent: "#37373e",
-			accentForeground: "#e8e8ea",
+			accent: "#393939",
+			accentForeground: "#f2f2f2",
 
 			// Sidebar and top bar: a step under the page.
-			tertiary: "#1b1b1f",
-			tertiaryActive: "#2f2f35",
+			tertiary: "#171717",
+			tertiaryActive: "#313131",
 
 			destructive: "#ff7d92",
 			destructiveForeground: "#fff1f3",
 
 			// Borders are barely there - spacing does the separating.
-			border: "#35353c",
-			input: "#40404a",
+			border: "#363636",
+			input: "#424242",
 			ring: accent,
 
-			sidebar: "#1b1b1f",
-			sidebarForeground: "#e8e8ea",
+			sidebar: "#171717",
+			sidebarForeground: "#f2f2f2",
 			sidebarPrimary: accent,
 			sidebarPrimaryForeground: accentForeground,
-			sidebarAccent: "#2f2f35",
-			sidebarAccentForeground: "#e8e8ea",
-			sidebarBorder: "#35353c",
+			sidebarAccent: "#313131",
+			sidebarAccentForeground: "#f2f2f2",
+			sidebarBorder: "#363636",
 			sidebarRing: accent,
 
 			chart1: accent,
 			chart2: "#2dd4bf",
-			chart3: "#4ade80",
-			chart4: "#f5b83d",
+			chart3: "#1ed760",
+			chart4: "#ffb020",
 			chart5: "#ff7d92",
 
 			highlightMatch: `rgba(${selection}, 0.2)`,
@@ -86,22 +87,22 @@ function spydDark({
 		},
 
 		terminal: {
-			background: "#202024",
-			foreground: "#e8e8ea",
+			background: "#1f1f1f",
+			foreground: "#f2f2f2",
 			cursor: accent,
-			cursorAccent: "#202024",
+			cursorAccent: "#1f1f1f",
 			selectionBackground: `rgba(${selection}, 0.28)`,
 
-			black: "#27272c",
+			black: "#282828",
 			red: "#ff7d92",
-			green: "#4ade80",
-			yellow: "#f5b83d",
+			green: "#1ed760",
+			yellow: "#ffb020",
 			blue: "#6f9bff",
 			magenta: "#c49bff",
 			cyan: "#5fd4d9",
-			white: "#e8e8ea",
+			white: "#f2f2f2",
 
-			brightBlack: "#878790",
+			brightBlack: "#8a8a8a",
 			brightRed: "#ff8095",
 			brightGreen: "#86efac",
 			brightYellow: "#ffcd6b",
@@ -119,13 +120,13 @@ function spydDark({
 	};
 }
 
-/** The default: Spider-Man's dark blue on graphite - red is for errors. */
+/** The default: a vivid Spider-Man blue on Spotify-neutral greys - red is for errors. */
 export const darkTheme = spydDark({
 	id: "dark",
 	name: "Spider",
-	accent: "#2350c8",
+	accent: "#335cf5",
 	accentForeground: "#ffffff",
-	selection: "35, 80, 200",
+	selection: "51, 92, 245",
 });
 
 /** A warm ember accent, dark labels on it. */

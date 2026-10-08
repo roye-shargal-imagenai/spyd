@@ -123,15 +123,17 @@ export function SessionList() {
 
 	return (
 		<div className="flex flex-col gap-0.5">
-			<div className="flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wide text-faint-foreground">
+			<div className="flex items-center justify-between px-2.5 pb-1.5 font-display text-[14px] font-bold text-soft-foreground">
 				<span>Sessions</span>
 				{needsYou > 0 ? (
-					<span className="normal-case tracking-normal text-primary-ink">
+					<span className="font-sans text-[12px] font-semibold text-primary-ink">
 						{needsYou} need{needsYou === 1 ? "s" : ""} you
 					</span>
 				) : (
 					sessions.length > 0 && (
-						<span className="tabular-nums">{sessions.length}</span>
+						<span className="font-sans text-[12px] font-medium tabular-nums text-faint-foreground">
+							{sessions.length}
+						</span>
 					)
 				)}
 			</div>

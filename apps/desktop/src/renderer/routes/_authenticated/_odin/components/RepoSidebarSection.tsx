@@ -21,6 +21,7 @@ import {
 	NewWorkspaceDialog,
 	useNewWorkspaceDialog,
 } from "./NewWorkspaceDialog";
+import { RepoArt } from "./RepoArt";
 import { useSupersetImport } from "./SupersetImport";
 
 /** What a session's dot looks like, by the board column it's in. */
@@ -107,11 +108,11 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 
 	return (
 		<div className="flex flex-col gap-0.5">
-			<div className="flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wide text-faint-foreground">
+			<div className="flex items-center justify-between px-2.5 pb-1.5 font-display text-[14px] font-bold text-soft-foreground">
 				<button
 					type="button"
 					onClick={() => setCollapsed((c) => !c)}
-					className="flex items-center gap-1 uppercase tracking-wide hover:text-muted-foreground"
+					className="flex items-center gap-1 hover:text-foreground"
 				>
 					<HiChevronRight
 						className={cn(
@@ -121,7 +122,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 					/>
 					Repositories
 					{collapsed && (
-						<span className="normal-case tracking-normal">
+						<span className="font-sans text-[12px] font-medium text-faint-foreground">
 							{projects.length}
 						</span>
 					)}
@@ -175,12 +176,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									onClick={() => toggle(project.id)}
 									className={cn(ROW, "min-w-0 flex-1 text-soft-foreground")}
 								>
-									<HiChevronRight
-										className={cn(
-											"size-3 shrink-0 text-faint-foreground transition-transform",
-											isOpen && "rotate-90",
-										)}
-									/>
+									<RepoArt name={project.name} size={20} />
 									<span className="min-w-0 flex-1 truncate font-medium">
 										{project.name}
 									</span>

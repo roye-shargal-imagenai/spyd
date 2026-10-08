@@ -17,44 +17,44 @@
 :root {
 	/* Fallbacks = the built-in Spider theme (shared/themes/built-in/ember.ts),
 	   so the first paint before the theme store hydrates already matches. */
-	--background: #202024;
-	--foreground: #e8e8ea;
-	--card: #27272c;
-	--card-foreground: #e8e8ea;
-	--popover: #2c2c32;
-	--popover-foreground: #e8e8ea;
-	--primary: #2350c8;
+	--background: #1f1f1f;
+	--foreground: #f2f2f2;
+	--card: #282828;
+	--card-foreground: #f2f2f2;
+	--popover: #2e2e2e;
+	--popover-foreground: #f2f2f2;
+	--primary: #335cf5;
 	--primary-foreground: #ffffff;
-	--secondary: #2f2f35;
-	--secondary-foreground: #e8e8ea;
-	--muted: #2f2f35;
-	--muted-foreground: #a8a8b0;
-	--accent: #37373e;
-	--accent-foreground: #e8e8ea;
-	--tertiary: #1b1b1f;
-	--tertiary-active: #2f2f35;
+	--secondary: #313131;
+	--secondary-foreground: #f2f2f2;
+	--muted: #313131;
+	--muted-foreground: #b3b3b3;
+	--accent: #393939;
+	--accent-foreground: #f2f2f2;
+	--tertiary: #171717;
+	--tertiary-active: #313131;
 	--destructive: #ff7d92;
 	--destructive-foreground: #fff1f3;
-	--border: #35353c;
-	--input: #40404a;
-	--ring: #2350c8;
-	--chart-1: #2350c8;
+	--border: #363636;
+	--input: #424242;
+	--ring: #335cf5;
+	--chart-1: #335cf5;
 	--chart-2: #2dd4bf;
-	--chart-3: #4ade80;
-	--chart-4: #f5b83d;
+	--chart-3: #1ed760;
+	--chart-4: #ffb020;
 	--chart-5: #ff7d92;
 	--radius: 0.375rem;
-	--sidebar: #1b1b1f;
-	--sidebar-foreground: #e8e8ea;
-	--sidebar-primary: #2350c8;
+	--sidebar: #171717;
+	--sidebar-foreground: #f2f2f2;
+	--sidebar-primary: #335cf5;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #2f2f35;
-	--sidebar-accent-foreground: #e8e8ea;
-	--sidebar-border: #35353c;
-	--sidebar-ring: #2350c8;
-	--highlight-match: rgba(35, 80, 200, 0.2);
-	--highlight-active: rgba(35, 80, 200, 0.45);
-	--highlight: #2350c8;
+	--sidebar-accent: #313131;
+	--sidebar-accent-foreground: #f2f2f2;
+	--sidebar-border: #363636;
+	--sidebar-ring: #335cf5;
+	--highlight-match: rgba(51, 92, 245, 0.2);
+	--highlight-active: rgba(51, 92, 245, 0.45);
+	--highlight: #335cf5;
 	--highlight-foreground: #ffffff;
 	/* Sidebar row fills: low-opacity foreground washes so they track any theme */
 	--fill-hover: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -70,11 +70,11 @@
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
 	   foreground and muted-foreground: soft (body copy) and faint (tags,
 	   separators, placeholders). */
-	--soft-foreground: #cdcdd2;
-	--faint-foreground: #878790;
+	--soft-foreground: #d6d6d6;
+	--faint-foreground: #8a8a8a;
 	--working: #2dd4bf;
-	--attention: #f5b83d;
-	--success: #4ade80;
+	--attention: #ffb020;
+	--success: #1ed760;
 	--danger: #ff7d92;
 	/* Links: periwinkle, so a link is never mistaken for the accent button
 	   or a teal working status. */
@@ -185,6 +185,9 @@
 }
 
 @theme inline {
+	--font-display:
+		"Avenir Next", "Avenir", "SF Pro Display", system-ui, sans-serif;
+	--ease-spyd: cubic-bezier(0.22, 1, 0.36, 1);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -496,5 +499,50 @@
 	}
 	60% {
 		transform: translateY(0) rotate(5deg);
+	}
+}
+
+/* spyd motion: things arrive by rising a few pixels and fading in, one
+   after another (set --i on each for the stagger). Nothing moves for
+   someone who asked the system for less motion. */
+@keyframes spyd-rise {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.99);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@utility rise {
+	animation: spyd-rise 520ms var(--ease-spyd) both;
+	animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* A card you can pick up: lifts and brightens under the pointer, settles
+   back on its own easing. Transform and opacity only, so it stays smooth. */
+@utility lift {
+	transition:
+		transform 260ms var(--ease-spyd),
+		background-color 260ms var(--ease-spyd),
+		box-shadow 260ms var(--ease-spyd);
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 14px 34px -18px rgb(0 0 0 / 0.75);
+	}
+	&:active {
+		transform: translateY(0) scale(0.995);
+		transition-duration: 90ms;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rise,
+	.lift {
+		animation: none;
+		transition: none;
+		transform: none;
 	}
 }

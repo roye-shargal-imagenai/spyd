@@ -450,8 +450,8 @@ function OdinShell() {
 				className={cn(
 					"flex h-7 w-full items-center gap-2.5 rounded-[6px] px-2.5 text-[13px] transition-colors",
 					isActive
-						? "bg-accent text-foreground"
-						: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+						? "font-semibold text-foreground"
+						: "text-muted-foreground hover:text-foreground",
 				)}
 			>
 				<Icon className="size-[15px] shrink-0 opacity-80" />
@@ -476,8 +476,8 @@ function OdinShell() {
 					style={{ width: isMac ? `${84 / zoomFactor}px` : "16px" }}
 				/>
 				<ZoomStable enabled={isMac}>
-					<span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-						<SpiderMark className="size-4" />
+					<span className="flex items-center gap-1.5 font-display text-[15px] font-bold tracking-[-0.01em] text-foreground">
+						<SpiderMark className="size-[18px]" />
 						{workConfig?.isDev ? "spyd Dev" : "spyd"}
 					</span>
 				</ZoomStable>
