@@ -303,10 +303,11 @@ const LSREGISTER =
 // picked up read as "Odin (so-this-is-a-complex-project-i-w)" in the menu
 // bar. Match app.setName in main/index.ts instead - CFBundleName is what
 // macOS shows (Dock, menu bar), setName alone doesn't reach it.
-// The bundle on disk keeps its old name: the terminal daemon and every live
-// session run its binary by path, so renaming it would orphan them.
+// The Dock labels a running app by its bundle's file name, so the bundle is
+// named after it too. A rename retires the daemon running out of the old name
+// (retireDaemonUnder) and leaves Electron.app as a symlink to the new one.
 export const DISPLAY_NAME = "spyd Dev";
-export const DEV_APP_BUNDLE_NAME = "Odin Dev.app";
+export const DEV_APP_BUNDLE_NAME = `${DISPLAY_NAME}.app`;
 
 /**
  * Register the patched bundle so odin-*:// deep links reach the dev app.
@@ -465,7 +466,7 @@ export function main() {
 	const commands = [
 		`Add :CFBundleURLTypes array`,
 		`Add :CFBundleURLTypes:0 dict`,
-		`Add :CFBundleURLTypes:0:CFBundleURLName string 'Odin Dev'`,
+		`Add :CFBundleURLTypes:0:CFBundleURLName string '${DISPLAY_NAME}'`,
 		`Add :CFBundleURLTypes:0:CFBundleURLSchemes array`,
 		`Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string '${PROTOCOL_SCHEME}'`,
 		`Add :CFBundleURLTypes:0:CFBundleTypeRole string 'Editor'`,

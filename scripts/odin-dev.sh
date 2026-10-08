@@ -94,7 +94,7 @@ pkill -f "$REPO.*turbo run dev" 2>/dev/null
 # path-to-app"), not Odin. So the entry only lives as long as the dev stack;
 # predev re-registers on the next start.
 # ponytail: EXIT trap only - a SIGKILL leaves the entry behind until next start.
-DEV_BUNDLE="$REPO/apps/desktop/node_modules/electron/dist/Odin Dev.app"
+DEV_BUNDLE="$REPO/apps/desktop/node_modules/electron/dist/spyd Dev.app"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 trap '"$LSREGISTER" -u "$DEV_BUNDLE" >/dev/null 2>&1' EXIT
 
