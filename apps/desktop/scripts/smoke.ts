@@ -345,7 +345,7 @@ const SCREENS: [string, string][] = [
 	["Review", "sweep now"],
 	["Automations", "add automation"],
 	["Insights", "who asks"],
-	["Session History", "every session spyd launched"],
+	["Archive", "every session spyd launched"],
 	["Dev Board", "next in line"],
 ];
 for (const [label, line] of SCREENS) {
@@ -383,7 +383,7 @@ await step("Tasks: every feed tab opens", async () => {
 for (const [label, line] of [
 	["Tasks", "waiting on you"],
 	["Dev Board", "next in line"],
-	["Session History", "every session spyd launched"],
+	["Archive", "every session spyd launched"],
 ]) {
 	await step(`⌘F focuses the search box on ${label}`, async () => {
 		await rail(label);

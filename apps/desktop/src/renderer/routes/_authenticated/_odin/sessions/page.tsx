@@ -202,7 +202,7 @@ function SessionsPage() {
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center gap-3 px-[18px] pb-2.5 pt-3.5">
-				<h1 className="text-[15px] font-semibold">Session History</h1>
+				<h1 className="text-[15px] font-semibold">Archive</h1>
 				<span className="text-xs text-muted-foreground">
 					every session spyd launched · search what was said, read it, resume it
 				</span>

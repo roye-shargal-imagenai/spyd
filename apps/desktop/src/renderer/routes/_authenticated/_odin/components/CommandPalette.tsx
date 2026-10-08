@@ -37,7 +37,7 @@ const PLACES = [
 	{ label: "Review", to: "/review" },
 	{ label: "Automations", to: "/automations" },
 	{ label: "Insights", to: "/insights" },
-	{ label: "Session History", to: "/sessions" },
+	{ label: "Archive (older sessions)", to: "/sessions" },
 	{ label: "Night Agent settings", to: "/settings/backlog" },
 	{ label: "Appearance", to: "/settings/appearance" },
 	{ label: "Settings", to: "/settings" },

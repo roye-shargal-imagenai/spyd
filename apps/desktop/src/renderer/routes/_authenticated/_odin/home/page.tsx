@@ -11,6 +11,12 @@ import { InlineAsk } from "../components/InlineAsk";
 import { useNewWorkspaceDialog } from "../components/NewWorkspaceDialog";
 import { cardBody } from "../components/OdinPromptDialog";
 import { BUTTON } from "../components/pill";
+import {
+	PAST,
+	PastDetail,
+	PastWeekGroup,
+	usePastWeek,
+} from "../components/RecentSessions";
 import { StatusGlyph, useSidebarSessions } from "../components/SessionList";
 import { SessionPane, useHomeSelection } from "../components/SessionPane";
 import { COMPACT_MARKDOWN } from "../components/TranscriptView";
@@ -44,8 +50,13 @@ function HomePage() {
 	const selectedId = useHomeSelection((s) => s.paneId);
 	const view = useHomeSelection((s) => s.view);
 	const { select, setView } = useHomeSelection.getState();
-	const selected =
-		sessions.find((s) => s.pane.id === selectedId) ?? sessions[0] ?? null;
+	const past = usePastWeek(sessions);
+	const pastRow = selectedId?.startsWith(PAST)
+		? (past.find((row) => `${PAST}${row.id}` === selectedId) ?? null)
+		: null;
+	const selected = pastRow
+		? null
+		: (sessions.find((s) => s.pane.id === selectedId) ?? sessions[0] ?? null);
 	const listRef = useRef<HTMLDivElement>(null);
 
 	// Something elsewhere (Tasks, a toast) asked to open a session: open it here.
@@ -73,7 +84,7 @@ function HomePage() {
 			?.scrollIntoView({ block: "nearest" });
 	}, [selected]);
 
-	if (ready && sessions.length === 0) return <EmptyHome />;
+	if (ready && sessions.length === 0 && past.length === 0) return <EmptyHome />;
 
 	return (
 		<div className="flex h-full min-h-0">
@@ -123,10 +134,15 @@ function HomePage() {
 						</section>
 					);
 				})}
+				<PastWeekGroup past={past} selectedId={selectedId} />
 			</div>
 
 			<div className="flex min-w-0 flex-1 flex-col">
-				{selected ? (
+				{pastRow ? (
+					<div className="min-h-0 flex-1 overflow-y-auto">
+						<PastDetail key={pastRow.id} row={pastRow} />
+					</div>
+				) : selected ? (
 					<>
 						<div className="flex shrink-0 items-center gap-1 border-b border-border px-4 py-2">
 							{(["summary", "session"] as const).map((mode) => (

@@ -165,7 +165,7 @@ const INSIGHTS_ITEM = {
 const HISTORY_ITEM = {
 	to: "/sessions" as const,
 	hotkey: "ODIN_SESSIONS" as const,
-	label: "Session History",
+	label: "Archive",
 	Icon: HiOutlineClock,
 };
 
