@@ -108,3 +108,15 @@ plans/local/
 
 # Agent worktrees (embedded checkouts, never part of this repo)
 .worktrees/
+
+# spyd: sign-in credentials never belong in the repo. The real file lives at
+# ~/.config/odin.json (outside any checkout); these catch a copy dropped in here.
+odin.json
+**/odin.json
+spyd.json
+**/spyd.json
+auth-token.enc
+*.pem
+*.p12
+*-secret*
+*_secret*
