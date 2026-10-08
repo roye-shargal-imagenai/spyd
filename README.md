@@ -25,7 +25,7 @@
 
 ---
 
-Odin runs many CLI agents in parallel on your own machine and keeps them in the
+spyd runs many CLI agents in parallel on your own machine and keeps them in the
 same place as the work that drives them - a Slack thread, a Jira issue, a review
 request. One queue, one board, one thing to look at.
 
@@ -44,7 +44,7 @@ the newest installer to upgrade.
 
 ### Upgrade
 
-On macOS, Odin updates itself: **Odin → Check for Updates…**, and it offers on launch when
+On macOS, spyd updates itself: **spyd → Check for Updates…**, and it offers on launch when
 a release is newer than what you are running. It downloads the DMG and swaps the
 bundle in place. Open terminal sessions survive the swap, because the
 terminal-host daemon keeps running from the bundle the update parks aside.
@@ -65,7 +65,7 @@ Re-running `odin-dev.sh` is also the restart: it replaces the dev stack that is
 already up, and live sessions survive it, because the terminal-host daemon is
 adopted rather than torn down. Hot reload covers the renderer only. Edits under
 `apps/desktop/src/renderer/` apply immediately; edits under `src/main/` need the
-in-app **Restart Odin** button, or `ODIN_DEV_WATCH=--watch` to restart on every
+in-app **Restart spyd** button, or `ODIN_DEV_WATCH=--watch` to restart on every
 save. Logs stream to `~/.odin/dev.log`, and the run that died is kept as
 `dev.log.prev`.
 
@@ -110,7 +110,7 @@ laptop. What runs out is **your attention** - deciding what to hand over,
 noticing which one is stuck, remembering what a session was even about when you
 come back to it an hour later.
 
-**Odin is one system.** Your queue and your agents are the same screen: a row in
+**spyd is one system.** Your queue and your agents are the same screen: a row in
 the queue becomes a running session, the session remembers the row it came from,
 and the board and the queue are two views of one pile of work rather than two
 piles you reconcile by hand.
@@ -157,7 +157,7 @@ Launches are paced to the machine. If the Mac is already loaded, a new session
 waits for room instead of starting a sixth agent into a swap storm, and says so
 while it waits.
 
-Odin drives whichever agent CLI you use, with your own subscription. Nothing is
+spyd drives whichever agent CLI you use, with your own subscription. Nothing is
 proxied and nothing leaves the machine.
 
 ### Notice when it needs you
@@ -191,7 +191,7 @@ Re-entry is where the time actually goes, so it gets real machinery:
 Terminal sessions are owned by a background daemon, so they survive the window
 closing, the app restarting, and the app being rebuilt under them.
 
-## What Odin is not
+## What spyd is not
 
 These are constraints, not gaps. They are what let it be opinionated.
 
@@ -199,7 +199,7 @@ These are constraints, not gaps. They are what let it be opinionated.
   no seats. The moment it serves a team it has to serve the average of a team.
 - **Not a cloud service.** Your hardware is the ceiling - which is exactly why
   launches are paced to it.
-- **Not fire-and-forget.** Odin is built to put you back in the loop at the right
+- **Not fire-and-forget.** spyd is built to put you back in the loop at the right
   moment, not to hand you finished work you never watched.
 - **Not an editor.** It starts, watches and reviews. You still open your IDE.
 
@@ -216,11 +216,11 @@ tickets.**
 
 The arc is **inbox → router**.
 
-Today Odin shows you the queue and you make every call: which item, which repo,
+Today spyd shows you the queue and you make every call: which item, which repo,
 which prompt. Those are small judgments made dozens of times a week, and most of
 them aren't interesting.
 
-The direction is that Odin proposes and you approve - *this looks like the
+The direction is that spyd proposes and you approve - *this looks like the
 export-retry kind of ask, repo X, here's the prompt, go?* - with rejecting a
 suggestion cheap enough that a wrong guess costs one keystroke. Getting there
 means recording not just what you delegated but how it turned out, and having

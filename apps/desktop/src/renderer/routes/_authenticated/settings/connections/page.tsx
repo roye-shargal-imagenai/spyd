@@ -76,7 +76,7 @@ const META: Record<
 		name: "Notion",
 		icon: <SiNotion className="size-5" />,
 		description: "Rows from a Notion database, in the Notion tab.",
-		help: "spyd reads only the Notion pages you share with it, plus their subpages. To add a teamspace, open its top page in Notion → ••• → Connections → Odin. Pages assigned to you and comments that tag you only show up from shared pages.",
+		help: "spyd reads only the Notion pages you share with it, plus their subpages. To add a teamspace, open its top page in Notion → ••• → Connections → your integration. Pages assigned to you and comments that tag you only show up from shared pages.",
 	},
 	gmail: {
 		name: "Gmail",

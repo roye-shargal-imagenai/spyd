@@ -347,7 +347,7 @@ function NotionPage() {
 				{config?.hasToken && mentions && (
 					<div className="px-2 py-4 text-center text-[11px] text-muted-foreground">
 						spyd only sees the Notion pages you shared with it. To add a
-						teamspace, open its top page in Notion → ••• → Connections → Odin;
+						teamspace, open its top page in Notion → ••• → Connections → your integration;
 						its subpages come along.
 					</div>
 				)}

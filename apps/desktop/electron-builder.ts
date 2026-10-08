@@ -190,8 +190,10 @@ const config: Configuration = {
 			"build/entitlements.mac.inherit.plist",
 		),
 		extendInfo: {
-			CFBundleName: productName,
-			CFBundleDisplayName: productName,
+			// The name Finder, the Dock and the menu bar show. The bundle stays
+			// Odin.app (productName) so updates and ~/.odin keep working.
+			CFBundleName: "spyd",
+			CFBundleDisplayName: "spyd",
 			// Required for Apple Events / Automation permission prompt
 			NSAppleEventsUsageDescription:
 				"Odin needs to interact with other applications to run terminal commands and development tools.",

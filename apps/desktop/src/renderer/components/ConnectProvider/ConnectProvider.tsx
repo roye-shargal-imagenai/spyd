@@ -148,7 +148,7 @@ function OAuthConnect({
 		return (
 			<div className="space-y-2">
 				<p className="text-xs text-muted-foreground">
-					Approve Odin in the browser tab that just opened…
+					Approve the connection in the browser tab that just opened…
 				</p>
 				<Button variant="ghost" size="sm" onClick={() => setState(null)}>
 					Cancel
