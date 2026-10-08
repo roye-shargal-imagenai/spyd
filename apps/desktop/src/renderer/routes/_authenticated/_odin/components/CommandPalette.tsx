@@ -37,7 +37,7 @@ export const useCommandPalette = create<{
 /** Every screen, by the name you'd type. */
 const PLACES = [
 	{ label: "Home", to: "/home" },
-	{ label: "Your web", to: "/web" },
+	{ label: "Night Agent", to: "/night" },
 	{ label: "Dev Board", to: "/board" },
 	{ label: "Tasks", to: "/all" },
 	{ label: "Review", to: "/review" },

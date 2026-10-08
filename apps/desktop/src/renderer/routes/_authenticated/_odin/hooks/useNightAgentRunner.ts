@@ -94,9 +94,20 @@ export function useNightAgentRunner() {
 			try {
 				const { waiting, rankInput, prompt } = latest.current;
 				const instructions = nightInstructions(prompt, offHours.instructions);
+				// Marked-only nights don't need the model's opinion of the queue:
+				// what runs is exactly what you marked, in the order you marked it.
+				const onlyMarked = offHours.onlyMarked !== false;
+				if (onlyMarked)
+					night.current = {
+						instructions,
+						seen: new Set(waiting.map((row) => row.key)),
+						order: new Map(),
+						hidden: new Set(),
+					};
 				const stale =
-					night.current?.instructions !== instructions ||
-					waiting.some((row) => !night.current?.seen.has(row.key));
+					!onlyMarked &&
+					(night.current?.instructions !== instructions ||
+						waiting.some((row) => !night.current?.seen.has(row.key)));
 				if (stale) {
 					// A failed ranking starts nothing: without it, nothing says which
 					// rows your instructions rule out.
@@ -133,6 +144,8 @@ export function useNightAgentRunner() {
 					...unpinned.toSorted((a, b) => rank(a.key) - rank(b.key)),
 				].find(
 					(row) =>
+						// Only what you marked, unless you've let it pick its own.
+						(offHours.onlyMarked === false || asked(row.key)) &&
 						(asked(row.key) || !hidden.has(row.key)) &&
 						!tried.current.has(row.key) &&
 						!duplicateFor(row),

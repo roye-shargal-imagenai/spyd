@@ -407,6 +407,10 @@ function MyJiraPage() {
 										{/* Two lines, read top to bottom: what the ticket is, then
 										    where it stands. The actions wait at the right edge. */}
 										<div className="flex items-start gap-3">
+											<StatusIcon
+												category={issue.statusCategory}
+												status={issue.status}
+											/>
 											<div className="flex min-w-0 flex-1 flex-col gap-1.5">
 												<FullTitle
 													text={issue.title}
@@ -645,5 +649,73 @@ function SprintHeading({
 				</div>
 			)}
 		</div>
+	);
+}
+
+/**
+ * Where a ticket stands, at a glance and without reading: an empty ring to
+ * do, a half-filled blue one in progress, a filled one in review, a green
+ * check when it's done. The status's own name rides beside it as a chip.
+ */
+function StatusIcon({
+	category,
+	status,
+}: {
+	category: string;
+	status: string;
+}) {
+	const c = category.toLowerCase();
+	const review = /review|qa|test/i.test(status);
+	const done = c === "done";
+	const doing = c === "in progress";
+	return (
+		<span
+			role="img"
+			aria-label={status}
+			title={status}
+			className="mt-0.5 flex size-[22px] shrink-0 items-center justify-center"
+		>
+			{done ? (
+				<svg viewBox="0 0 22 22" className="size-[22px]" aria-hidden="true">
+					<circle cx="11" cy="11" r="10" className="fill-success" />
+					<path
+						d="M6.5 11.5l3 3 6-6.5"
+						fill="none"
+						stroke="white"
+						strokeWidth="2.2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					/>
+				</svg>
+			) : doing ? (
+				<svg viewBox="0 0 22 22" className="size-[22px]" aria-hidden="true">
+					<circle
+						cx="11"
+						cy="11"
+						r="9"
+						fill="none"
+						strokeWidth="2.2"
+						className="stroke-working"
+					/>
+					{review ? (
+						<circle cx="11" cy="11" r="5.5" className="fill-working" />
+					) : (
+						<path d="M11 5.5a5.5 5.5 0 0 1 0 11z" className="fill-working" />
+					)}
+				</svg>
+			) : (
+				<svg viewBox="0 0 22 22" className="size-[22px]" aria-hidden="true">
+					<circle
+						cx="11"
+						cy="11"
+						r="9"
+						fill="none"
+						strokeWidth="2.2"
+						strokeDasharray="3.4 2.6"
+						className="stroke-muted-foreground"
+					/>
+				</svg>
+			)}
+		</span>
 	);
 }

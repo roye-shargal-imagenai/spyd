@@ -19,6 +19,7 @@ import {
 	HiOutlineMagnifyingGlass,
 	HiOutlineMoon,
 	HiOutlineScale,
+	HiOutlineViewColumns,
 } from "react-icons/hi2";
 import { ClaudeCommandPicker } from "renderer/components/ClaudeCommandPicker";
 import { ZoomStable } from "renderer/components/ZoomStable/ZoomStable";
@@ -147,31 +148,12 @@ const SETTINGS_ITEM = {
  * The kanban overview. Home is where sessions live now, so the board sits
  * with the other look-back screens at the foot - still a click, D, or ⌘K away.
  */
-/** Your web: every agent on one map. It took the Dev Board's place and key. */
 const BOARD_ITEM = {
-	to: "/web" as const,
+	to: "/board" as const,
 	hotkey: "ODIN_BOARD" as const,
-	label: "Your web",
-	Icon: WebIcon,
+	label: "Dev Board",
+	Icon: HiOutlineViewColumns,
 };
-
-function WebIcon({ className }: { className?: string }) {
-	return (
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth={1.6}
-			strokeLinecap="round"
-			className={className}
-			aria-hidden="true"
-		>
-			<circle cx="12" cy="12" r="3.5" />
-			<circle cx="12" cy="12" r="8.5" />
-			<path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1" />
-		</svg>
-	);
-}
 
 /** Insights reads the logs rather than being one - it sits with History. */
 const INSIGHTS_ITEM = {
@@ -380,7 +362,7 @@ function OdinShell() {
 		),
 		ODIN_BOARD: useHotkey(
 			"ODIN_BOARD",
-			() => navigate({ to: "/web" }),
+			() => navigate({ to: "/board" }),
 			NAV_HOTKEY_OPTIONS,
 		),
 		ODIN_ALL: useHotkey(
@@ -655,13 +637,12 @@ function OdinShell() {
 							<span className="flex-1 text-left">Search or jump to…</span>
 							<kbd className="font-sans text-[11px]">⌘K</kbd>
 						</button>
-						{renderRailItem(RAIL_ITEMS[0])}
-						{renderRailItem(BOARD_ITEM)}
-						{RAIL_ITEMS.slice(1).map(renderRailItem)}
+						{RAIL_ITEMS.map(renderRailItem)}
 					</div>
 					<SidebarSessions />
 					<div className="flex flex-col gap-0.5 px-2 pt-2 pb-2.5">
 						<NightAgentRailButton />
+						{renderRailItem(BOARD_ITEM)}
 
 						{renderRailItem(INSIGHTS_ITEM)}
 						{renderRailItem(HISTORY_ITEM)}
@@ -743,6 +724,7 @@ function OdinShell() {
  */
 function NightAgentRailButton() {
 	const navigate = useNavigate();
+	const onNight = !!useMatchRoute()({ to: "/night", fuzzy: true });
 	const offHours = useNextInLinePrompt((s) => s.offHours);
 	const started = useNextInLinePrompt((s) => s.offHoursStarted);
 	// The window opens and closes on the clock, not on a store change.
@@ -767,9 +749,10 @@ function NightAgentRailButton() {
 			type="button"
 			aria-label="Night Agent"
 			title={hint}
-			onClick={() => navigate({ to: "/settings/backlog" })}
+			onClick={() => navigate({ to: "/night" })}
 			className={cn(
 				"flex h-8 w-full items-center gap-2.5 rounded-[12px] px-2.5 text-[13px] font-medium transition-colors",
+				onNight && "ring-1 ring-inset ring-primary/40",
 				isRunning
 					? PILL.brand
 					: offHours.enabled

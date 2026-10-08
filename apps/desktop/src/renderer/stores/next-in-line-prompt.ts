@@ -10,6 +10,11 @@ export interface OffHours {
 	maxSessions: number;
 	/** Appended to every Night Agent task's prompt. */
 	instructions: string;
+	/**
+	 * Only what you marked for tonight (the moon, #tonight, a 🌙 reaction) -
+	 * never a row it picked from the queue itself. On by default.
+	 */
+	onlyMarked: boolean;
 }
 
 export const DEFAULT_OFF_HOURS: OffHours = {
@@ -17,6 +22,7 @@ export const DEFAULT_OFF_HOURS: OffHours = {
 	start: "23:00",
 	end: "07:00",
 	maxSessions: 8,
+	onlyMarked: true,
 	instructions:
 		"This is a Night Agent run: I'm asleep and will read the result in the morning. Get it as far as you can on your own - investigate, find the root cause, and make and verify the change on a branch with a PR open. Don't do anything other people would see before I've looked: no Slack or email messages, no Jira or PR comments, no merging, no deploys. Leave those in ACTION ITEMS.",
 };
