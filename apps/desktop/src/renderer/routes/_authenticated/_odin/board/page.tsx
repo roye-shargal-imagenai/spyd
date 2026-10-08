@@ -3478,7 +3478,7 @@ function DevBoardPage() {
 				/>
 			)}
 
-			<div className="flex min-h-0 flex-1 gap-3 overflow-x-auto bg-[radial-gradient(color-mix(in_oklab,var(--foreground)_9%,transparent)_1px,transparent_1.2px)] bg-size-[18px_18px] px-[18px] pb-[18px] pt-1">
+			<div className="flex min-h-0 flex-1 gap-3 overflow-x-auto px-[18px] pb-[18px] pt-1">
 				{COLUMNS.map((column) => {
 					const cards = cardsByStatus.get(column.status) ?? [];
 					// ponytail: re-sorted on the board's next render, not on the
@@ -3534,12 +3534,11 @@ function DevBoardPage() {
 									: undefined
 							}
 							className={cn(
-								// The column wears its status: a hairline of the hue along the
-								// top and a wash that fades out under the header. The cards
-								// stay neutral - the colour says where they are, not what.
+								// Plain columns: the dot in the header says the status; the
+								// cards stay neutral - colour says where they are, not what.
 								// An empty column steps back - narrower, so the ones with
 								// work in them get the room.
-								"relative flex flex-col overflow-hidden rounded-[10px] border bg-card/80 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--col)_16%,transparent),transparent_200px)] shadow-[0_8px_24px_-16px_rgb(0_0_0/0.6)] transition-[flex-grow] duration-300",
+								"relative flex flex-col overflow-hidden rounded-[8px] border bg-card/40 transition-[flex-grow] duration-300",
 								cards.length === 0
 									? "min-w-[170px] flex-[0.45]"
 									: "min-w-[240px] flex-1",
@@ -3551,12 +3550,8 @@ function DevBoardPage() {
 								{ "--col": PANE_STATUS[column.status].dot } as CSSProperties
 							}
 						>
-							<span
-								aria-hidden
-								className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-(--col)"
-							/>
 							<div className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold uppercase tracking-[.4px] text-soft-foreground">
-								<span className="size-2 rounded-full bg-(--col) shadow-[0_0_8px_var(--col)]" />
+								<span className="size-2 rounded-full bg-(--col)" />
 								{PANE_STATUS[column.status].label}
 								{canCatchUp && (
 									<button
@@ -3589,7 +3584,6 @@ function DevBoardPage() {
 							<div className="flex flex-col gap-2 overflow-y-auto px-2 pt-0.5 pb-2.5">
 								{cards.length === 0 ? (
 									<div className="flex flex-col items-center gap-1.5 px-3 py-10 text-center">
-										<span className="size-6 rounded-full border border-dashed border-(--col)/50" />
 										<span className="text-[12px] text-muted-foreground">
 											{EMPTY_COLUMN[column.status]}
 										</span>
@@ -3648,10 +3642,7 @@ function DevBoardPage() {
 																	// that only fades in: background, border and shadow can't
 																	// animate on the compositor, so they repainted every frame
 																	// and stuttered whenever the board was busy rendering.
-																	// A stripe of the column's hue down the left edge says
-																	// where the card sits at a glance.
-																	"before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-(--col)",
-																	"group relative isolate cursor-pointer rounded-[6px] border bg-secondary/70 px-3 py-2.5 pl-3.5 text-left shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate] duration-200 ease-out hover:-translate-y-px",
+																	"group relative isolate cursor-pointer rounded-[6px] border bg-card px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate] duration-200 ease-out hover:-translate-y-px",
 																	"after:pointer-events-none after:absolute after:-inset-px after:-z-10 after:rounded-[inherit] after:border after:border-primary/40 after:bg-secondary after:opacity-0 after:shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_10px_24px_-12px_color-mix(in_oklab,var(--primary)_55%,transparent)] after:transition-opacity after:duration-200 after:ease-out hover:after:opacity-100",
 																	// Cards are neutral - the column header already says the
 																	// status. Only a failure earns its red edge.

@@ -756,10 +756,12 @@ function NightAgentRailButton() {
  */
 function SidebarSessions() {
 	const { sessions } = useSidebarSessions();
+	// Home is the session list - showing it twice side by side says nothing.
+	const onHome = !!useMatchRoute()({ to: "/home", fuzzy: true });
 	return (
 		<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2 py-3">
 			<RepoSidebarSection entries={sessions} />
-			<SessionList />
+			{!onHome && <SessionList />}
 		</div>
 	);
 }
