@@ -282,7 +282,7 @@ function BackupRow() {
 }
 
 /**
- * The two emojis the Reactions tab watches for - the same values its header
+ * The three emojis the Reactions tab watches for - the same values its header
  * chips edit. Slack names reactions, so these are names, not glyphs.
  */
 function SlackReactions() {
@@ -294,20 +294,33 @@ function SlackReactions() {
 			hint: "Adds the message to the Reactions tab.",
 			value: reactions.data?.reaction ?? "eyes",
 			launch: false,
+			night: false,
 		},
 		{
 			label: "Queue and start",
 			hint: "Also starts a session on it, no click needed.",
 			value: reactions.data?.launchReaction ?? "robot_face",
 			launch: true,
+			night: false,
+		},
+		{
+			label: "Queue for tonight",
+			hint: "The Night Agent starts it first in tonight's run.",
+			value: reactions.data?.nightReaction ?? "crescent_moon",
+			launch: false,
+			night: true,
 		},
 	];
-	const save = (raw: string, current: string, launch: boolean) => {
+	const save = (
+		raw: string,
+		current: string,
+		kind: { launch?: boolean; night?: boolean },
+	) => {
 		const name = raw
 			.trim()
 			.replace(/^:+|:+$/g, "")
 			.toLowerCase();
-		if (name && name !== current) setReaction.mutate({ name, launch });
+		if (name && name !== current) setReaction.mutate({ name, ...kind });
 	};
 	return (
 		<div className="mt-3 ml-11 space-y-2">
@@ -320,7 +333,10 @@ function SlackReactions() {
 						defaultValue={field.value}
 						aria-label={`${field.label} reaction`}
 						onBlur={(e) =>
-							save(e.currentTarget.value, field.value, field.launch)
+							save(e.currentTarget.value, field.value, {
+								launch: field.launch,
+								night: field.night,
+							})
 						}
 						onKeyDown={(e) => {
 							if (e.key === "Enter") e.currentTarget.blur();

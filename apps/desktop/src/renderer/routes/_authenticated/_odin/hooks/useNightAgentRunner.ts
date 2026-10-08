@@ -6,6 +6,7 @@ import {
 } from "renderer/stores/next-in-line-prompt";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { useNextInLineQueue } from "../board/NextInLine";
+import { useOdinFeeds } from "./useOdinFeeds";
 
 const TICK_MS = 60_000;
 
@@ -42,6 +43,10 @@ export function nightInstructions(sort: string, offHours: string): string {
  * Asked again before a start whenever the words changed or new rows came in:
  * an edit applies to the very next session.
  *
+ * A Slack message you put the night reaction on (:crescent_moon: by default)
+ * jumps the line: it starts before anything the ranking picked, and the
+ * ranking can't rule it out - you asked for it by name.
+ *
  * ponytail: renderer-side and only while Odin is open, same as automations.
  * Move it to main the day it has to run with the window shut.
  */
@@ -49,6 +54,14 @@ export function useNightAgentRunner() {
 	const queue = useNextInLineQueue(true);
 	const latest = useRef(queue);
 	latest.current = queue;
+	const { reactions } = useOdinFeeds();
+	const nightKeys = useRef(new Set<string>());
+	// The queue item's key for a Slack row - see all-items.ts.
+	nightKeys.current = new Set(
+		(reactions.data?.rows ?? [])
+			.filter((row) => row.night)
+			.map((row) => `slack:${row.id}`),
+	);
 	// Keys already tried this run, so a launch that doesn't take the row out
 	// of the queue can't start it again every minute.
 	const tried = useRef(new Set<string>());
@@ -108,12 +121,14 @@ export function useNightAgentRunner() {
 				const { order, hidden } = night.current as NightRanking;
 				const { pinned, unpinned, start, duplicateFor } = latest.current;
 				const rank = (key: string) => order.get(key) ?? order.size;
+				const asked = (key: string) => nightKeys.current.has(key);
 				const item = [
+					...[...pinned, ...unpinned].filter((row) => asked(row.key)),
 					...pinned,
 					...unpinned.toSorted((a, b) => rank(a.key) - rank(b.key)),
 				].find(
 					(row) =>
-						!hidden.has(row.key) &&
+						(asked(row.key) || !hidden.has(row.key)) &&
 						!tried.current.has(row.key) &&
 						!duplicateFor(row),
 				);

@@ -13,6 +13,13 @@ export const QUEUE_REACTION = "eyes";
 export const LAUNCH_REACTION = "robot_face";
 
 /**
+ * The reaction that queues a message for the Night Agent - "do this one
+ * tonight". It waits in the queue like :eyes:, and the overnight run starts
+ * it ahead of everything Next in line would have picked.
+ */
+export const NIGHT_REACTION = "crescent_moon";
+
+/**
  * `:eyes:`, `eyes`, ` Eyes ` → `eyes`. Slack names reactions, so a pasted
  * glyph (👀) is not accepted - ponytail: add a unicode→name table if typing
  * the name ever grates.
@@ -79,6 +86,8 @@ export interface EyedMessage {
 	permalink: string | null;
 	/** It carries my launch reaction: start a session without asking. */
 	launch: boolean;
+	/** It carries my night reaction: the Night Agent starts it first. */
+	night: boolean;
 }
 
 export function reactionId(channelId: string, messageTs: string): string {
@@ -95,6 +104,7 @@ export function pickEyedMessages(
 	myUserId: string,
 	reaction: string = QUEUE_REACTION,
 	launchReaction: string = LAUNCH_REACTION,
+	nightReaction: string = NIGHT_REACTION,
 ): EyedMessage[] {
 	const eyed: EyedMessage[] = [];
 	for (const item of items) {
@@ -105,7 +115,8 @@ export function pickEyedMessages(
 				(r) => r.name === name && (r.users ?? []).includes(myUserId),
 			) ?? false;
 		const launch = mine(launchReaction);
-		if (!launch && !mine(reaction)) continue;
+		const night = mine(nightReaction);
+		if (!launch && !night && !mine(reaction)) continue;
 		eyed.push({
 			id: reactionId(item.channel, message.ts),
 			channelId: item.channel,
@@ -115,6 +126,7 @@ export function pickEyedMessages(
 			text: slackTextToPlain(messageBody(message)),
 			permalink: message.permalink ?? null,
 			launch,
+			night,
 		});
 	}
 	return eyed;

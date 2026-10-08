@@ -31,7 +31,7 @@ import {
 } from "../components/FeedChrome";
 import { FeedError } from "../components/FeedError";
 import { PersonChip } from "../components/PersonChip";
-import { BUTTON } from "../components/pill";
+import { BUTTON, PILL } from "../components/pill";
 import {
 	useOdinFeeds,
 	useSetSlackDone,
@@ -211,6 +211,12 @@ function ReactionsPage() {
 						title="React with this in Slack to add a message here and start a session on it. Click to change the emoji."
 						onSave={(name) => setReaction.mutate({ name, launch: true })}
 					/>
+					<ReactionChip
+						label="Tonight"
+						value={data?.nightReaction ?? "crescent_moon"}
+						title="React with this in Slack to add a message here for the Night Agent - it starts these first in tonight's run. Click to change the emoji."
+						onSave={(name) => setReaction.mutate({ name, night: true })}
+					/>
 					<SyncButton isSyncing={isSyncing} onClick={() => void syncAll()} />
 				</div>
 			</FeedHeader>
@@ -261,6 +267,17 @@ function ReactionsPage() {
 											"(no text)"}
 									</button>
 									<div className="flex shrink-0 items-center gap-2 text-[11px]">
+										{row.night && !row.done && row.status === "Not started" && (
+											<span
+												title="Queued for the Night Agent - it starts this first tonight"
+												className={cn(
+													"rounded-full px-2 py-[1px] font-semibold",
+													PILL.brand,
+												)}
+											>
+												Tonight
+											</span>
+										)}
 										<span className={META_PERSON}>
 											{row.authorName && (
 												<PersonChip

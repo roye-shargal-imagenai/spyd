@@ -117,17 +117,25 @@ export function useOdinFeeds() {
 }
 
 /**
- * Change the queue emoji, or with `launch` the auto-start one. The new name
+ * Change the queue emoji, or with `launch` the auto-start one, or with
+ * `night` the Night Agent one. The new name
  * shows at once: the refetch behind it is a full Slack sync, and until it
  * lands the old emoji read as "the edit didn't take".
  */
 export function useSetSlackReaction() {
 	const utils = electronTrpc.useUtils();
 	return electronTrpc.slack.setReaction.useMutation({
-		onMutate: ({ name, launch }) =>
+		onMutate: ({ name, launch, night }) =>
 			utils.slack.reactions.setData(undefined, (prev) =>
 				prev
-					? { ...prev, [launch ? "launchReaction" : "reaction"]: name }
+					? {
+							...prev,
+							[night
+								? "nightReaction"
+								: launch
+									? "launchReaction"
+									: "reaction"]: name,
+						}
 					: prev,
 			),
 		onSettled: () => void utils.slack.reactions.invalidate(),

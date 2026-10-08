@@ -68,6 +68,20 @@ describe("pickEyedMessages", () => {
 		]);
 	});
 
+	test("my night reaction queues the message and flags it for tonight", () => {
+		const items = [
+			item({ ts: "100.1" }, [{ name: "eyes", users: [ME] }]),
+			item({ ts: "100.2" }, [{ name: "crescent_moon", users: [ME] }]),
+			item({ ts: "100.3" }, [{ name: "crescent_moon", users: ["U_OTHER"] }]),
+		];
+		expect(
+			pickEyedMessages(items, ME).map((m) => [m.messageTs, m.night]),
+		).toEqual([
+			["100.1", false],
+			["100.2", true],
+		]);
+	});
+
 	test("keys a row by channel + ts, and carries the thread parent", () => {
 		const [row] = pickEyedMessages(
 			[

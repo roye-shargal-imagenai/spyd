@@ -920,7 +920,7 @@ export function ChatView({
  * bracketed paste when it spans lines (a bare newline would submit early),
  * then Enter in its own write.
  */
-async function typeIntoClaude(
+export async function typeIntoClaude(
 	write: (input: { paneId: string; data: string }) => Promise<unknown>,
 	paneId: string,
 	text: string,

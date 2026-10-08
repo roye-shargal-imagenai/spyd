@@ -14,6 +14,8 @@ import {
 	HiOutlineClipboardDocumentCheck,
 	HiOutlineClock,
 	HiOutlineCog6Tooth,
+	HiOutlineHome,
+	HiOutlineMoon,
 	HiOutlineScale,
 	HiOutlineViewColumns,
 } from "react-icons/hi2";
@@ -24,6 +26,10 @@ import { useZoomFactor } from "renderer/hooks/useZoomFactor";
 import { useHotkey } from "renderer/hotkeys";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useLaunchLimits } from "renderer/stores/launch-limits";
+import {
+	inOffHours,
+	useNextInLinePrompt,
+} from "renderer/stores/next-in-line-prompt";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import {
 	type LaunchLimits,
@@ -79,6 +85,13 @@ export const Route = createFileRoute("/_authenticated/_odin")({
  * keys still jump straight to one; each is rebindable in Settings → Keyboard.
  */
 const RAIL_ITEMS = [
+	// Where Odin opens: the few things that want you now, as big cards.
+	{
+		to: "/home" as const,
+		hotkey: "ODIN_HOME" as const,
+		label: "Home",
+		Icon: HiOutlineHome,
+	},
 	{
 		to: "/board" as const,
 		hotkey: "ODIN_BOARD" as const,
@@ -320,6 +333,11 @@ function OdinShell() {
 	// Settings → Keyboard shortcuts says after that. The returned display drives
 	// each rail tooltip, so the hint can't drift from the binding.
 	const railHotkeys = {
+		ODIN_HOME: useHotkey(
+			"ODIN_HOME",
+			() => navigate({ to: "/home" }),
+			NAV_HOTKEY_OPTIONS,
+		),
 		ODIN_BOARD: useHotkey(
 			"ODIN_BOARD",
 			() => navigate({ to: "/board" }),
@@ -586,6 +604,7 @@ function OdinShell() {
 				<div className="flex w-[52px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-tertiary/70 py-2.5">
 					{RAIL_ITEMS.map(renderRailItem)}
 					<div className="flex-1" />
+					<NightAgentRailButton />
 					{renderRailItem(INSIGHTS_ITEM)}
 					{renderRailItem(HISTORY_ITEM)}
 					{renderRailItem(SETTINGS_ITEM)}
@@ -642,5 +661,58 @@ function OdinShell() {
 				/>
 			)}
 		</div>
+	);
+}
+
+/**
+ * Night Agent on the rail: a moon that says whether it's on, and lights up
+ * with tonight's count while its window is open. The switch itself lives in
+ * Settings → Backlog, next to the window and ceiling it runs by, so a click
+ * goes there rather than flipping it blind.
+ */
+function NightAgentRailButton() {
+	const navigate = useNavigate();
+	const offHours = useNextInLinePrompt((s) => s.offHours);
+	const started = useNextInLinePrompt((s) => s.offHoursStarted);
+	// The window opens and closes on the clock, not on a store change.
+	const [now, setNow] = useState(() => new Date());
+	useEffect(() => {
+		const timer = setInterval(() => setNow(new Date()), 60_000);
+		return () => clearInterval(timer);
+	}, []);
+	const isRunning =
+		offHours.enabled && inOffHours(now, offHours.start, offHours.end);
+	const hours = `${offHours.start}-${offHours.end}`;
+	const hint = !offHours.enabled
+		? "Night Agent - off"
+		: isRunning
+			? `Night Agent - running until ${offHours.end}, ${started} of ${offHours.maxSessions} started tonight`
+			: `Night Agent - on, ${hours}`;
+	return (
+		<Tooltip delayDuration={300}>
+			<TooltipTrigger asChild>
+				<button
+					type="button"
+					aria-label="Night Agent"
+					onClick={() => navigate({ to: "/settings/backlog" })}
+					className={cn(
+						"relative flex size-9 items-center justify-center rounded-[9px] transition-colors",
+						isRunning
+							? PILL.brand
+							: offHours.enabled
+								? "text-primary-ink hover:text-foreground"
+								: "text-muted-foreground hover:text-foreground",
+					)}
+				>
+					<HiOutlineMoon className="size-[17px]" />
+					{isRunning && started > 0 && (
+						<span className="absolute -right-0.5 -top-0.5 min-w-[15px] rounded-full bg-primary px-1 text-[9px] font-bold leading-[15px] text-primary-foreground tabular-nums">
+							{started}
+						</span>
+					)}
+				</button>
+			</TooltipTrigger>
+			<TooltipContent side="right">{hint}</TooltipContent>
+		</Tooltip>
 	);
 }

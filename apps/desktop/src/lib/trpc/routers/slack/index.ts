@@ -16,6 +16,7 @@ import {
 	LAUNCH_REACTION,
 	mentionedUserIds,
 	messageBody,
+	NIGHT_REACTION,
 	normalizeReaction,
 	pickEyedMessages,
 	QUEUE_REACTION,
@@ -59,6 +60,12 @@ function launchReaction(): string {
 	);
 }
 
+function nightReaction(): string {
+	return normalizeReaction(
+		readOdinConfig().slackNightReaction ?? NIGHT_REACTION,
+	);
+}
+
 /**
  * I reacted to this message, and not with a queue reaction. The :eyes: on
  * someone's newest message is me queueing it, which says the opposite of
@@ -68,7 +75,7 @@ function ackedByMe(
 	reactions: { name?: string; users?: string[] }[] | undefined,
 	myUserId: string,
 ): boolean {
-	const queue = new Set([queueReaction(), launchReaction()]);
+	const queue = new Set([queueReaction(), launchReaction(), nightReaction()]);
 	return (reactions ?? []).some(
 		(r) =>
 			!queue.has(normalizeReaction(r.name ?? "")) &&
@@ -84,6 +91,12 @@ function ackedByMe(
  * here needs to survive a restart.
  */
 const launchRequested = new Set<string>();
+
+/**
+ * Rows whose message carries my night reaction right now. Rebuilt on every
+ * sync, so taking the reaction off in Slack takes the row off tonight's list.
+ */
+let nightRequested = new Set<string>();
 
 interface SlackResponse {
 	ok?: boolean;
@@ -296,7 +309,14 @@ async function syncReactions(token: string, reaction: string): Promise<void> {
 	>("reactions.list", { user: me.userId, limit: "100", full: "true" }, token);
 	const items = res.items ?? [];
 	const launch = launchReaction();
-	const eyed = pickEyedMessages(items, me.userId, reaction, launch);
+	const eyed = pickEyedMessages(
+		items,
+		me.userId,
+		reaction,
+		launch,
+		nightReaction(),
+	);
+	nightRequested = new Set(eyed.filter((m) => m.night).map((m) => m.id));
 	const now = Date.now();
 	// The first sync ever only records what was already there: reacting before
 	// this feature existed wasn't asking for a session. After that, a message
@@ -802,6 +822,8 @@ export interface ReactionRow {
 	status: ReactionStatus;
 	/** Carries my launch reaction and hasn't been started: start it now. */
 	autoLaunch: boolean;
+	/** Carries my night reaction: the Night Agent starts it first tonight. */
+	night: boolean;
 }
 
 function readRows(): ReactionRow[] {
@@ -827,6 +849,7 @@ function readRows(): ReactionRow[] {
 			status: reactionStatus(row),
 			autoLaunch:
 				launchRequested.has(row.id) && reactionStatus(row) === "Not started",
+			night: nightRequested.has(row.id),
 		}));
 }
 
@@ -854,6 +877,7 @@ export const createSlackRouter = () => {
 				connected: token !== null,
 				reaction,
 				launchReaction: launchReaction(),
+				nightReaction: nightReaction(),
 			};
 		}),
 
@@ -875,13 +899,21 @@ export const createSlackRouter = () => {
 		 * one that queues and starts. Rows already queued are left alone.
 		 */
 		setReaction: publicProcedure
-			.input(z.object({ name: z.string(), launch: z.boolean().optional() }))
+			.input(
+				z.object({
+					name: z.string(),
+					launch: z.boolean().optional(),
+					night: z.boolean().optional(),
+				}),
+			)
 			.mutation(({ input }) => {
 				const reaction = normalizeReaction(input.name);
 				updateOdinConfig(
-					input.launch
-						? { slackLaunchReaction: reaction }
-						: { slackReaction: reaction },
+					input.night
+						? { slackNightReaction: reaction }
+						: input.launch
+							? { slackLaunchReaction: reaction }
+							: { slackReaction: reaction },
 				);
 				return { reaction };
 			}),

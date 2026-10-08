@@ -77,6 +77,8 @@ export interface OdinFileConfig {
 	slackReaction?: string;
 	/** Reaction that queues a message and starts its session. Default `robot_face`. */
 	slackLaunchReaction?: string;
+	/** Reaction that queues a message for the Night Agent. Default `crescent_moon`. */
+	slackNightReaction?: string;
 	/**
 	 * When auto-launch first synced, ms - set once, and its presence means the
 	 * baseline below was taken.
