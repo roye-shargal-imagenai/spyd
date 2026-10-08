@@ -28,6 +28,7 @@ import {
 	ROW_START_BUTTON,
 	SyncButton,
 } from "../components/FeedChrome";
+import { FullTitle } from "../components/FullTitle";
 import { FEED_TABS, type FeedPath } from "../components/feed-counts";
 import { PersonChip } from "../components/PersonChip";
 import { PILL } from "../components/pill";
@@ -604,17 +605,21 @@ function AllFeedPage() {
 											<SourceIcon className="size-3 shrink-0" aria-hidden />
 											{item.source}
 										</span>
-										<button
-											type="button"
-											title="Show details"
-											onClick={() =>
-												setOpenKey(item.key === openKey ? null : item.key)
-											}
-											className="min-w-0 flex-1 truncate bg-none text-left text-[13px] font-semibold text-foreground"
-										>
-											<OverdueMark itemKey={item.key} upstream={item.dueDate} />
-											{emojify(item.title)}
-										</button>
+										<FullTitle text={emojify(item.title)} detail={item.source}>
+											<button
+												type="button"
+												onClick={() =>
+													setOpenKey(item.key === openKey ? null : item.key)
+												}
+												className="min-w-0 flex-1 truncate bg-none text-left text-[13px] font-semibold text-foreground"
+											>
+												<OverdueMark
+													itemKey={item.key}
+													upstream={item.dueDate}
+												/>
+												{emojify(item.title)}
+											</button>
+										</FullTitle>
 										{/* The open row's meta is in the panel, and with the panel
 										    open the columns don't fit beside it - they squeezed the
 										    title to nothing and pushed Done past the row's edge. */}

@@ -12,7 +12,7 @@ import { BUTTON, PILL, ROW_REVEAL } from "./pill";
  */
 export function FeedHeader({ children }: { children?: ReactNode }) {
 	return (
-		<div className="flex items-center gap-2.5 border-b border-border px-[18px] py-2.5">
+		<div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-border px-[18px] py-2.5">
 			<FeedTabs />
 			{children}
 		</div>

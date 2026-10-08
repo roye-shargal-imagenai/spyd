@@ -1,8 +1,9 @@
 import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import type { PullRequestRow } from "lib/trpc/routers/work";
+import type { JiraIssueRow, PullRequestRow } from "lib/trpc/routers/work";
 import { useMemo, useState } from "react";
+import { SiJira } from "react-icons/si";
 import { ConnectNotice } from "renderer/components/ConnectProvider/ConnectProvider";
 import { useLaunchTaskSession } from "renderer/hooks/useLaunchTaskSession";
 import { openUrl } from "renderer/stores/in-app-browser";
@@ -16,23 +17,18 @@ import {
 	FeedSearch,
 	FeedSelect,
 	FilterPill,
-	META_DATE,
-	META_PERSON,
-	META_STATUS,
-	META_TAG,
-	META_TEXT,
-	ROW_LINK_BUTTON,
-	ROW_LINK_SLOT,
 	ROW_LIVE_BUTTON,
 	ROW_PRIMARY_SLOT,
 	ROW_START_BUTTON,
 	SyncButton,
 } from "../components/FeedChrome";
 import { FeedError } from "../components/FeedError";
+import { FullTitle } from "../components/FullTitle";
 import { PersonChip } from "../components/PersonChip";
 import { PILL } from "../components/pill";
-import { DueChip, META_DUE, OverdueMark } from "../components/Reminders";
+import { DueChip, OverdueMark } from "../components/Reminders";
 import { askSessionContext } from "../components/SessionContextDialog";
+import { TonightToggle } from "../components/TonightToggle";
 import { buildIssuePrompt } from "../feed-prompts";
 import { useDone } from "../hooks/useDone";
 import { useOdinFeeds } from "../hooks/useOdinFeeds";
@@ -93,9 +89,9 @@ function shortDate(iso: string | null): string | null {
 }
 
 const ROLE_TABS = [
-	{ id: "assigned" as const, label: "Assigned to me" },
-	{ id: "reported" as const, label: "Reported by me" },
-	{ id: "mentioned" as const, label: "Mentioning me" },
+	{ id: "assigned" as const, label: "Assigned" },
+	{ id: "reported" as const, label: "I filed" },
+	{ id: "mentioned" as const, label: "Mentions" },
 	{ id: "all" as const, label: "All" },
 ];
 
@@ -114,6 +110,8 @@ function MyJiraPage() {
 	const [role, setRole] = useState<Role>("all");
 	// Free text over key, title, reporter, status and project.
 	const [search, setSearch] = useState("");
+	// Sprints, the way Jira's board lists them, or by where each ticket stands.
+	const [groupBy, setGroupBy] = useState<"sprint" | "status">("sprint");
 	const needle = search.trim().toLowerCase();
 	// Same feeds the shell warms on boot - rows are usually already cached.
 	const {
@@ -207,10 +205,52 @@ function MyJiraPage() {
 					: 1;
 		for (const rows of byCategory.values())
 			rows.sort((a, b) => rank(a) - rank(b));
-		return [...byCategory.entries()].sort(
-			(a, b) => categoryRank(a[0]) - categoryRank(b[0]),
+		if (groupBy === "status")
+			return [...byCategory.entries()]
+				.sort((a, b) => categoryRank(a[0]) - categoryRank(b[0]))
+				.map(
+					([category, rows]): IssueGroup => ({
+						id: category,
+						label: category,
+						sprint: null,
+						inProgress: category.toLowerCase() === "in progress",
+						rows,
+					}),
+				);
+		// Jira's board order: the active sprint, the ones coming up, then the
+		// Backlog. Inside a sprint, where each ticket stands (In Progress first).
+		const bySprint = new Map<string, IssueGroup>();
+		for (const issue of filtered) {
+			const sprint = issue.sprint ?? null;
+			const id = sprint ? `sprint:${sprint.name}` : "backlog";
+			const group =
+				bySprint.get(id) ??
+				bySprint
+					.set(id, {
+						id,
+						label: sprint?.name ?? "Backlog",
+						sprint,
+						inProgress: false,
+						rows: [],
+					})
+					.get(id);
+			group?.rows.push(issue);
+		}
+		const order = (group: IssueGroup) =>
+			!group.sprint ? 2 : group.sprint.state === "active" ? 0 : 1;
+		const groups = [...bySprint.values()].sort(
+			(a, b) =>
+				order(a) - order(b) ||
+				(a.sprint?.startDate ?? "~").localeCompare(b.sprint?.startDate ?? "~"),
 		);
-	}, [issues, projectFilter, needle, livePaneByKey]);
+		for (const group of groups)
+			group.rows.sort(
+				(a, b) =>
+					categoryRank(a.statusCategory) - categoryRank(b.statusCategory) ||
+					rank(a) - rank(b),
+			);
+		return groups;
+	}, [issues, projectFilter, needle, livePaneByKey, groupBy]);
 
 	const handleStart = async (issue: (typeof issues)[number]) => {
 		const title = `${issue.key}: ${issue.title}`;
@@ -254,6 +294,27 @@ function MyJiraPage() {
 					</FilterPill>
 				))}
 				<div className="ml-auto flex items-center gap-2.5">
+					<fieldset
+						aria-label="Group issues by"
+						className="m-0 flex gap-0.5 rounded-full border-0 bg-tertiary p-[3px]"
+					>
+						{(["sprint", "status"] as const).map((mode) => (
+							<button
+								key={mode}
+								type="button"
+								aria-pressed={groupBy === mode}
+								onClick={() => setGroupBy(mode)}
+								className={cn(
+									"h-[26px] rounded-full px-3 text-[12px] transition-colors",
+									groupBy === mode
+										? "bg-secondary font-medium text-foreground"
+										: "text-muted-foreground hover:text-foreground",
+								)}
+							>
+								{mode === "sprint" ? "Sprints" : "Status"}
+							</button>
+						))}
+					</fieldset>
 					<FeedSearch
 						value={search}
 						onChange={setSearch}
@@ -296,18 +357,24 @@ function MyJiraPage() {
 					</div>
 				)}
 
-				{groups.map(([category, rows]) => (
-					<div key={category} className="mb-1">
-						<div className="flex items-center gap-2 py-1 pl-1 text-[11px] font-medium uppercase tracking-[.3px] text-muted-foreground">
+				{groups.map(({ id, label, sprint, inProgress, rows }) => (
+					<div key={id} className={cn("mb-1", groupBy === "sprint" && "mb-4")}>
+						{groupBy === "sprint" ? (
+							<SprintHeading label={label} sprint={sprint} rows={rows} />
+						) : null}
+						<div
+							className={cn(
+								"flex items-center gap-2 py-1 pl-1 text-[11px] font-medium uppercase tracking-[.3px] text-muted-foreground",
+								groupBy === "sprint" && "hidden",
+							)}
+						>
 							<span
 								className={cn(
 									"size-1.5 rounded-full",
-									category.toLowerCase() === "in progress"
-										? "bg-working"
-										: "bg-muted-foreground",
+									inProgress ? "bg-working" : "bg-muted-foreground",
 								)}
 							/>
-							{category}
+							{label}
 							<span className="rounded-[12px] bg-secondary px-1.5 font-medium text-muted-foreground">
 								{rows.length}
 							</span>
@@ -337,60 +404,61 @@ function MyJiraPage() {
 											!activePaneId && tone === "parked" && "opacity-60",
 										)}
 									>
-										{/* One line per ticket: title takes the slack, meta rides in
-										    the space that used to be empty to its right. A grid, not a
-										    flex row, so the mention below can sit in the title's column. */}
-										<div className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-x-2.5">
-											<span className="shrink-0 font-mono text-[11px] font-semibold text-muted-foreground">
-												{issue.key}
-											</span>
-											<span className="min-w-0 truncate text-[13px] font-semibold text-foreground">
-												<OverdueMark
-													itemKey={`jira:${issue.key}`}
-													upstream={issue.dueDate}
-												/>
-												{issue.title}
-											</span>
-											<div className="flex shrink-0 items-center gap-2 text-[11px]">
-												<span className={META_PERSON}>
-													{issue.reporter && (
-														<PersonChip
-															name={issue.reporter}
-															className="max-w-full truncate"
+										{/* Two lines, read top to bottom: what the ticket is, then
+										    where it stands. The actions wait at the right edge. */}
+										<div className="flex items-start gap-3">
+											<div className="flex min-w-0 flex-1 flex-col gap-1.5">
+												<FullTitle
+													text={issue.title}
+													detail={[issue.key, issue.status, issue.sprint?.name]
+														.filter(Boolean)
+														.join(" · ")}
+												>
+													<span className="line-clamp-2 text-[14px] font-semibold leading-snug text-foreground [overflow-wrap:anywhere]">
+														<OverdueMark
+															itemKey={`jira:${issue.key}`}
+															upstream={issue.dueDate}
 														/>
-													)}
-												</span>
-												{/* What the row wants from me: a review when a PR on it
-												    waits on me (click opens the PR), else why it's here. */}
-												<span className={META_TAG}>
-													{reviewPull ? (
-														<button
-															type="button"
-															onClick={() => openUrl(reviewPull.url)}
-															title={`Waiting on your review: ${reviewPull.repo}#${reviewPull.number} ${reviewPull.title}`}
-															className={cn(
-																"rounded-[5px] px-[7px] py-[1px] font-semibold",
-																PILL.attention,
-															)}
-														>
-															review
-														</button>
-													) : (
+														{issue.title}
+													</span>
+												</FullTitle>
+												<div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px]">
+													<button
+														type="button"
+														onClick={() => openUrl(issue.url)}
+														title="Open in Jira"
+														className="flex h-6 items-center gap-1 rounded-full bg-secondary px-2.5 font-mono text-[11.5px] font-semibold text-soft-foreground transition-colors hover:bg-input hover:text-foreground"
+													>
+														<SiJira
+															className="size-3 text-[#4c9aff]"
+															aria-hidden
+														/>
+														{issue.key}
+													</button>
+													<span
+														className={cn(
+															"flex h-6 items-center rounded-full px-2.5 font-semibold",
+															TONE_CHIP[tone],
+														)}
+													>
+														{issue.status}
+													</span>
+													{(issue.mention ||
+														(issue.priority &&
+															isHotPriority(issue.priority))) && (
 														<span
 															className={cn(
-																"rounded-[5px] px-[7px] py-[1px]",
-																ROLE_BADGE[issue.role].className,
+																"flex h-6 items-center rounded-full px-2.5 font-semibold",
+																PILL.danger,
 															)}
 														>
-															{ROLE_BADGE[issue.role].label}
+															{issue.mention ? "High" : issue.priority}
 														</span>
 													)}
-												</span>
-												<span className={META_TAG}>
 													{activePaneId && (
 														<span
 															className={cn(
-																"inline-flex items-center gap-1 rounded-[5px] px-[7px] py-[1px] font-semibold",
+																"flex h-6 items-center gap-1.5 rounded-full px-2.5 font-semibold",
 																PILL.working,
 															)}
 														>
@@ -398,59 +466,64 @@ function MyJiraPage() {
 															Live
 														</span>
 													)}
-												</span>
-												<span className={META_STATUS}>
-													<span
-														className={cn(
-															"truncate rounded-[5px] px-[7px] py-[1px] font-semibold",
-															TONE_CHIP[tone],
-														)}
-													>
-														{issue.status}
-													</span>
-												</span>
-												<span className={META_TAG}>
-													{/* Someone asked me directly - High, whatever the ticket says. */}
-													{(issue.mention ||
-														(issue.priority &&
-															isHotPriority(issue.priority))) && (
-														<span
+													{reviewPull ? (
+														<button
+															type="button"
+															onClick={() => openUrl(reviewPull.url)}
+															title={`Waiting on your review: ${reviewPull.repo}#${reviewPull.number} ${reviewPull.title}`}
 															className={cn(
-																"rounded-[5px] px-[7px] py-[1px]",
-																PILL.danger,
+																"flex h-6 items-center rounded-full px-2.5 font-semibold",
+																PILL.attention,
 															)}
 														>
-															{issue.mention ? "High" : issue.priority}
+															Review waiting
+														</button>
+													) : (
+														issue.role !== "assigned" && (
+															<span
+																className={cn(
+																	"flex h-6 items-center rounded-full px-2.5",
+																	ROLE_BADGE[issue.role].className,
+																)}
+															>
+																{ROLE_BADGE[issue.role].label}
+															</span>
+														)
+													)}
+													{issue.reporter && (
+														<PersonChip
+															name={issue.reporter}
+															className="max-w-[160px] truncate"
+														/>
+													)}
+													{date && (
+														<span
+															title={issue.updated ?? undefined}
+															className="px-1 text-faint-foreground"
+														>
+															updated {date}
 														</span>
 													)}
-												</span>
-												<span className={META_TEXT}>{issue.project}</span>
-												<span
-													title={issue.updated ?? undefined}
-													className={META_DATE}
-												>
-													{date}
-												</span>
-												{/* Same key the All view sets a date under, so a
-												    ticket has one due date wherever you set it. */}
-												<span className={META_DUE}>
 													<DueChip
 														itemKey={`jira:${issue.key}`}
 														title={`${issue.key}: ${issue.title}`}
 														upstream={issue.dueDate}
 													/>
-												</span>
+												</div>
+												{/* A mention row exists because of one comment - so it
+												    shows that comment, not just the ticket it sits on. */}
+												{issue.mention && (
+													<div className="line-clamp-2 cursor-text select-text text-[12px] leading-relaxed text-muted-foreground">
+														<span className="font-semibold text-soft-foreground">
+															{issue.mention.author ?? "Someone"}
+															{": "}
+														</span>
+														{issue.mention.text}
+													</div>
+												)}
 											</div>
-											<div className="flex shrink-0 items-center gap-1.5">
-												<span className={ROW_LINK_SLOT}>
-													<button
-														type="button"
-														onClick={() => openUrl(issue.url)}
-														className={ROW_LINK_BUTTON}
-													>
-														Ticket ↗
-													</button>
-												</span>
+											<div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+												<TonightToggle itemKey={`jira:${issue.key}`} />
 												<span className={ROW_PRIMARY_SLOT}>
 													{activePaneId ? (
 														<button
@@ -478,18 +551,6 @@ function MyJiraPage() {
 												</span>
 												<DoneButton onClick={() => markDone(doable(issue))} />
 											</div>
-											{/* A mention row exists because of one comment - so it
-											    shows that comment, not just the ticket it sits on.
-											    Column 2 keeps it under the title, not under the key. */}
-											{issue.mention && (
-												<div className="col-start-2 mt-1.5 line-clamp-2 select-text cursor-text text-[11.5px] leading-relaxed text-muted-foreground">
-													<span className="font-semibold text-soft-foreground">
-														{issue.mention.author ?? "Someone"}
-														{": "}
-													</span>
-													{issue.mention.text}
-												</div>
-											)}
 										</div>
 									</div>
 								);
@@ -498,6 +559,91 @@ function MyJiraPage() {
 					</div>
 				))}
 			</div>
+		</div>
+	);
+}
+
+type IssueRow = JiraIssueRow;
+
+interface IssueGroup {
+	id: string;
+	label: string;
+	sprint: IssueRow["sprint"] | null;
+	inProgress: boolean;
+	rows: IssueRow[];
+}
+
+function daysLeft(endDate: string | null): number | null {
+	if (!endDate) return null;
+	return Math.ceil((new Date(endDate).getTime() - Date.now()) / 86_400_000);
+}
+
+/**
+ * A sprint the way you'd glance at it on the board: its name, whether it's
+ * running and how long it has left, and how much of yours is done-ish - a
+ * thin bar, not a chart.
+ */
+function SprintHeading({
+	label,
+	sprint,
+	rows,
+}: {
+	label: string;
+	sprint: IssueRow["sprint"] | null;
+	rows: IssueRow[];
+}) {
+	const left = daysLeft(sprint?.endDate ?? null);
+	const moving = rows.filter(
+		(row) => row.statusCategory.toLowerCase() === "in progress",
+	).length;
+	const active = sprint?.state === "active";
+	return (
+		<div className="sticky top-0 z-10 -mx-1 mb-2 flex items-end gap-3 bg-background/95 px-1 pt-3 pb-2 backdrop-blur">
+			<div className="flex min-w-0 flex-col gap-1">
+				<div className="flex items-center gap-2">
+					<h2 className="truncate font-display text-[17px] font-bold tracking-[-0.01em]">
+						{label}
+					</h2>
+					{active ? (
+						<span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary-ink">
+							<span className="size-1.5 animate-pulse rounded-full bg-primary" />
+							Active
+						</span>
+					) : sprint ? (
+						<span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+							Up next
+						</span>
+					) : null}
+				</div>
+				<span className="text-[12px] text-faint-foreground">
+					{[
+						`${rows.length} ${rows.length === 1 ? "ticket" : "tickets"}`,
+						moving > 0 && `${moving} in progress`,
+						left !== null &&
+							(active
+								? left > 0
+									? `${left} ${left === 1 ? "day" : "days"} left`
+									: "ends today"
+								: sprint?.startDate
+									? `starts ${new Date(sprint.startDate).toLocaleDateString(undefined, { day: "numeric", month: "short" })}`
+									: null),
+						!sprint && "not in a sprint",
+					]
+						.filter(Boolean)
+						.join(" · ")}
+				</span>
+			</div>
+			{active && rows.length > 0 && (
+				<div
+					className="ml-auto mb-1.5 h-1 w-28 shrink-0 overflow-hidden rounded-full bg-secondary"
+					title={`${moving} of ${rows.length} in progress`}
+				>
+					<div
+						className="h-full rounded-full bg-working transition-[width] duration-500 ease-spyd"
+						style={{ width: `${(moving / rows.length) * 100}%` }}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }
