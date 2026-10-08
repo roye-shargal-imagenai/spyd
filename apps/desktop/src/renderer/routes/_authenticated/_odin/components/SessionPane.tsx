@@ -1,3 +1,4 @@
+import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
@@ -5,12 +6,12 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
 import { coldRestoreState } from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/state";
 import { Terminal } from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/Terminal";
 import * as terminalCache from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/v1-terminal-cache";
+import { claudeCli } from "renderer/stores/claude-command";
 import { useSessionView } from "renderer/stores/session-view";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { create } from "zustand";
 import { ChatView } from "../board/ChatView";
 import { usePaneMeta } from "../hooks/usePaneMeta";
-import { usePendingFocus } from "../hooks/usePendingFocus";
 import type { SessionEntry } from "../hooks/useSessionSections";
 
 /**
@@ -53,7 +54,7 @@ export function SessionPane({
 	header?: ReactNode;
 }) {
 	const { pane } = entry;
-	const navigate = useNavigate();
+	const _navigate = useNavigate();
 	const tab = useTabsStore((s) => s.tabs.find((t) => t.id === pane.tabId));
 	const mirrored = usePaneMeta((s) => s.sessionIdByPane[pane.id]);
 	const sessionId = pane.claudeSessionId ?? mirrored ?? null;
@@ -67,6 +68,79 @@ export function SessionPane({
 		(s) => s.sessionId === pane.id && s.isAlive,
 	);
 	const write = electronTrpc.terminal.write.useMutation();
+	const utils = electronTrpc.useUtils();
+	const kill = electronTrpc.terminal.kill.useMutation();
+	const [resuming, setResuming] = useState(false);
+	const [lost, setLost] = useState(false);
+	const cwd = pane.odinCwd ?? pane.cwd ?? pane.initialCwd ?? undefined;
+
+	/**
+	 * Bring an ended session back where it is: the same conversation, in the
+	 * same pane, at a ready prompt - the way Superset reattaches. A session
+	 * that died mid-turn gets "Continue" so it picks its work back up.
+	 */
+	const resume = async () => {
+		if (resuming || !tab) return;
+		setResuming(true);
+		try {
+			if (sessionId) {
+				try {
+					await utils.client.terminal.readClaudeTranscript.query({ sessionId });
+				} catch (error) {
+					if (String(error).includes("No transcript on this machine")) {
+						setLost(true);
+						return;
+					}
+				}
+			}
+			const diedWorking =
+				useTabsStore.getState().panes[pane.id]?.status === "working";
+			const command = `${
+				sessionId
+					? `${claudeCli()} --resume ${sessionId}`
+					: `${claudeCli()} --continue`
+			}${diedWorking ? " Continue" : ""}`;
+			await kill.mutateAsync({ paneId: pane.id }).catch(() => {});
+			coldRestoreState.delete(pane.id);
+			terminalCache.dispose(pane.id);
+			await new Promise((resolve) => setTimeout(resolve, 300));
+			await utils.client.terminal.createOrAttach.mutate({
+				paneId: pane.id,
+				tabId: pane.tabId,
+				workspaceId: tab.workspaceId,
+				cwd,
+				command: cwd ? `cd '${cwd}' && ${command}` : command,
+				allowKilled: true,
+			});
+			useTabsStore.setState((state) => ({
+				panes: {
+					...state.panes,
+					[pane.id]: {
+						...state.panes[pane.id],
+						status: "idle",
+						odinParked: false,
+						interrupted: false,
+						completed: false,
+					},
+				},
+			}));
+			await utils.terminal.listDaemonSessions.invalidate();
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : String(error));
+		} finally {
+			setResuming(false);
+		}
+	};
+
+	// Opening an ended session is asking to work in it: bring it back once,
+	// on arrival, instead of showing a dead end.
+	const [autoTried, setAutoTried] = useState(false);
+	useEffect(() => {
+		if (daemon === undefined || alive || autoTried || !tab) return;
+		setAutoTried(true);
+		void resume();
+		// biome-ignore lint/correctness/useExhaustiveDependencies: once per pane, on arrival
+	}, [daemon, alive, tab, autoTried, resume]);
 
 	// A live PTY must mount clean: a cached xterm or a cold-restore marker
 	// from an earlier view leaves it read-only and keystrokes vanish (the
@@ -102,27 +176,38 @@ export function SessionPane({
 		return (
 			<div className="flex h-full min-h-0 flex-col">
 				{header && (
-					<div className="shrink-0 border-b border-border px-4 py-2">
+					<div className="shrink-0 border-b border-border px-[18px] py-3">
 						{header}
 					</div>
 				)}
 				<div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
-					<div className="text-[15px] font-semibold">
-						This session has ended
-					</div>
-					<p className="max-w-[340px] text-[13px] text-muted-foreground">
-						Its conversation is saved. Resume it to pick up where it left off.
-					</p>
-					<button
-						type="button"
-						onClick={() => {
-							usePendingFocus.getState().focus(pane.id);
-							navigate({ to: "/board" });
-						}}
-						className="rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:brightness-110"
-					>
-						Resume
-					</button>
+					{lost ? (
+						<>
+							<div className="text-[15px] font-semibold">
+								This conversation isn't on this Mac anymore
+							</div>
+							<p className="max-w-[360px] text-[13px] text-muted-foreground">
+								Claude has no transcript for it, so there's nothing to reopen.
+								Start a new session from the same task instead.
+							</p>
+						</>
+					) : (
+						<>
+							<span className="size-5 animate-spin rounded-full border-2 border-faint-foreground border-t-transparent" />
+							<div className="text-[14px] font-medium text-muted-foreground">
+								{resuming ? "Bringing the session back…" : "Reconnecting…"}
+							</div>
+							{!resuming && (
+								<button
+									type="button"
+									onClick={() => void resume()}
+									className="rounded-full bg-secondary px-4 py-2 text-[13px] font-medium hover:bg-input"
+								>
+									Resume
+								</button>
+							)}
+						</>
+					)}
 				</div>
 			</div>
 		);
