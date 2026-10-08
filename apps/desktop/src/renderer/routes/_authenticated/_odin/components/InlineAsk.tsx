@@ -40,9 +40,12 @@ export function describeTool(
 export function InlineAsk({
 	paneId,
 	sessionId,
+	toolsOnly = false,
 }: {
 	paneId: string;
 	sessionId: string;
+	/** Leave questions and plans to a chat view already showing its own cards. */
+	toolsOnly?: boolean;
 }) {
 	const utils = electronTrpc.useUtils();
 	const { data: tool } = electronTrpc.terminal.pendingTool.useQuery(
@@ -66,6 +69,11 @@ export function InlineAsk({
 	};
 
 	if (!tool) return null;
+	if (
+		toolsOnly &&
+		(tool.name === "AskUserQuestion" || tool.name === "ExitPlanMode")
+	)
+		return null;
 	if (tool.name === "AskUserQuestion")
 		return (
 			<QuestionCard

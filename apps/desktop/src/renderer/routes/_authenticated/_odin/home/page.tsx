@@ -1,15 +1,11 @@
 import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { MarkdownRenderer } from "renderer/components/MarkdownRenderer";
+import { useEffect, useRef } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { emojify } from "renderer/lib/emoji";
 import { openUrl } from "renderer/stores/in-app-browser";
-import { typeIntoClaude } from "../board/ChatView";
 import { InlineAsk } from "../components/InlineAsk";
 import { useNewWorkspaceDialog } from "../components/NewWorkspaceDialog";
-import { cardBody } from "../components/OdinPromptDialog";
 import { BUTTON } from "../components/pill";
 import {
 	PAST,
@@ -19,7 +15,6 @@ import {
 } from "../components/RecentSessions";
 import { StatusGlyph, useSidebarSessions } from "../components/SessionList";
 import { SessionPane, useHomeSelection } from "../components/SessionPane";
-import { COMPACT_MARKDOWN } from "../components/TranscriptView";
 import { endSession } from "../hooks/useDone";
 import { usePaneMeta } from "../hooks/usePaneMeta";
 import { usePendingFocus } from "../hooks/usePendingFocus";
@@ -32,10 +27,9 @@ export const Route = createFileRoute("/_authenticated/_odin/home/")({
 /**
  * Home - a mail client for your agents, and where you work with them. The
  * sessions on the left, grouped by what they want from you (Needs you first,
- * then Finished, Working, Idle); the one you pick on the right, either as a
- * summary - what it wants, what it last said, what it was asked - or as the
- * live session itself. No decoration: type, spacing and one accent colour.
- * Up/Down move, Enter opens the session, Esc goes back to the summary.
+ * then Finished, Working, Idle); the one you pick on the right, as the
+ * live session itself, opened as soon as you pick it. No decoration: type,
+ * spacing and one accent colour. Up/Down move between sessions.
  */
 
 const GROUPS: { column: string; title: string }[] = [
@@ -48,8 +42,7 @@ const GROUPS: { column: string; title: string }[] = [
 function HomePage() {
 	const { sessions, ready } = useSidebarSessions();
 	const selectedId = useHomeSelection((s) => s.paneId);
-	const view = useHomeSelection((s) => s.view);
-	const { select, setView } = useHomeSelection.getState();
+	const { select } = useHomeSelection.getState();
 	const past = usePastWeek(sessions);
 	const pastRow = selectedId?.startsWith(PAST)
 		? (past.find((row) => `${PAST}${row.id}` === selectedId) ?? null)
@@ -64,7 +57,7 @@ function HomePage() {
 	useEffect(() => {
 		if (!pendingPaneId || !sessions.some((s) => s.pane.id === pendingPaneId))
 			return;
-		select(pendingPaneId, "session");
+		select(pendingPaneId);
 		usePendingFocus.getState().clear();
 	}, [pendingPaneId, sessions, select]);
 
@@ -73,7 +66,7 @@ function HomePage() {
 		const i = sessions.findIndex((s) => s.pane.id === selected.pane.id);
 		const next =
 			sessions[Math.min(Math.max(i + offset, 0), sessions.length - 1)];
-		if (next) select(next.pane.id, view);
+		if (next) select(next.pane.id);
 	};
 
 	// Keep the selected row in view as the keyboard walks the list.
@@ -99,10 +92,6 @@ function HomePage() {
 					} else if (event.key === "ArrowUp") {
 						event.preventDefault();
 						move(-1);
-					} else if (event.key === "Enter" && selected) {
-						setView("session");
-					} else if (event.key === "Escape") {
-						setView("summary");
 					}
 				}}
 				className="flex w-[320px] shrink-0 flex-col overflow-y-auto border-r border-border pb-4 outline-none"
@@ -127,8 +116,7 @@ function HomePage() {
 									key={entry.pane.id}
 									entry={entry}
 									selected={entry.pane.id === selected?.pane.id}
-									onSelect={() => select(entry.pane.id, view)}
-									onOpen={() => select(entry.pane.id, "session")}
+									onSelect={() => select(entry.pane.id)}
 								/>
 							))}
 						</section>
@@ -144,33 +132,14 @@ function HomePage() {
 					</div>
 				) : selected ? (
 					<>
-						<div className="flex shrink-0 items-center gap-1 border-b border-border px-4 py-2">
-							{(["summary", "session"] as const).map((mode) => (
-								<button
-									key={mode}
-									type="button"
-									onClick={() => setView(mode)}
-									className={cn(
-										"rounded-[6px] px-3 py-1 text-[13px] font-medium capitalize",
-										view === mode
-											? "bg-accent text-foreground"
-											: "text-muted-foreground hover:text-foreground",
-									)}
-								>
-									{mode}
-								</button>
-							))}
-							<span className="ml-2 min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
-								{selected.title}
-							</span>
-						</div>
-						<div className="min-h-0 flex-1 overflow-y-auto">
-							{view === "session" ? (
-								<SessionPane key={selected.pane.id} entry={selected} />
-							) : (
-								<Detail key={selected.pane.id} entry={selected} />
-							)}
-						</div>
+						<SessionPane
+							key={selected.pane.id}
+							entry={selected}
+							header={<SessionHeader entry={selected} />}
+						/>
+						{selected.column === "permission" && (
+							<WaitingTool key={`ask-${selected.pane.id}`} entry={selected} />
+						)}
 					</>
 				) : (
 					<div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
@@ -228,12 +197,10 @@ function ListRow({
 	entry,
 	selected,
 	onSelect,
-	onOpen,
 }: {
 	entry: SessionEntry;
 	selected: boolean;
 	onSelect: () => void;
-	onOpen: () => void;
 }) {
 	const { repo } = useWork(entry);
 	const waiting = entry.column === "permission";
@@ -242,7 +209,6 @@ function ListRow({
 			type="button"
 			data-pane={entry.pane.id}
 			onClick={onSelect}
-			onDoubleClick={onOpen}
 			className={cn(
 				"flex w-full gap-2.5 border-b border-border/60 px-4 py-3 text-left",
 				selected ? "bg-primary text-primary-foreground" : "hover:bg-accent/40",
@@ -297,58 +263,35 @@ function ListRow({
 	);
 }
 
-/** The open session: what it wants, what it last said, what it was asked. */
-function Detail({ entry }: { entry: SessionEntry }) {
-	const { pane } = entry;
-	const { repo, pullRequests } = useWork(entry);
+/** The command it's stuck on, answered without typing into the terminal. */
+function WaitingTool({ entry }: { entry: SessionEntry }) {
 	const sessionId = useSessionId(entry);
-	const briefByPane = usePaneMeta((s) => s.briefByPane);
-	const brief = pane.odinBrief ?? briefByPane[pane.id] ?? null;
-	const body = cardBody(entry.title, brief);
-	const { data: transcript } =
-		electronTrpc.terminal.readClaudeTranscript.useQuery(
-			{ sessionId: sessionId ?? "" },
-			{ enabled: !!sessionId, retry: false, refetchInterval: 10_000 },
-		);
-	const lastWord = useMemo(
-		() =>
-			transcript?.messages.findLast(
-				(m) => m.role === "assistant" && m.text.trim(),
-			)?.text ?? null,
-		[transcript],
+	if (!sessionId) return null;
+	return (
+		<div className="shrink-0 border-t border-border px-4 py-3 empty:hidden">
+			<InlineAsk paneId={entry.pane.id} sessionId={sessionId} toolsOnly />
+		</div>
 	);
-	const openSession = () => useHomeSelection.getState().setView("session");
-	const write = electronTrpc.terminal.write.useMutation();
-	const [replying, setReplying] = useState(false);
-	const [showAll, setShowAll] = useState(false);
-	const [note, setNote] = useState("");
-	const unattended = entry.section === "night" || entry.section === "slack";
-	const canReply = entry.column !== "idle";
-	const when = ago(pane.odinStatusAt);
+}
 
+/**
+ * Above the live session: what it is, where, and - for work that started
+ * without you (Slack, the Night Agent) - Approve or Drop.
+ */
+function SessionHeader({ entry }: { entry: SessionEntry }) {
+	const { repo, pullRequests } = useWork(entry);
+	const unattended = entry.section === "night" || entry.section === "slack";
+	const when = ago(entry.pane.odinStatusAt);
 	const finish = (verb: string) => {
-		endSession(pane.id);
+		endSession(entry.pane.id);
 		toast.success(`${verb} - ${entry.title.slice(0, 50)}`);
 	};
-	const sendBack = async () => {
-		const text = note.trim();
-		if (!text) return;
-		try {
-			await typeIntoClaude(write.mutateAsync, pane.id, text);
-		} catch {
-			toast.error("That session has ended - open it and resume first");
-			return;
-		}
-		setNote("");
-		setReplying(false);
-		toast.success("Sent");
-	};
-
 	return (
-		<article className="mx-auto flex max-w-[760px] flex-col gap-8 px-10 pt-8 pb-16 [overflow-wrap:anywhere]">
-			<header className="flex flex-col gap-4">
-				<div className="flex items-center gap-2">
-					<div className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
+		<div className="flex min-w-0 items-center gap-3">
+			<div className="min-w-0 flex-1">
+				<div className="truncate text-[14px] font-semibold">{entry.title}</div>
+				<div className="flex min-w-0 gap-3 truncate text-[12px] text-muted-foreground">
+					<span className="truncate">
 						{[
 							repo,
 							STATE[entry.column],
@@ -357,151 +300,39 @@ function Detail({ entry }: { entry: SessionEntry }) {
 						]
 							.filter(Boolean)
 							.join(" · ")}
-					</div>
-					{unattended && (
-						<>
-							<button
-								type="button"
-								title="It's good - take it off the list. Session History keeps it."
-								onClick={() => finish("Approved")}
-								className={cn(
-									"rounded-[6px] px-3 py-1.5 text-[13px] font-medium",
-									BUTTON.secondary,
-								)}
-							>
-								Approve
-							</button>
-							<button
-								type="button"
-								title="Not wanted - end the session"
-								onClick={() => finish("Dropped")}
-								className={cn(
-									"rounded-[6px] px-3 py-1.5 text-[13px] font-medium",
-									BUTTON.secondary,
-								)}
-							>
-								Drop
-							</button>
-						</>
-					)}
-					<button
-						type="button"
-						onClick={openSession}
-						className={cn(
-							"rounded-[6px] px-3 py-1.5 text-[13px] font-semibold",
-							BUTTON.primary,
-						)}
-					>
-						Open session
-					</button>
-				</div>
-				<h2 className="text-[24px] font-semibold leading-tight tracking-[-0.01em]">
-					{entry.title}
-				</h2>
-				{pullRequests.length > 0 && (
-					<div className="flex flex-wrap gap-3 text-[13px]">
-						{pullRequests.map((pr) => (
-							<button
-								key={pr.url}
-								type="button"
-								onClick={() => openUrl(pr.url)}
-								className="text-link hover:underline"
-							>
-								{pr.repo} #{pr.number}
-							</button>
-						))}
-					</div>
-				)}
-			</header>
-
-			{entry.column === "permission" && sessionId && (
-				<InlineAsk paneId={pane.id} sessionId={sessionId} />
-			)}
-
-			{lastWord && (
-				<section className="flex flex-col gap-2">
-					<h3 className="text-[12px] font-medium text-muted-foreground">
-						Latest from the agent
-					</h3>
-					<MarkdownRenderer
-						content={lastWord}
-						className={cn(COMPACT_MARKDOWN, "text-[14px]! text-foreground!")}
-					/>
-				</section>
-			)}
-
-			{body && (
-				<section className="flex flex-col gap-2">
-					<h3 className="text-[12px] font-medium text-muted-foreground">
-						What it was asked
-					</h3>
-					<p
-						className={cn(
-							"cursor-text select-text whitespace-pre-wrap text-[14px] leading-relaxed text-soft-foreground [overflow-wrap:anywhere]",
-							!showAll && "line-clamp-[10]",
-						)}
-					>
-						{emojify(body)}
-					</p>
-					{!showAll && body.split("\n").length > 10 && (
+					</span>
+					{pullRequests.map((pr) => (
 						<button
+							key={pr.url}
 							type="button"
-							onClick={() => setShowAll(true)}
-							className="self-start text-[13px] text-muted-foreground hover:text-foreground"
+							onClick={() => openUrl(pr.url)}
+							className="shrink-0 text-link hover:underline"
 						>
-							Show more
+							{pr.repo} #{pr.number}
 						</button>
-					)}
-				</section>
-			)}
-
-			{canReply &&
-				(replying ? (
-					<section className="flex flex-col gap-2">
-						<textarea
-							// biome-ignore lint/a11y/noAutofocus: opened by a click on Reply
-							autoFocus
-							value={note}
-							onChange={(e) => setNote(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter" && (e.metaKey || e.ctrlKey))
-									void sendBack();
-								if (e.key === "Escape") setReplying(false);
-							}}
-							placeholder="Reply to the agent - ⌘↵ to send"
-							className="min-h-[96px] resize-none rounded-[6px] border border-border bg-card px-3 py-2.5 text-[14px] outline-none focus:border-primary"
-						/>
-						<div className="flex gap-2">
-							<button
-								type="button"
-								disabled={!note.trim()}
-								onClick={() => void sendBack()}
-								className={cn(
-									"rounded-[6px] px-3 py-1.5 text-[13px] font-semibold disabled:opacity-50",
-									BUTTON.primary,
-								)}
-							>
-								Send
-							</button>
-							<button
-								type="button"
-								onClick={() => setReplying(false)}
-								className="rounded-[6px] px-3 py-1.5 text-[13px] text-muted-foreground hover:text-foreground"
-							>
-								Cancel
-							</button>
-						</div>
-					</section>
-				) : (
+					))}
+				</div>
+			</div>
+			{unattended &&
+				(["Approve", "Drop"] as const).map((verb) => (
 					<button
+						key={verb}
 						type="button"
-						onClick={() => setReplying(true)}
-						className="self-start text-[13px] text-muted-foreground hover:text-foreground"
+						title={
+							verb === "Approve"
+								? "It's good - take it off the list. The Archive keeps it."
+								: "Not wanted - end the session"
+						}
+						onClick={() => finish(verb === "Approve" ? "Approved" : "Dropped")}
+						className={cn(
+							"rounded-[6px] px-3 py-1 text-[12px] font-medium",
+							BUTTON.secondary,
+						)}
 					>
-						Reply to the agent…
+						{verb}
 					</button>
 				))}
-		</article>
+		</div>
 	);
 }
 

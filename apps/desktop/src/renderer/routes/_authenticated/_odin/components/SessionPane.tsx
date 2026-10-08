@@ -1,6 +1,6 @@
 import { cn } from "@odin/ui/utils";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { coldRestoreState } from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/state";
 import { Terminal } from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/Terminal";
@@ -44,7 +44,14 @@ export function useOpenInHome() {
  * chat (or the raw terminal, one click away) while the agent runs, and a way
  * back in once it has ended.
  */
-export function SessionPane({ entry }: { entry: SessionEntry }) {
+export function SessionPane({
+	entry,
+	header,
+}: {
+	entry: SessionEntry;
+	/** What sits left of the Chat / Terminal switch: the session's title. */
+	header?: ReactNode;
+}) {
 	const { pane } = entry;
 	const navigate = useNavigate();
 	const tab = useTabsStore((s) => s.tabs.find((t) => t.id === pane.tabId));
@@ -93,28 +100,38 @@ export function SessionPane({ entry }: { entry: SessionEntry }) {
 
 	if (!alive) {
 		return (
-			<div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-				<div className="text-[15px] font-semibold">This session has ended</div>
-				<p className="max-w-[340px] text-[13px] text-muted-foreground">
-					Its conversation is saved. Resume it to pick up where it left off.
-				</p>
-				<button
-					type="button"
-					onClick={() => {
-						usePendingFocus.getState().focus(pane.id);
-						navigate({ to: "/board" });
-					}}
-					className="rounded-[6px] bg-secondary px-3 py-1.5 text-[13px] font-medium ring-1 ring-inset ring-border hover:bg-accent"
-				>
-					Resume
-				</button>
+			<div className="flex h-full min-h-0 flex-col">
+				{header && (
+					<div className="shrink-0 border-b border-border px-4 py-2">
+						{header}
+					</div>
+				)}
+				<div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
+					<div className="text-[15px] font-semibold">
+						This session has ended
+					</div>
+					<p className="max-w-[340px] text-[13px] text-muted-foreground">
+						Its conversation is saved. Resume it to pick up where it left off.
+					</p>
+					<button
+						type="button"
+						onClick={() => {
+							usePendingFocus.getState().focus(pane.id);
+							navigate({ to: "/board" });
+						}}
+						className="rounded-[6px] bg-secondary px-3 py-1.5 text-[13px] font-medium ring-1 ring-inset ring-border hover:bg-accent"
+					>
+						Resume
+					</button>
+				</div>
 			</div>
 		);
 	}
 
 	return (
 		<div className="flex h-full min-h-0 flex-col">
-			<div className="flex shrink-0 justify-end gap-1 px-4 pt-2">
+			<div className="flex shrink-0 items-center gap-1 border-b border-border px-4 py-2">
+				<div className="min-w-0 flex-1">{header}</div>
 				{(["chat", "terminal"] as const).map((mode) => {
 					const active = (mode === "terminal") === asTerminal;
 					return (
