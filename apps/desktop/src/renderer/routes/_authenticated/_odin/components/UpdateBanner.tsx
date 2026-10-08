@@ -50,7 +50,7 @@ export function UpdateBanner() {
 				<button
 					type="button"
 					onClick={() => dismiss.mutate()}
-					className="rounded-[6px] px-3 py-1 text-xs font-medium opacity-85 hover:bg-white/15 hover:opacity-100"
+					className="rounded-full px-3 py-1 text-xs font-medium opacity-85 hover:bg-white/15 hover:opacity-100"
 				>
 					Later
 				</button>
@@ -59,7 +59,7 @@ export function UpdateBanner() {
 				type="button"
 				disabled={busy}
 				onClick={() => install.mutate()}
-				className="rounded-[6px] bg-white px-3 py-1 text-xs font-bold text-primary-ink shadow-sm hover:brightness-95 disabled:opacity-60"
+				className="rounded-[12px] bg-white px-3 py-1 text-xs font-bold text-primary-ink shadow-sm hover:brightness-95 disabled:opacity-60"
 			>
 				{busy ? "Updating…" : "Update and restart"}
 			</button>

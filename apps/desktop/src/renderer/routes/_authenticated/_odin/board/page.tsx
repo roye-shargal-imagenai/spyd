@@ -507,7 +507,7 @@ function CatchUpCard({
 				onClick={onShowSession}
 				title="Leave Catch up and open this session"
 				className={cn(
-					"mt-auto self-start rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+					"mt-auto self-start rounded-full px-3 py-1.5 text-xs font-semibold",
 					BUTTON.secondary,
 				)}
 			>
@@ -1317,7 +1317,7 @@ function TagMenu({
 		<div
 			ref={ref}
 			style={{ left, top }}
-			className="fixed z-[60] w-[220px] rounded-[6px] border border-border bg-card p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)]"
+			className="fixed z-[60] w-[220px] rounded-[12px] border border-border bg-card p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)]"
 		>
 			<button
 				type="button"
@@ -3574,7 +3574,7 @@ function DevBoardPage() {
 								)}
 								<span
 									className={cn(
-										"rounded-[6px] bg-secondary px-2 font-medium",
+										"rounded-[12px] bg-secondary px-2 font-medium",
 										!canCatchUp && "ml-auto",
 									)}
 								>
@@ -3642,7 +3642,7 @@ function DevBoardPage() {
 																	// that only fades in: background, border and shadow can't
 																	// animate on the compositor, so they repainted every frame
 																	// and stuttered whenever the board was busy rendering.
-																	"group relative isolate cursor-pointer rounded-[6px] border bg-card px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate] duration-200 ease-out hover:-translate-y-px",
+																	"group relative isolate cursor-pointer rounded-[12px] border bg-card px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate] duration-200 ease-out hover:-translate-y-px",
 																	"after:pointer-events-none after:absolute after:-inset-px after:-z-10 after:rounded-[inherit] after:border after:border-primary/40 after:bg-secondary after:opacity-0 after:shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_10px_24px_-12px_color-mix(in_oklab,var(--primary)_55%,transparent)] after:transition-opacity after:duration-200 after:ease-out hover:after:opacity-100",
 																	// Cards are neutral - the column header already says the
 																	// status. Only a failure earns its red edge.
@@ -3880,7 +3880,7 @@ function DevBoardPage() {
 																					void resumeCard(card);
 																				}}
 																				className={cn(
-																					"ml-auto shrink-0 whitespace-nowrap rounded-[6px] px-2.5 py-1 text-xs font-semibold",
+																					"ml-auto shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold",
 																					BUTTON.secondary,
 																				)}
 																			>
@@ -3915,7 +3915,7 @@ function DevBoardPage() {
 																					void resumeCard(card);
 																				}}
 																				className={cn(
-																					"rounded-[6px] px-2.5 py-1 text-xs font-semibold",
+																					"rounded-full px-2.5 py-1 text-xs font-semibold",
 																					BUTTON.secondary,
 																				)}
 																			>
@@ -4324,7 +4324,7 @@ function DevBoardPage() {
 														: "Reopen this conversation at an idle prompt (claude --resume)"
 									}
 									className={cn(
-										"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+										"rounded-full px-3 py-1.5 text-xs font-semibold",
 										BUTTON.primary,
 										// The gradient is a background-image, so it has to go before
 										// bg-secondary can show - otherwise disabled stays violet.
@@ -4363,7 +4363,7 @@ function DevBoardPage() {
 									}
 									onClick={() => interruptPane(drawerCard.pane.id)}
 									className={cn(
-										"rounded-[6px] px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50",
+										"rounded-full px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50",
 										BUTTON.secondary,
 									)}
 								>
@@ -4381,7 +4381,7 @@ function DevBoardPage() {
 											chatView ? setTerminalPaneId(null) : setChatView(true)
 										}
 										className={cn(
-											"flex items-center gap-1.5 rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+											"flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold",
 											BUTTON.secondary,
 										)}
 									>
@@ -4399,7 +4399,7 @@ function DevBoardPage() {
 									onClick={() => markDone(drawerCard)}
 									title="Done - end the session and remove it from the board"
 									className={cn(
-										"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+										"rounded-full px-3 py-1.5 text-xs font-semibold",
 										BUTTON.done,
 									)}
 								>
@@ -4410,7 +4410,7 @@ function DevBoardPage() {
 								onPick={(day) => remindMe(drawerCard, day)}
 								label="Remind me"
 								className={cn(
-									"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+									"rounded-full px-3 py-1.5 text-xs font-semibold",
 									BUTTON.remind,
 								)}
 							/>
@@ -4419,7 +4419,7 @@ function DevBoardPage() {
 									type="button"
 									onClick={() => setDrawerCard(null)}
 									className={cn(
-										"rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+										"rounded-full px-3 py-1.5 text-xs font-semibold",
 										BUTTON.secondary,
 									)}
 								>

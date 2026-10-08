@@ -81,7 +81,7 @@ function Section({
 
 function Card({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="rounded-[6px] border border-border bg-card p-4">
+		<div className="rounded-[12px] border border-border bg-card p-4">
 			{children}
 		</div>
 	);
@@ -97,7 +97,7 @@ function Stat({
 	hint?: string;
 }) {
 	return (
-		<div className="flex min-w-[112px] flex-1 flex-col gap-1 rounded-[6px] border border-border bg-card px-3.5 py-3">
+		<div className="flex min-w-[112px] flex-1 flex-col gap-1 rounded-[12px] border border-border bg-card px-3.5 py-3">
 			<div className="text-[22px] font-semibold leading-none text-foreground">
 				{value}
 			</div>
@@ -725,7 +725,7 @@ function ClockToggle({
 	setClock: (clock: Clock) => void;
 }) {
 	return (
-		<div className="flex rounded-[6px] border border-border bg-card p-[2px] text-[10.5px]">
+		<div className="flex rounded-[12px] border border-border bg-card p-[2px] text-[10.5px]">
 			{(["you", "agents"] as const).map((option) => (
 				<button
 					key={option}
@@ -758,7 +758,7 @@ function Step({
 			aria-label={label}
 			disabled={disabled}
 			onClick={onClick}
-			className="h-[22px] w-[22px] rounded-[6px] border border-border bg-card text-[13px] leading-none text-muted-foreground hover:bg-secondary disabled:opacity-35 disabled:hover:bg-card"
+			className="h-[22px] w-[22px] rounded-[12px] border border-border bg-card text-[13px] leading-none text-muted-foreground hover:bg-secondary disabled:opacity-35 disabled:hover:bg-card"
 		>
 			{glyph}
 		</button>
@@ -867,7 +867,7 @@ function RepoFilter({
 			{[null, ...repos].map((name) => (
 				<div
 					key={name ?? "all"}
-					className={`flex items-center rounded-[6px] border text-[10.5px] ${
+					className={`flex items-center rounded-[12px] border text-[10.5px] ${
 						repo === name
 							? "border-primary bg-primary/15 text-soft-foreground"
 							: "border-border bg-card text-muted-foreground"
@@ -899,7 +899,7 @@ function RepoFilter({
 					type="button"
 					title="Hidden - click to show again"
 					onClick={() => toggleExcluded(name)}
-					className="rounded-[6px] border border-dashed border-border px-2 py-[2px] text-[10.5px] text-faint-foreground line-through hover:text-muted-foreground"
+					className="rounded-[12px] border border-dashed border-border px-2 py-[2px] text-[10.5px] text-faint-foreground line-through hover:text-muted-foreground"
 				>
 					{name}
 				</button>
@@ -950,7 +950,7 @@ function Workload() {
 				}}
 				placeholder={`Search tasks…${search.hint}`}
 				aria-label="Search tasks"
-				className="h-[22px] w-[180px] shrink-0 rounded-[6px] border border-border bg-card px-2 text-[11px] text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
+				className="h-[22px] w-[180px] shrink-0 rounded-[12px] border border-border bg-card px-2 text-[11px] text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
 			/>
 			<RepoFilter
 				repos={data.repos ?? data.byRepo.map((row) => row.repo)}

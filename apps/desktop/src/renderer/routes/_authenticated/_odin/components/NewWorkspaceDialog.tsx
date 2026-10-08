@@ -151,7 +151,7 @@ function DialogBody({
 			<div
 				role="dialog"
 				aria-label="New workspace"
-				className="fade-in zoom-in-95 slide-in-from-top-2 fixed top-[18vh] left-1/2 z-50 flex w-[600px] max-w-[calc(100vw-32px)] -translate-x-1/2 animate-in flex-col overflow-hidden rounded-[6px] border border-border bg-popover shadow-2xl duration-150"
+				className="fade-in zoom-in-95 slide-in-from-top-2 fixed top-[18vh] left-1/2 z-50 flex w-[600px] max-w-[calc(100vw-32px)] -translate-x-1/2 animate-in flex-col overflow-hidden rounded-[12px] border border-border bg-popover shadow-2xl duration-150"
 				onKeyDown={(e) => {
 					if (e.key === "Escape") {
 						e.preventDefault();
@@ -207,7 +207,7 @@ function DialogBody({
 								setBranchEdit(null);
 							}}
 							className={cn(
-								"rounded-[6px] px-2 py-1 text-[12px] font-medium transition-colors",
+								"rounded-full px-2 py-1 text-[12px] font-medium transition-colors",
 								p.id === project.id
 									? BUTTON.selected
 									: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
@@ -253,7 +253,7 @@ function DialogBody({
 						{images.map((image, i) => (
 							<span
 								key={`${image.name}-${i}`}
-								className="flex items-center gap-1 rounded-[6px] bg-secondary py-0.5 pr-1 pl-2 text-[11px] text-soft-foreground"
+								className="flex items-center gap-1 rounded-[12px] bg-secondary py-0.5 pr-1 pl-2 text-[11px] text-soft-foreground"
 							>
 								{image.name || "image"}
 								<button
@@ -323,7 +323,7 @@ function DialogBody({
 						type="button"
 						onClick={submit}
 						className={cn(
-							"ml-auto rounded-[6px] px-3 py-1.5 text-[12px] font-semibold",
+							"ml-auto rounded-full px-3 py-1.5 text-[12px] font-semibold",
 							BUTTON.primary,
 						)}
 					>

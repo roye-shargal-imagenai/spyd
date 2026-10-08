@@ -187,7 +187,7 @@ function SessionRow({
 			title={entry.title}
 			onClick={onOpen}
 			className={cn(
-				"group flex w-full items-start gap-2 rounded-[6px] px-2.5 py-1.5 text-left transition-colors hover:bg-accent/60",
+				"group flex w-full items-start gap-2 rounded-[12px] px-2.5 py-1.5 text-left transition-colors hover:bg-accent/60",
 				entry.column === "permission" && "bg-primary/[0.08]",
 			)}
 		>

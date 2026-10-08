@@ -20,6 +20,8 @@ import { electronQueryClient } from "./providers/ElectronTRPCProvider";
 import { NotFound } from "./routes/not-found";
 import { routeTree } from "./routeTree.gen";
 
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/geist";
 import "./globals.css";
 import "./styles/bundled-fonts.css";
 

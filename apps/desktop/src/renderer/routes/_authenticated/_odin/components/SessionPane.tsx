@@ -119,7 +119,7 @@ export function SessionPane({
 							usePendingFocus.getState().focus(pane.id);
 							navigate({ to: "/board" });
 						}}
-						className="rounded-[6px] bg-secondary px-3 py-1.5 text-[13px] font-medium ring-1 ring-inset ring-border hover:bg-accent"
+						className="rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:brightness-110"
 					>
 						Resume
 					</button>
@@ -130,26 +130,28 @@ export function SessionPane({
 
 	return (
 		<div className="flex h-full min-h-0 flex-col">
-			<div className="flex shrink-0 items-center gap-1 border-b border-border px-4 py-2">
+			<div className="flex shrink-0 items-center gap-3 border-b border-border px-[18px] py-3">
 				<div className="min-w-0 flex-1">{header}</div>
-				{(["chat", "terminal"] as const).map((mode) => {
-					const active = (mode === "terminal") === asTerminal;
-					return (
-						<button
-							key={mode}
-							type="button"
-							onClick={() => setAsTerminal(mode === "terminal")}
-							className={cn(
-								"rounded-[6px] px-2.5 py-1 text-[12px] font-medium capitalize",
-								active
-									? "bg-accent text-foreground"
-									: "text-muted-foreground hover:text-foreground",
-							)}
-						>
-							{mode}
-						</button>
-					);
-				})}
+				<div className="flex shrink-0 gap-0.5 rounded-full bg-tertiary p-[3px]">
+					{(["chat", "terminal"] as const).map((mode) => {
+						const active = (mode === "terminal") === asTerminal;
+						return (
+							<button
+								key={mode}
+								type="button"
+								onClick={() => setAsTerminal(mode === "terminal")}
+								className={cn(
+									"h-[26px] rounded-full px-3 text-[12px] capitalize transition-colors",
+									active
+										? "bg-secondary font-medium text-foreground"
+										: "text-muted-foreground hover:text-foreground",
+								)}
+							>
+								{mode}
+							</button>
+						);
+					})}
+				</div>
 			</div>
 			<div className="flex min-h-0 flex-1 flex-col">
 				{asTerminal ? (

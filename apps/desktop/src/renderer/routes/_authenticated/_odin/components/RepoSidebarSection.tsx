@@ -33,7 +33,7 @@ export const SESSION_DOT: Record<string, string> = {
 };
 
 const ROW =
-	"flex h-8 w-full items-center gap-2 rounded-[6px] px-2.5 text-left text-[13px] transition-colors hover:bg-accent/60 hover:text-foreground";
+	"flex h-8 w-full items-center gap-2 rounded-[12px] px-2.5 text-left text-[13px] transition-colors hover:bg-accent/60 hover:text-foreground";
 
 /**
  * The repos you keep on this machine, Superset-style: add one from disk once,
@@ -191,7 +191,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									aria-label={`New workspace in ${project.name}`}
 									title={`New workspace in ${project.name} (⌥-click to describe it first)`}
 									onClick={(event) => newWorkspace(project, event)}
-									className="ml-0.5 flex size-7 shrink-0 items-center justify-center rounded-[6px] text-faint-foreground opacity-0 transition-[opacity,color] hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+									className="ml-0.5 flex size-7 shrink-0 items-center justify-center rounded-[12px] text-faint-foreground opacity-0 transition-[opacity,color] hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
 								>
 									<HiOutlinePlus className="size-3.5" />
 								</button>
@@ -275,7 +275,7 @@ function PendingRow({
 	return (
 		<div
 			title={item.error ?? item.title}
-			className="flex flex-col gap-0.5 rounded-[6px] px-2.5 py-1.5 text-[12px]"
+			className="flex flex-col gap-0.5 rounded-[12px] px-2.5 py-1.5 text-[12px]"
 		>
 			<div className="flex items-center gap-2">
 				{failed ? (

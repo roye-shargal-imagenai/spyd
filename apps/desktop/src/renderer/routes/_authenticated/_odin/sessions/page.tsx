@@ -247,7 +247,7 @@ function SessionsPage() {
 							type="button"
 							onClick={() => setDraft(draft === name ? "" : name)}
 							className={cn(
-								"rounded-[6px] transition-opacity",
+								"rounded-[12px] transition-opacity",
 								draft === name ? "opacity-100" : "opacity-55 hover:opacity-90",
 							)}
 						>
@@ -279,7 +279,7 @@ function SessionsPage() {
 					{rows.map((row) => (
 						<div
 							key={`${row.project}/${row.sessionId}`}
-							className="flex items-start gap-3 rounded-[6px] border border-border bg-card px-3 py-2.5 transition-colors hover:border-input"
+							className="flex items-start gap-3 rounded-[12px] border border-border bg-card px-3 py-2.5 transition-colors hover:border-input"
 						>
 							<button
 								type="button"
@@ -409,7 +409,7 @@ function SessionsPage() {
 								disabled={isLaunching}
 								onClick={() => void resume(openRow)}
 								className={cn(
-									"rounded-[6px] px-3 py-1.5 text-xs font-semibold disabled:opacity-50",
+									"rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-50",
 									BUTTON.primary,
 								)}
 							>
@@ -418,7 +418,7 @@ function SessionsPage() {
 							<button
 								type="button"
 								onClick={() => setOpenRow(null)}
-								className="ml-auto rounded-[6px] bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+								className="ml-auto rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground"
 							>
 								Close
 							</button>

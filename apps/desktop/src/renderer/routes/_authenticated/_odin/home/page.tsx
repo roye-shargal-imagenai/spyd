@@ -2,6 +2,7 @@ import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
+import { HiPlus } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { openUrl } from "renderer/stores/in-app-browser";
 import { InlineAsk } from "../components/InlineAsk";
@@ -80,7 +81,7 @@ function HomePage() {
 	if (ready && sessions.length === 0 && past.length === 0) return <EmptyHome />;
 
 	return (
-		<div className="flex h-full min-h-0">
+		<div className="flex h-full min-h-0 gap-2">
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: the list owns arrow-key navigation */}
 			<div
 				ref={listRef}
@@ -94,8 +95,24 @@ function HomePage() {
 						move(-1);
 					}
 				}}
-				className="flex w-[320px] shrink-0 flex-col overflow-y-auto border-r border-border pb-4 outline-none"
+				className="flex w-[340px] shrink-0 flex-col overflow-y-auto rounded-[24px] bg-background px-2 pb-4 ring-1 ring-inset ring-border outline-none"
 			>
+				<div className="flex items-baseline justify-between px-2.5 pt-[18px] pb-1">
+					<h1 className="font-display text-[22px] font-bold tracking-[-0.02em]">
+						Sessions
+					</h1>
+					<button
+						type="button"
+						onClick={() => useNewWorkspaceDialog.getState().open()}
+						className={cn(
+							"flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold",
+							BUTTON.primary,
+						)}
+					>
+						<HiPlus className="size-3" />
+						New
+					</button>
+				</div>
 				{GROUPS.map((group) => {
 					const items = sessions.filter((s) => s.column === group.column);
 					if (items.length === 0) return null;
@@ -104,12 +121,14 @@ function HomePage() {
 						<section key={group.column}>
 							<h2
 								className={cn(
-									"sticky top-0 z-10 flex items-baseline justify-between bg-background/95 px-4 pt-5 pb-2 text-[12px] font-semibold backdrop-blur",
+									"sticky top-0 z-10 flex items-baseline gap-2 bg-background/95 px-2.5 pt-[18px] pb-1.5 text-[12px] font-semibold backdrop-blur",
 									urgent ? "text-primary-ink" : "text-muted-foreground",
 								)}
 							>
 								{group.title}
-								<span className="font-normal tabular-nums">{items.length}</span>
+								<span className="font-normal tabular-nums text-faint-foreground">
+									{items.length}
+								</span>
 							</h2>
 							{items.map((entry) => (
 								<ListRow
@@ -125,7 +144,7 @@ function HomePage() {
 				<PastWeekGroup past={past} selectedId={selectedId} />
 			</div>
 
-			<div className="flex min-w-0 flex-1 flex-col">
+			<div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] bg-background ring-1 ring-inset ring-border">
 				{pastRow ? (
 					<div className="min-h-0 flex-1 overflow-y-auto">
 						<PastDetail key={pastRow.id} row={pastRow} />
@@ -210,51 +229,27 @@ function ListRow({
 			data-pane={entry.pane.id}
 			onClick={onSelect}
 			className={cn(
-				"flex w-full gap-2.5 border-b border-border/60 px-4 py-3 text-left",
-				selected ? "bg-primary text-primary-foreground" : "hover:bg-accent/40",
+				"flex w-full gap-3 rounded-[16px] px-2.5 py-3 text-left transition-colors duration-150",
+				selected ? "bg-secondary/80" : "hover:bg-accent/60",
 			)}
 		>
-			<StatusGlyph
-				column={entry.column}
-				className={cn(
-					"mt-[3px]",
-					selected && "[&>span]:border-white [&>span]:bg-white",
-				)}
-			/>
-			<span className="min-w-0 flex-1">
+			<StatusGlyph column={entry.column} className="mt-[5px]" />
+			<span className="flex min-w-0 flex-1 flex-col gap-[3px]">
 				<span className="flex items-baseline gap-2">
 					<span
 						className={cn(
-							"min-w-0 flex-1 truncate text-[13px]",
+							"min-w-0 flex-1 truncate text-[13px] text-foreground",
 							waiting ? "font-semibold" : "font-medium",
 						)}
 					>
-						{repo || "Session"}
+						{entry.title}
 					</span>
-					<span
-						className={cn(
-							"shrink-0 text-[12px] tabular-nums",
-							selected ? "text-primary-foreground/80" : "text-muted-foreground",
-						)}
-					>
+					<span className="shrink-0 text-[12px] tabular-nums text-faint-foreground">
 						{ago(entry.pane.odinStatusAt)}
 					</span>
 				</span>
-				<span
-					className={cn(
-						"mt-0.5 block truncate text-[13px]",
-						selected ? "text-primary-foreground" : "text-soft-foreground",
-					)}
-				>
-					{entry.title}
-				</span>
-				<span
-					className={cn(
-						"mt-0.5 block truncate text-[12px]",
-						selected ? "text-primary-foreground/75" : "text-muted-foreground",
-					)}
-				>
-					{[STATE[entry.column], SOURCE[entry.section]]
+				<span className="truncate text-[12px] text-faint-foreground">
+					{[repo, STATE[entry.column], SOURCE[entry.section]]
 						.filter(Boolean)
 						.join(" · ")}
 				</span>
@@ -325,7 +320,7 @@ function SessionHeader({ entry }: { entry: SessionEntry }) {
 						}
 						onClick={() => finish(verb === "Approve" ? "Approved" : "Dropped")}
 						className={cn(
-							"rounded-[6px] px-3 py-1 text-[12px] font-medium",
+							"rounded-full px-3 py-1 text-[12px] font-medium",
 							BUTTON.secondary,
 						)}
 					>
@@ -338,8 +333,10 @@ function SessionHeader({ entry }: { entry: SessionEntry }) {
 
 function EmptyHome() {
 	return (
-		<div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-			<div className="text-[15px] font-semibold">No sessions</div>
+		<div className="flex h-full flex-col items-center justify-center gap-3 rounded-[24px] bg-background text-center ring-1 ring-inset ring-border">
+			<div className="font-display text-[22px] font-bold tracking-[-0.02em]">
+				No sessions
+			</div>
 			<p className="max-w-[320px] text-[13px] text-muted-foreground">
 				Start a workspace from a repository in the sidebar, or press ⌘N.
 			</p>
@@ -347,7 +344,7 @@ function EmptyHome() {
 				type="button"
 				onClick={() => useNewWorkspaceDialog.getState().open()}
 				className={cn(
-					"mt-2 rounded-[6px] px-3 py-1.5 text-[13px] font-semibold",
+					"mt-2 rounded-full px-4 py-2 text-[13px] font-semibold",
 					BUTTON.primary,
 				)}
 			>

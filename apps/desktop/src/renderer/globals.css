@@ -17,44 +17,44 @@
 :root {
 	/* Fallbacks = the built-in Spider theme (shared/themes/built-in/ember.ts),
 	   so the first paint before the theme store hydrates already matches. */
-	--background: #1f1f1f;
-	--foreground: #f2f2f2;
-	--card: #282828;
-	--card-foreground: #f2f2f2;
-	--popover: #2e2e2e;
-	--popover-foreground: #f2f2f2;
-	--primary: #335cf5;
+	--background: #0f1630;
+	--foreground: #f3f5fb;
+	--card: #15203f;
+	--card-foreground: #f3f5fb;
+	--popover: #15203f;
+	--popover-foreground: #f3f5fb;
+	--primary: #e8303f;
 	--primary-foreground: #ffffff;
-	--secondary: #313131;
-	--secondary-foreground: #f2f2f2;
-	--muted: #313131;
-	--muted-foreground: #b3b3b3;
-	--accent: #393939;
-	--accent-foreground: #f2f2f2;
-	--tertiary: #171717;
-	--tertiary-active: #313131;
+	--secondary: #22305c;
+	--secondary-foreground: #f3f5fb;
+	--muted: #22305c;
+	--muted-foreground: #a9b3cf;
+	--accent: #1c2a52;
+	--accent-foreground: #f3f5fb;
+	--tertiary: #070b17;
+	--tertiary-active: #22305c;
 	--destructive: #ff7d92;
 	--destructive-foreground: #fff1f3;
-	--border: #363636;
-	--input: #424242;
-	--ring: #335cf5;
-	--chart-1: #335cf5;
+	--border: #1c2a52;
+	--input: #2a3a6b;
+	--ring: #e8303f;
+	--chart-1: #e8303f;
 	--chart-2: #2dd4bf;
 	--chart-3: #1ed760;
 	--chart-4: #ffb020;
 	--chart-5: #ff7d92;
-	--radius: 0.375rem;
-	--sidebar: #171717;
-	--sidebar-foreground: #f2f2f2;
-	--sidebar-primary: #335cf5;
+	--radius: 0.875rem;
+	--sidebar: #070b17;
+	--sidebar-foreground: #f3f5fb;
+	--sidebar-primary: #e8303f;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #313131;
-	--sidebar-accent-foreground: #f2f2f2;
-	--sidebar-border: #363636;
-	--sidebar-ring: #335cf5;
-	--highlight-match: rgba(51, 92, 245, 0.2);
-	--highlight-active: rgba(51, 92, 245, 0.45);
-	--highlight: #335cf5;
+	--sidebar-accent: #22305c;
+	--sidebar-accent-foreground: #f3f5fb;
+	--sidebar-border: #1c2a52;
+	--sidebar-ring: #e8303f;
+	--highlight-match: rgba(232, 48, 63, 0.2);
+	--highlight-active: rgba(232, 48, 63, 0.45);
+	--highlight: #e8303f;
 	--highlight-foreground: #ffffff;
 	/* Sidebar row fills: low-opacity foreground washes so they track any theme */
 	--fill-hover: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -63,16 +63,16 @@
 	/* Odin's semantic palette. Not theme-store variables: a theme recolours
 	   surfaces, but a state reads the same everywhere. Each hue means one
 	   thing - never use one for decoration:
-	     working   - an agent is running (teal)
+	     working   - an agent is running (suit blue)
 	     attention - waiting on you, a warning (amber)
 	     success   - finished, done, connected (green)
 	     danger    - failed, overdue, destructive (red)
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
 	   foreground and muted-foreground: soft (body copy) and faint (tags,
 	   separators, placeholders). */
-	--soft-foreground: #d6d6d6;
-	--faint-foreground: #8a8a8a;
-	--working: #2dd4bf;
+	--soft-foreground: #ccd3e6;
+	--faint-foreground: #8590b3;
+	--working: #7cb7ff;
 	--attention: #ffb020;
 	--success: #1ed760;
 	--danger: #ff7d92;
@@ -186,7 +186,9 @@
 
 @theme inline {
 	--font-display:
-		"Avenir Next", "Avenir", "SF Pro Display", system-ui, sans-serif;
+		"Bricolage Grotesque Variable", "Avenir Next", system-ui, sans-serif;
+	--font-sans:
+		"Geist Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--ease-spyd: cubic-bezier(0.22, 1, 0.36, 1);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

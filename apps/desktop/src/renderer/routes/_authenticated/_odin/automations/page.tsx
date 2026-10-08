@@ -70,7 +70,7 @@ const REPEATS: [Repeat, string][] = [
 ];
 
 const FIELD =
-	"cursor-pointer rounded-[6px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground focus:text-foreground";
+	"cursor-pointer rounded-[12px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground focus:text-foreground";
 
 const HOURS = Array.from({ length: 24 }, (_, hour) =>
 	String(hour).padStart(2, "0"),
@@ -207,7 +207,7 @@ function ScheduleFields({
 						if (event.key === "Enter") commit();
 					}}
 					className={cn(
-						"w-[124px] rounded-[6px] border bg-background px-2 py-[2px] font-mono text-[11px] text-foreground outline-none",
+						"w-[124px] rounded-[12px] border bg-background px-2 py-[2px] font-mono text-[11px] text-foreground outline-none",
 						text.trim() && !isValidCron(text)
 							? "border-danger"
 							: "border-border focus:border-primary",
@@ -291,7 +291,7 @@ function ScheduleFields({
 // paints it pale blue with an !important background - an inset shadow is the
 // only thing that covers it.
 const RULE_INPUT =
-	"min-w-0 flex-1 rounded-[6px] border border-border bg-background px-2 py-1 text-[12px] text-foreground outline-none placeholder:text-faint-foreground focus:border-primary autofill:shadow-[inset_0_0_0_1000px_var(--background)] autofill:[-webkit-text-fill-color:#f5f5f7]";
+	"min-w-0 flex-1 rounded-[12px] border border-border bg-background px-2 py-1 text-[12px] text-foreground outline-none placeholder:text-faint-foreground focus:border-primary autofill:shadow-[inset_0_0_0_1000px_var(--background)] autofill:[-webkit-text-fill-color:#f5f5f7]";
 
 /**
  * Chromium's datalist popup can't be styled: a long label runs under the value
@@ -334,7 +334,7 @@ function RepoModeToggle({
 			}
 			onClick={() => onChange(!exclude)}
 			className={cn(
-				"shrink-0 rounded-[6px] px-1.5 py-[2px] text-[11px] font-semibold hover:bg-secondary",
+				"shrink-0 rounded-[12px] px-1.5 py-[2px] text-[11px] font-semibold hover:bg-secondary",
 				exclude ? "text-danger" : "text-muted-foreground",
 			)}
 		>
@@ -380,7 +380,7 @@ function RepoPicker({
 				<span
 					key={repo}
 					title={repo}
-					className="flex items-center gap-1 rounded-[6px] bg-secondary px-1.5 py-[2px] text-[11px] font-semibold text-foreground"
+					className="flex items-center gap-1 rounded-[12px] bg-secondary px-1.5 py-[2px] text-[11px] font-semibold text-foreground"
 				>
 					{repoLabel(repo)}
 					<button
@@ -487,7 +487,7 @@ function RuleRow({ rule }: { rule: OdinRule }) {
 						: "Pause - keep it, stop handing it out"
 				}
 				onClick={() => update(rule.id, { paused: !rule.paused })}
-				className="shrink-0 rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+				className="shrink-0 rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 			>
 				{rule.paused ? "Resume" : "Pause"}
 			</button>
@@ -496,7 +496,7 @@ function RuleRow({ rule }: { rule: OdinRule }) {
 					type="button"
 					title="Delete this rule"
 					onClick={() => remove(rule.id)}
-					className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+					className="rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 				>
 					✕
 				</button>
@@ -597,7 +597,7 @@ function AutomationsPage() {
 				    to look clickable too, or it reads as a caption. */}
 				<div
 					role="tablist"
-					className="flex items-center gap-[2px] rounded-[6px] border border-border bg-background p-[2px]"
+					className="flex items-center gap-[2px] rounded-[12px] border border-border bg-background p-[2px]"
 				>
 					{(
 						[
@@ -613,7 +613,7 @@ function AutomationsPage() {
 							aria-selected={view === value}
 							onClick={() => setView(value)}
 							className={cn(
-								"cursor-pointer rounded-[6px] px-2.5 py-[3px] text-[12px] font-semibold transition-colors",
+								"cursor-pointer rounded-[12px] px-2.5 py-[3px] text-[12px] font-semibold transition-colors",
 								view === value
 									? BUTTON.selected
 									: "text-muted-foreground hover:text-foreground",
@@ -754,13 +754,13 @@ function RemindersPanel() {
 											)
 										: setDue(key, day, r.title)
 								}
-								className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+								className="rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 							/>
 							<button
 								type="button"
 								title="Drop this reminder"
 								onClick={() => clear(key)}
-								className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+								className="rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 							>
 								✕
 							</button>
@@ -998,7 +998,7 @@ function SchedulesPanel() {
 												: "Pause - keep it, stop running it"
 										}
 										onClick={() => setPaused(task.id, !task.paused)}
-										className="shrink-0 rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+										className="shrink-0 rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 									>
 										{task.paused ? "Resume" : "Pause"}
 									</button>
@@ -1007,7 +1007,7 @@ function SchedulesPanel() {
 											type="button"
 											title="Delete this automation"
 											onClick={() => remove(task.id)}
-											className="rounded-[6px] px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+											className="rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 										>
 											✕
 										</button>

@@ -11,15 +11,62 @@ import type { Theme } from "../types";
  * The sidebar and top bar (tertiary) sit a step darker than the page, so the
  * chrome recedes and the work leads.
  */
+/** The surface ladder a theme sits on: page, raised, chrome, lines, text. */
+type Surface = {
+	page: string;
+	card: string;
+	popover: string;
+	raised: string;
+	hover: string;
+	chrome: string;
+	border: string;
+	input: string;
+	text: string;
+	muted: string;
+	faint: string;
+};
+
+/** Spotify's neutral greys. */
+const GREY: Surface = {
+	page: "#1f1f1f",
+	card: "#282828",
+	popover: "#2e2e2e",
+	raised: "#313131",
+	hover: "#393939",
+	chrome: "#171717",
+	border: "#363636",
+	input: "#424242",
+	text: "#f2f2f2",
+	muted: "#b3b3b3",
+	faint: "#8a8a8a",
+};
+
+/** The suit at night: deep navy panes floating on a near-black window. */
+export const WEB: Surface = {
+	page: "#0f1630",
+	card: "#15203f",
+	popover: "#15203f",
+	raised: "#22305c",
+	hover: "#1c2a52",
+	chrome: "#070b17",
+	border: "#1c2a52",
+	input: "#2a3a6b",
+	text: "#f3f5fb",
+	muted: "#a9b3cf",
+	faint: "#8590b3",
+};
+
 function spydDark({
 	id,
 	name,
 	accent,
 	accentForeground,
 	selection,
+	surface = GREY,
 }: {
 	id: string;
 	name: string;
+	surface?: Surface;
 	accent: string;
 	/** Text on a solid accent button - dark on a light accent, white on a deep one. */
 	accentForeground: string;
@@ -34,44 +81,44 @@ function spydDark({
 		isBuiltIn: true,
 
 		ui: {
-			background: "#1f1f1f",
-			foreground: "#f2f2f2",
-			card: "#282828",
-			cardForeground: "#f2f2f2",
-			popover: "#2e2e2e",
-			popoverForeground: "#f2f2f2",
+			background: surface.page,
+			foreground: surface.text,
+			card: surface.card,
+			cardForeground: surface.text,
+			popover: surface.popover,
+			popoverForeground: surface.text,
 
 			primary: accent,
 			primaryForeground: accentForeground,
 
 			// The raised neutral every quiet button and chip sits on.
-			secondary: "#313131",
-			secondaryForeground: "#f2f2f2",
-			muted: "#313131",
-			mutedForeground: "#b3b3b3",
+			secondary: surface.raised,
+			secondaryForeground: surface.text,
+			muted: surface.raised,
+			mutedForeground: surface.muted,
 			// Hover fill for rows and menu items.
-			accent: "#393939",
-			accentForeground: "#f2f2f2",
+			accent: surface.hover,
+			accentForeground: surface.text,
 
 			// Sidebar and top bar: a step under the page.
-			tertiary: "#171717",
-			tertiaryActive: "#313131",
+			tertiary: surface.chrome,
+			tertiaryActive: surface.raised,
 
 			destructive: "#ff7d92",
 			destructiveForeground: "#fff1f3",
 
 			// Borders are barely there - spacing does the separating.
-			border: "#363636",
-			input: "#424242",
+			border: surface.border,
+			input: surface.input,
 			ring: accent,
 
-			sidebar: "#171717",
-			sidebarForeground: "#f2f2f2",
+			sidebar: surface.chrome,
+			sidebarForeground: surface.text,
 			sidebarPrimary: accent,
 			sidebarPrimaryForeground: accentForeground,
-			sidebarAccent: "#313131",
-			sidebarAccentForeground: "#f2f2f2",
-			sidebarBorder: "#363636",
+			sidebarAccent: surface.raised,
+			sidebarAccentForeground: surface.text,
+			sidebarBorder: surface.border,
 			sidebarRing: accent,
 
 			chart1: accent,
@@ -87,22 +134,22 @@ function spydDark({
 		},
 
 		terminal: {
-			background: "#1f1f1f",
-			foreground: "#f2f2f2",
+			background: surface.page,
+			foreground: surface.text,
 			cursor: accent,
-			cursorAccent: "#1f1f1f",
+			cursorAccent: surface.page,
 			selectionBackground: `rgba(${selection}, 0.28)`,
 
-			black: "#282828",
+			black: surface.card,
 			red: "#ff7d92",
 			green: "#1ed760",
 			yellow: "#ffb020",
 			blue: "#6f9bff",
 			magenta: "#c49bff",
 			cyan: "#5fd4d9",
-			white: "#f2f2f2",
+			white: surface.text,
 
-			brightBlack: "#8a8a8a",
+			brightBlack: surface.faint,
 			brightRed: "#ff8095",
 			brightGreen: "#86efac",
 			brightYellow: "#ffcd6b",
@@ -120,13 +167,14 @@ function spydDark({
 	};
 }
 
-/** The default: a vivid Spider-Man blue on Spotify-neutral greys - red is for errors. */
+/** The default: the suit - Spider red on deep navy. */
 export const darkTheme = spydDark({
 	id: "dark",
 	name: "Spider",
-	accent: "#335cf5",
+	surface: WEB,
+	accent: "#e8303f",
 	accentForeground: "#ffffff",
-	selection: "51, 92, 245",
+	selection: "232, 48, 63",
 });
 
 /** A warm ember accent, dark labels on it. */

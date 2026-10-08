@@ -91,7 +91,7 @@ export function FeedTabs() {
 								aria-current={isActive ? "page" : undefined}
 								onClick={() => navigate({ to })}
 								className={cn(
-									"relative flex items-center gap-1.5 rounded-[6px] px-2 py-1.5 text-[13px] font-semibold transition-colors",
+									"relative flex items-center gap-1.5 rounded-full px-2 py-1.5 text-[13px] font-semibold transition-colors",
 									isActive
 										? BUTTON.selected
 										: "text-muted-foreground hover:text-foreground",
@@ -114,7 +114,7 @@ export function FeedTabs() {
 								{count > 0 && (
 									<span
 										className={cn(
-											"rounded-[6px] px-1.5 text-[11px] font-semibold tabular-nums",
+											"rounded-[12px] px-1.5 text-[11px] font-semibold tabular-nums",
 											isActive
 												? "bg-accent text-soft-foreground"
 												: "bg-secondary text-muted-foreground",

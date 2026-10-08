@@ -251,7 +251,7 @@ function NotionPage() {
 								)}
 							/>
 							{status}
-							<span className="rounded-[6px] bg-secondary px-1.5 font-medium text-muted-foreground">
+							<span className="rounded-[12px] bg-secondary px-1.5 font-medium text-muted-foreground">
 								{group.length}
 							</span>
 						</div>

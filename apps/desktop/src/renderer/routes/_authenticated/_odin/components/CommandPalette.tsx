@@ -43,7 +43,7 @@ const PLACES = [
 	{ label: "Settings", to: "/settings" },
 ] as const;
 
-const ITEM = "gap-2.5 rounded-[6px] px-2.5 py-2";
+const ITEM = "gap-2.5 rounded-[12px] px-2.5 py-2";
 
 /**
  * ⌘K: one box for everything - a session by what it's about, a new workspace
@@ -78,7 +78,7 @@ export function CommandPalette() {
 			title="Command palette"
 			description="Jump to a session, start a workspace, or open a screen"
 			showCloseButton={false}
-			className="top-[18vh] max-w-[600px] translate-y-0 rounded-[6px] border-border bg-popover sm:max-w-[600px]"
+			className="top-[18vh] max-w-[600px] translate-y-0 rounded-[12px] border-border bg-popover sm:max-w-[600px]"
 		>
 			<CommandInput placeholder="Search sessions, repositories, screens…" />
 			<CommandList className="max-h-[420px]">

@@ -247,6 +247,7 @@ function useLastClaudeUsage(
 function OdinShell() {
 	const navigate = useNavigate();
 	const matchRoute = useMatchRoute();
+	const onHomePage = !!matchRoute({ to: "/home", fuzzy: true });
 	const zoomFactor = useZoomFactor();
 	const { data: platform } = electronTrpc.window.getPlatform.useQuery();
 	const isFeedRoute = FEED_TABS.some(
@@ -454,9 +455,9 @@ function OdinShell() {
 				title={keys ? `${label} (${keys})` : label}
 				onClick={() => navigate({ to })}
 				className={cn(
-					"flex h-7 w-full items-center gap-2.5 rounded-[6px] px-2.5 text-[13px] transition-colors",
+					"flex h-8 w-full items-center gap-2.5 rounded-[12px] px-2.5 text-[13px] transition-colors",
 					isActive
-						? "font-semibold text-foreground"
+						? "bg-card font-medium text-foreground"
 						: "text-muted-foreground hover:text-foreground",
 				)}
 			>
@@ -467,14 +468,14 @@ function OdinShell() {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col bg-background text-foreground">
+		<div className="flex h-full w-full flex-col bg-tertiary text-foreground">
 			{/* top bar - left pad clears macOS traffic lights; empty areas drag.
 			    The traffic lights are native and DON'T scale with page zoom, so the
 			    bar height and their inset are counter-scaled by 1/zoomFactor to stay
 			    a constant physical size (otherwise zooming out slides the bar under
 			    the lights). Same trick the stock TopBar uses. */}
 			<div
-				className="flex shrink-0 items-center gap-3 border-b border-border bg-tertiary/70 pr-3"
+				className="flex shrink-0 items-center gap-3 pr-3"
 				style={isMac ? { height: `${36 / zoomFactor}px` } : undefined}
 			>
 				<div
@@ -501,7 +502,7 @@ function OdinShell() {
 							value={activeProfileId}
 							disabled={isSwitchingProfile}
 							onChange={(event) => switchProfile(event.target.value)}
-							className="cursor-pointer rounded-[6px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground disabled:opacity-50"
+							className="cursor-pointer rounded-[12px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground disabled:opacity-50"
 						>
 							{profiles.map((profile) => {
 								// A native <option> is text and nothing else - no dot, no
@@ -555,7 +556,7 @@ function OdinShell() {
 								<TooltipTrigger asChild>
 									<span
 										className={cn(
-											"rounded-[6px] px-2 py-[3px] text-[11px] font-semibold tabular-nums",
+											"rounded-[12px] px-2 py-[3px] text-[11px] font-semibold tabular-nums",
 											usageTone(
 												Math.max(
 													usage.fiveHour?.percent ?? 0,
@@ -593,7 +594,7 @@ function OdinShell() {
 								<TooltipTrigger asChild>
 									<span
 										className={cn(
-											"rounded-[6px] px-2 py-[3px] text-[11px] font-semibold tabular-nums",
+											"rounded-[12px] px-2 py-[3px] text-[11px] font-semibold tabular-nums",
 											badgeTone(load, limits),
 										)}
 									>
@@ -621,14 +622,14 @@ function OdinShell() {
 				    you, the app's own corners at the foot. */}
 				<nav
 					aria-label="Sidebar"
-					className="flex w-[264px] shrink-0 flex-col border-r border-border bg-tertiary"
+					className="flex w-[248px] shrink-0 flex-col bg-tertiary"
 				>
 					<div className="flex flex-col gap-0.5 px-2 pt-2.5 pb-1">
 						{/* The way into everything, where you'd look for it. */}
 						<button
 							type="button"
 							onClick={() => useCommandPalette.getState().setOpen(true)}
-							className="mb-1.5 flex h-8 w-full items-center gap-2 rounded-[6px] border border-border bg-background/60 px-2.5 text-[12px] text-faint-foreground transition-colors hover:border-input hover:text-muted-foreground"
+							className="mb-2 flex h-[34px] w-full items-center gap-2 rounded-full border border-secondary bg-background px-3 text-[12px] text-faint-foreground transition-colors hover:border-input hover:text-muted-foreground"
 						>
 							<HiOutlineMagnifyingGlass className="size-[14px] shrink-0" />
 							<span className="flex-1 text-left">Search or jump to…</span>
@@ -648,8 +649,16 @@ function OdinShell() {
 
 				{/* `relative`: the page drawers anchor to this area, not the viewport,
 				    so they can't slide under the native traffic lights. */}
-				<div className="relative min-w-0 flex-1 overflow-hidden">
-					<div className="h-full">
+				<div className="relative min-w-0 flex-1 overflow-hidden pt-0 pr-2 pb-2">
+					{/* Every page floats as one rounded pane on the window; Home
+					    lays out its own two. */}
+					<div
+						className={cn(
+							"h-full overflow-hidden",
+							!onHomePage &&
+								"rounded-[24px] bg-background ring-1 ring-inset ring-border",
+						)}
+					>
 						<Outlet />
 					</div>
 					<GettingStarted
@@ -734,7 +743,7 @@ function NightAgentRailButton() {
 			title={hint}
 			onClick={() => navigate({ to: "/settings/backlog" })}
 			className={cn(
-				"flex h-8 w-full items-center gap-2.5 rounded-[6px] px-2.5 text-[13px] font-medium transition-colors",
+				"flex h-8 w-full items-center gap-2.5 rounded-[12px] px-2.5 text-[13px] font-medium transition-colors",
 				isRunning
 					? PILL.brand
 					: offHours.enabled

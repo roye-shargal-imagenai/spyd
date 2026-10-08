@@ -308,7 +308,7 @@ function MyJiraPage() {
 								)}
 							/>
 							{category}
-							<span className="rounded-[6px] bg-secondary px-1.5 font-medium text-muted-foreground">
+							<span className="rounded-[12px] bg-secondary px-1.5 font-medium text-muted-foreground">
 								{rows.length}
 							</span>
 							{(() => {
@@ -316,7 +316,7 @@ function MyJiraPage() {
 									livePaneByKey.has(r.key),
 								).length;
 								return live > 0 ? (
-									<span className="rounded-[6px] bg-working/12 px-1.5 font-medium text-working">
+									<span className="rounded-[12px] bg-working/12 px-1.5 font-medium text-working">
 										{live} live
 									</span>
 								) : null;

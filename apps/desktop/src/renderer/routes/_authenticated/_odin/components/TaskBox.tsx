@@ -96,7 +96,7 @@ export function TaskBox({
 		<div className="flex h-full min-h-0 flex-col gap-1.5">
 			{/* grow, not flex-1: the basis stays the rows=2 height, so inline use is
 			    unchanged and only a resized dialog hands it extra room. */}
-			<div className="flex min-h-0 grow flex-col overflow-hidden rounded-[6px] border border-border bg-card focus-within:border-primary">
+			<div className="flex min-h-0 grow flex-col overflow-hidden rounded-[12px] border border-border bg-card focus-within:border-primary">
 				<input
 					value={title}
 					placeholder={placeholder ?? "Name it"}
@@ -148,7 +148,7 @@ export function TaskBox({
 							onChange={(event) =>
 								onChange(withPriority(value, Number(event.target.value)))
 							}
-							className="cursor-pointer rounded-[6px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground"
+							className="cursor-pointer rounded-[12px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground"
 						>
 							{/* Levels only - slot 0 ("None") is legacy storage, not a choice. */}
 							{PRIORITY_LABELS.slice(1).map((label, index) => (
@@ -298,7 +298,7 @@ function SkillSelect({
 					}
 				}}
 				className={cn(
-					"w-[130px] rounded-[6px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold outline-none transition-colors placeholder:font-normal placeholder:text-muted-foreground",
+					"w-[130px] rounded-[12px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold outline-none transition-colors placeholder:font-normal placeholder:text-muted-foreground",
 					// Amber, not red: a name the list doesn't know is usually a skill
 					// installed on another machine, not a typo.
 					current && !known ? "text-attention" : "text-foreground",
@@ -310,7 +310,7 @@ function SkillSelect({
 			{at && matches.length > 0 && (
 				<div
 					style={{ left: at.left, top: at.top }}
-					className="fixed z-50 w-[340px] overflow-hidden rounded-[6px] border border-border bg-card shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+					className="fixed z-50 w-[340px] overflow-hidden rounded-[12px] border border-border bg-card shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
 				>
 					{matches.map((skill, index) => (
 						<button
@@ -407,7 +407,7 @@ function RepoSelect({
 				// Same :autofill override as the New Session dialog - a picked option
 				// otherwise paints white-on-black over any bg-*.
 				className={cn(
-					"w-[140px] rounded-[6px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold outline-none [color-scheme:inherit] placeholder:font-normal placeholder:text-muted-foreground autofill:shadow-[inset_0_0_0_1000px_var(--secondary)] autofill:[-webkit-text-fill-color:var(--foreground)]",
+					"w-[140px] rounded-[12px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold outline-none [color-scheme:inherit] placeholder:font-normal placeholder:text-muted-foreground autofill:shadow-[inset_0_0_0_1000px_var(--secondary)] autofill:[-webkit-text-fill-color:var(--foreground)]",
 					value
 						? "text-foreground"
 						: unresolved
@@ -638,7 +638,7 @@ export function QuickAddTask({ onClose }: { onClose: () => void }) {
 				aria-modal="true"
 				aria-label="New task"
 				// ponytail: CSS `resize` - Chromium draws the corner grip for free.
-				className="fixed left-1/2 top-[12vh] z-50 flex h-[190px] max-h-[80vh] w-[520px] min-w-[320px] max-w-[92vw] -translate-x-1/2 resize flex-col overflow-hidden rounded-[6px] border border-border bg-popover p-3.5 shadow-[0_18px_60px_rgba(0,0,0,0.6)]"
+				className="fixed left-1/2 top-[12vh] z-50 flex h-[190px] max-h-[80vh] w-[520px] min-w-[320px] max-w-[92vw] -translate-x-1/2 resize flex-col overflow-hidden rounded-[12px] border border-border bg-popover p-3.5 shadow-[0_18px_60px_rgba(0,0,0,0.6)]"
 			>
 				{/* The button sits in the header, not under the fields: the dialog's
 				    height is fixed and the fields row is already full at 520px. */}
@@ -651,7 +651,7 @@ export function QuickAddTask({ onClose }: { onClose: () => void }) {
 						type="button"
 						onClick={save}
 						disabled={!parseTask(draft).title}
-						className="ml-auto rounded-[6px] bg-primary px-2.5 py-[3px] text-[11px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-default disabled:opacity-40"
+						className="ml-auto rounded-[12px] bg-primary px-2.5 py-[3px] text-[11px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-default disabled:opacity-40"
 					>
 						Add task
 					</button>
