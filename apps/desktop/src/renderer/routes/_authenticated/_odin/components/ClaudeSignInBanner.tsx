@@ -25,7 +25,11 @@ export function ClaudeSignInBanner() {
 	const [code, setCode] = useState("");
 
 	if (customCommand || status.data?.signedIn !== false) return null;
-	const failed = login.data && !login.data.ok ? login.data.error : null;
+	// A thrown error (tRPC) and a failed login (data) both have to show: a
+	// silent strip reads as a dead button.
+	const failed =
+		login.error?.message ??
+		(login.data && !login.data.ok ? login.data.error : null);
 
 	return (
 		<div className="flex shrink-0 items-center gap-3 bg-primary px-4 py-2 text-primary-foreground">
