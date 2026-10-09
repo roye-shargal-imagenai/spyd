@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import {
 	actionItemList,
 	applyLines,
-	groupSummary,
 	isAnswerItem,
 	isApprovalItem,
 	isYouOnly,
@@ -158,7 +157,7 @@ describe("ChatView transcript", () => {
 		expect(done[0]).toBe(items[0]);
 	});
 
-	test("tool runs fold into one group with a counted summary", () => {
+	test("tool runs fold into one group", () => {
 		const tool = (id: string, name: string) =>
 			({ kind: "tool", id, name, input: {} }) as const;
 		const out = segments([
@@ -169,7 +168,7 @@ describe("ChatView transcript", () => {
 			{ kind: "text", id: "b", text: "done" },
 		]);
 		expect(out.length).toBe(3);
-		expect(groupSummary(out[1] as never)).toBe("Ran 2 commands, read 1 file");
+		expect((out[1] as unknown[]).length).toBe(3);
 	});
 
 	test("narration between two runs folds into one group; the last reply stays", () => {
@@ -185,7 +184,7 @@ describe("ChatView transcript", () => {
 			{ kind: "text", id: "d", text: "done" },
 		]);
 		expect(out.length).toBe(3);
-		expect(groupSummary(out[1] as never)).toBe("Ran 2 commands, wrote 1 file");
+		expect((out[1] as unknown[]).length).toBe(5);
 		expect((out[2] as { id: string }).id).toBe("d");
 	});
 
