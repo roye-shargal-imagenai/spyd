@@ -997,7 +997,7 @@ export function ChatView({
 	cwd: string | undefined;
 	workspaceId: string;
 	working?: boolean;
-	/** Omitted for an ended session: nothing to type into, so no composer. */
+	/** Omitted for an ended session: its composer resumes via `onResumeWith`. */
 	onShowTerminal?: () => void;
 	/** Interrupt the turn - the drawer's Interrupt, so the card leaves Working too. */
 	onStop?: () => void;
@@ -1318,6 +1318,15 @@ export function ChatView({
 						/>
 					)}
 				</>
+			) : onResumeWith ? (
+				// Ended session: the first message resumes it.
+				<Composer
+					paneId={paneId}
+					working={false}
+					onSent={() => {}}
+					onResume={onResumeWith}
+					placeholder="Reply to resume the session"
+				/>
 			) : (
 				<div className="border-t border-border px-5 py-2 text-center text-[11.5px] text-muted-foreground">
 					Session ended - Resume to reply
@@ -1357,11 +1366,16 @@ function Composer({
 	working,
 	onSent,
 	onStop,
+	placeholder = "Reply to Claude",
+	onResume,
 }: {
 	paneId: string;
 	working: boolean;
 	onSent: (text: string, previews?: Preview[]) => void;
 	onStop?: () => void;
+	placeholder?: string;
+	/** Ended session: sending resumes it with the text instead of typing into a PTY. */
+	onResume?: (text: string) => void;
 }) {
 	const [draft, setDraft] = useState("");
 	// "!" on an empty box switches to bash mode, like the terminal's prompt.
@@ -1402,6 +1416,10 @@ function Composer({
 		setDraft("");
 		setBash(false);
 		setPreviews([]);
+		if (onResume) {
+			onResume(text);
+			return;
+		}
 		// ponytail: blob URLs are never revoked - a few per session.
 		onSent(text, previews);
 		try {
@@ -1506,6 +1524,8 @@ function Composer({
 							const images = files.filter((f) => f.type.startsWith("image/"));
 							const videos = files.filter((f) => f.type.startsWith("video/"));
 							if (images.length === 0 && videos.length === 0) return;
+							// ponytail: no PTY to Ctrl+V into yet - drop an image file instead.
+							if (onResume && images.length > 0) return;
 							event.preventDefault();
 							if (images.length > 0) write.mutate({ paneId, data: "\x16" });
 							const paths = videos
