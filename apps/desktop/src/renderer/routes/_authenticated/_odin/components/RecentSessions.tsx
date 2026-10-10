@@ -219,7 +219,7 @@ export function PastDetail({ row }: { row: PastSession }) {
 						disabled={isLaunching}
 						onClick={() => void resume()}
 						className={cn(
-							"rounded-full px-3 py-1.5 text-[13px] font-semibold disabled:opacity-50",
+							"rounded-md px-3 py-1.5 text-[13px] font-semibold disabled:opacity-50",
 							BUTTON.primary,
 						)}
 					>

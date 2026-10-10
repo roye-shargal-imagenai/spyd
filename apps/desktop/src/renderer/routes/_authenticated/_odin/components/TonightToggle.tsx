@@ -28,7 +28,7 @@ export function TonightToggle({
 			}
 			onClick={() => useOdinTasks.getState().setTonight(itemKey, !on)}
 			className={cn(
-				"flex h-6 shrink-0 items-center gap-1 rounded-full px-2 text-[11px] font-semibold transition-colors",
+				"flex h-6 shrink-0 items-center gap-1 rounded-md px-2 text-[11px] font-semibold transition-colors",
 				on
 					? "bg-primary/15 text-primary-ink"
 					: cn(

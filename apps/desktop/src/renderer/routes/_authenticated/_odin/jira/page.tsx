@@ -305,7 +305,7 @@ function MyJiraPage() {
 								aria-pressed={groupBy === mode}
 								onClick={() => setGroupBy(mode)}
 								className={cn(
-									"h-[26px] rounded-full px-3 text-[12px] transition-colors",
+									"h-[26px] rounded-md px-3 text-[12px] transition-colors",
 									groupBy === mode
 										? "bg-secondary font-medium text-foreground"
 										: "text-muted-foreground hover:text-foreground",
@@ -375,7 +375,7 @@ function MyJiraPage() {
 								)}
 							/>
 							{label}
-							<span className="rounded-[12px] bg-secondary px-1.5 font-medium text-muted-foreground">
+							<span className="rounded-md bg-secondary px-1.5 font-medium text-muted-foreground">
 								{rows.length}
 							</span>
 							{(() => {
@@ -383,7 +383,7 @@ function MyJiraPage() {
 									livePaneByKey.has(r.key),
 								).length;
 								return live > 0 ? (
-									<span className="rounded-[12px] bg-working/12 px-1.5 font-medium text-working">
+									<span className="rounded-md bg-working/12 px-1.5 font-medium text-working">
 										{live} live
 									</span>
 								) : null;
@@ -431,7 +431,7 @@ function MyJiraPage() {
 														type="button"
 														onClick={() => openUrl(issue.url)}
 														title="Open in Jira"
-														className="flex h-6 items-center gap-1 rounded-full bg-secondary px-2.5 font-mono text-[11.5px] font-semibold text-soft-foreground transition-colors hover:bg-input hover:text-foreground"
+														className="flex h-6 items-center gap-1 rounded-md bg-secondary px-2.5 font-mono text-[11.5px] font-semibold text-soft-foreground transition-colors hover:bg-input hover:text-foreground"
 													>
 														<SiJira
 															className="size-3 text-[#4c9aff]"
@@ -441,7 +441,7 @@ function MyJiraPage() {
 													</button>
 													<span
 														className={cn(
-															"flex h-6 items-center rounded-full px-2.5 font-semibold",
+															"flex h-6 items-center rounded-md px-2.5 font-semibold",
 															TONE_CHIP[tone],
 														)}
 													>
@@ -452,7 +452,7 @@ function MyJiraPage() {
 															isHotPriority(issue.priority))) && (
 														<span
 															className={cn(
-																"flex h-6 items-center rounded-full px-2.5 font-semibold",
+																"flex h-6 items-center rounded-md px-2.5 font-semibold",
 																PILL.danger,
 															)}
 														>
@@ -462,7 +462,7 @@ function MyJiraPage() {
 													{activePaneId && (
 														<span
 															className={cn(
-																"flex h-6 items-center gap-1.5 rounded-full px-2.5 font-semibold",
+																"flex h-6 items-center gap-1.5 rounded-md px-2.5 font-semibold",
 																PILL.working,
 															)}
 														>
@@ -476,7 +476,7 @@ function MyJiraPage() {
 															onClick={() => openUrl(reviewPull.url)}
 															title={`Waiting on your review: ${reviewPull.repo}#${reviewPull.number} ${reviewPull.title}`}
 															className={cn(
-																"flex h-6 items-center rounded-full px-2.5 font-semibold",
+																"flex h-6 items-center rounded-md px-2.5 font-semibold",
 																PILL.attention,
 															)}
 														>
@@ -486,7 +486,7 @@ function MyJiraPage() {
 														issue.role !== "assigned" && (
 															<span
 																className={cn(
-																	"flex h-6 items-center rounded-full px-2.5",
+																	"flex h-6 items-center rounded-md px-2.5",
 																	ROLE_BADGE[issue.role].className,
 																)}
 															>
@@ -605,16 +605,16 @@ function SprintHeading({
 		<div className="sticky top-0 z-10 -mx-1 mb-2 flex items-end gap-3 bg-background/95 px-1 pt-3 pb-2 backdrop-blur">
 			<div className="flex min-w-0 flex-col gap-1">
 				<div className="flex items-center gap-2">
-					<h2 className="truncate font-display text-[17px] font-bold tracking-[-0.01em]">
+					<h2 className="truncate font-display text-[17px] font-semibold tracking-[-0.01em]">
 						{label}
 					</h2>
 					{active ? (
-						<span className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary-ink">
+						<span className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary-ink">
 							<span className="size-1.5 animate-pulse rounded-full bg-primary" />
 							Active
 						</span>
 					) : sprint ? (
-						<span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+						<span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
 							Up next
 						</span>
 					) : null}

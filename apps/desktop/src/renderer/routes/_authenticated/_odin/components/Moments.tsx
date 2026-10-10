@@ -128,7 +128,7 @@ function MomentCard({
 			/>
 			<div
 				className={cn(
-					"flex items-start gap-3 rounded-[20px] bg-card/95 p-3.5 pr-3 shadow-[0_20px_50px_-18px_rgba(0,0,0,0.75)] ring-1 ring-inset backdrop-blur",
+					"flex items-start gap-3 rounded-lg bg-card/95 p-3.5 pr-3 shadow-[0_20px_50px_-18px_rgba(0,0,0,0.75)] ring-1 ring-inset backdrop-blur",
 					needs ? "ring-attention/45" : "ring-input",
 				)}
 			>
@@ -157,7 +157,7 @@ function MomentCard({
 							type="button"
 							onClick={onOpen}
 							className={cn(
-								"h-7 rounded-full px-3.5 text-[12px] font-semibold",
+								"h-7 rounded-md px-3.5 text-[12px] font-semibold",
 								needs
 									? "bg-primary text-primary-foreground hover:brightness-110"
 									: "bg-secondary text-foreground hover:bg-input",

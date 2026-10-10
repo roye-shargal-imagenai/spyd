@@ -118,10 +118,10 @@ export function SessionList() {
 
 	return (
 		<div className="flex flex-col gap-0.5">
-			<div className="flex items-center justify-between px-2.5 pb-1.5 font-display text-[14px] font-bold text-soft-foreground">
+			<div className="flex items-center justify-between px-2.5 pb-1.5 font-display text-[14px] font-semibold text-soft-foreground">
 				<span>Sessions</span>
 				{needsYou > 0 ? (
-					<span className="font-sans text-[12px] font-semibold text-primary-ink">
+					<span className="font-sans text-[12px] font-semibold text-attention-ink">
 						{needsYou} need{needsYou === 1 ? "s" : ""} you
 					</span>
 				) : (
@@ -187,7 +187,7 @@ function SessionRow({
 			title={entry.title}
 			onClick={onOpen}
 			className={cn(
-				"group flex w-full items-start gap-2 rounded-[12px] px-2.5 py-1.5 text-left transition-colors hover:bg-accent/60",
+				"group flex w-full items-start gap-2 rounded-md px-2.5 py-1.5 text-left transition-colors hover:bg-accent/60",
 				entry.column === "permission" && "bg-primary/[0.08]",
 			)}
 		>
@@ -205,7 +205,7 @@ function SessionRow({
 				</span>
 				<span className="block truncate text-[11px] leading-4 text-faint-foreground">
 					{waiting && asking ? (
-						<span className="text-primary-ink">{asking}</span>
+						<span className="text-attention-ink">{asking}</span>
 					) : (
 						meta(entry, work?.name ?? undefined)
 					)}

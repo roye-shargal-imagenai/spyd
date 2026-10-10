@@ -28,7 +28,7 @@ export function FeedError({
 					type="button"
 					onClick={() => navigate({ to: "/settings/connections" })}
 					className={cn(
-						"shrink-0 rounded-full px-2.5 py-1 font-semibold",
+						"shrink-0 rounded-md px-2.5 py-1 font-semibold",
 						BUTTON.primary,
 					)}
 				>

@@ -51,7 +51,7 @@ export function ClaudeSignInBanner() {
 						value={code}
 						onChange={(event) => setCode(event.target.value)}
 						placeholder="Paste code"
-						className="w-40 rounded-[12px] bg-white/15 px-2 py-1 text-xs placeholder:text-white/60 focus:outline-none"
+						className="w-40 rounded-md bg-white/15 px-2 py-1 text-xs placeholder:text-white/60 focus:outline-none"
 					/>
 					<span className="text-xs opacity-85">Waiting…</span>
 				</form>
@@ -59,7 +59,7 @@ export function ClaudeSignInBanner() {
 				<button
 					type="button"
 					onClick={() => login.mutate()}
-					className="rounded-[12px] bg-white px-3 py-1 text-xs font-bold text-primary-ink shadow-sm hover:brightness-95"
+					className="rounded-md bg-white px-3 py-1 text-xs font-bold text-primary-ink shadow-sm hover:brightness-95"
 				>
 					{failed ? "Try again" : "Sign in"}
 				</button>

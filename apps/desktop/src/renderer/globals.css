@@ -17,44 +17,44 @@
 :root {
 	/* Fallbacks = the built-in Spider theme (shared/themes/built-in/ember.ts),
 	   so the first paint before the theme store hydrates already matches. */
-	--background: #262624;
-	--foreground: #f4f3ee;
-	--card: #30302e;
-	--card-foreground: #f4f3ee;
-	--popover: #30302e;
-	--popover-foreground: #f4f3ee;
-	--primary: #5272ee;
+	--background: #1d1d21;
+	--foreground: #ececef;
+	--card: #24242a;
+	--card-foreground: #ececef;
+	--popover: #24242a;
+	--popover-foreground: #ececef;
+	--primary: #5470f0;
 	--primary-foreground: #ffffff;
-	--secondary: #353532;
-	--secondary-foreground: #f4f3ee;
-	--muted: #353532;
-	--muted-foreground: #b9b6ab;
-	--accent: #3a3936;
-	--accent-foreground: #f4f3ee;
-	--tertiary: #1f1e1d;
-	--tertiary-active: #353532;
+	--secondary: #2a2a30;
+	--secondary-foreground: #ececef;
+	--muted: #2a2a30;
+	--muted-foreground: #a3a3ad;
+	--accent: #2e2e35;
+	--accent-foreground: #ececef;
+	--tertiary: #161619;
+	--tertiary-active: #2a2a30;
 	--destructive: #ff7d92;
 	--destructive-foreground: #fff1f3;
-	--border: #3a3936;
-	--input: #4a4945;
-	--ring: #5272ee;
-	--chart-1: #5272ee;
+	--border: #2c2c33;
+	--input: #3d3d46;
+	--ring: #5470f0;
+	--chart-1: #5470f0;
 	--chart-2: #2dd4bf;
 	--chart-3: #1ed760;
 	--chart-4: #ffb020;
 	--chart-5: #ff7d92;
-	--radius: 0.875rem;
-	--sidebar: #1f1e1d;
-	--sidebar-foreground: #f4f3ee;
-	--sidebar-primary: #5272ee;
+	--radius: 0.5rem;
+	--sidebar: #161619;
+	--sidebar-foreground: #ececef;
+	--sidebar-primary: #5470f0;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #353532;
-	--sidebar-accent-foreground: #f4f3ee;
-	--sidebar-border: #3a3936;
-	--sidebar-ring: #5272ee;
-	--highlight-match: rgba(82, 114, 238, 0.2);
-	--highlight-active: rgba(82, 114, 238, 0.45);
-	--highlight: #5272ee;
+	--sidebar-accent: #2a2a30;
+	--sidebar-accent-foreground: #ececef;
+	--sidebar-border: #2c2c33;
+	--sidebar-ring: #5470f0;
+	--highlight-match: rgba(84, 112, 240, 0.2);
+	--highlight-active: rgba(84, 112, 240, 0.45);
+	--highlight: #5470f0;
 	--highlight-foreground: #ffffff;
 	/* Sidebar row fills: low-opacity foreground washes so they track any theme */
 	--fill-hover: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -70,15 +70,15 @@
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
 	   foreground and muted-foreground: soft (body copy) and faint (tags,
 	   separators, placeholders). */
-	--soft-foreground: #dcd9cf;
-	--faint-foreground: #94918a;
-	--working: #7fb0ff;
-	--attention: #f0857a;
-	--success: #7ccf98;
+	--soft-foreground: #d4d4da;
+	--faint-foreground: #80808b;
+	--working: #6ea8fe;
+	--attention: #f2786f;
+	--success: #5cc98a;
 	--danger: #ff7d92;
 	/* Links: periwinkle, so a link is never mistaken for the accent button
 	   or a teal working status. */
-	--link: #9db2ff;
+	--link: #93a8ff;
 	/* Each hue's "ink": the hue lifted toward white, for text sitting on its
 	   own tint - the light label on a pill, the top of a glossy button. */
 	--primary-ink: color-mix(in oklab, var(--primary) 52%, white);
@@ -187,7 +187,7 @@
 
 @theme inline {
 	--font-display:
-		"Bricolage Grotesque Variable", "Avenir Next", system-ui, sans-serif;
+		"Geist Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--font-sans:
 		"Geist Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--ease-spyd: cubic-bezier(0.22, 1, 0.36, 1);

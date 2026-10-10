@@ -188,7 +188,7 @@ function DialogBody({
 			<div
 				role="dialog"
 				aria-label="New workspace"
-				className="fade-in zoom-in-95 slide-in-from-top-2 fixed top-[18vh] left-1/2 z-50 flex w-[640px] max-w-[calc(100vw-32px)] -translate-x-1/2 animate-in flex-col overflow-hidden rounded-[28px] bg-card shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-inset ring-input duration-200 ease-spyd"
+				className="fade-in zoom-in-95 slide-in-from-top-2 fixed top-[18vh] left-1/2 z-50 flex w-[640px] max-w-[calc(100vw-32px)] -translate-x-1/2 animate-in flex-col overflow-hidden rounded-md bg-card shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-inset ring-input duration-200 ease-spyd"
 				onKeyDown={(e) => {
 					if (e.key === "Escape") {
 						e.preventDefault();
@@ -212,7 +212,7 @@ function DialogBody({
 			>
 				{/* Mode: how the agent should go at it. ⌘1-4 from the prompt. */}
 				<div className="flex items-center gap-3 px-[22px] pt-5">
-					<h2 className="font-display text-[20px] font-bold tracking-[-0.02em]">
+					<h2 className="font-display text-[17px] font-semibold tracking-[-0.02em]">
 						New workspace
 					</h2>
 					<div className="ml-auto flex gap-0.5 rounded-full bg-tertiary p-[3px]">
@@ -223,7 +223,7 @@ function DialogBody({
 								title={`${m.hint} (⌘${i + 1})`}
 								onClick={() => useNewWorkspaceDialog.setState({ mode: m.id })}
 								className={cn(
-									"h-[26px] rounded-full px-3 text-[13px] transition-colors",
+									"h-[26px] rounded-md px-3 text-[13px] transition-colors",
 									m.id === mode
 										? "bg-input font-medium text-foreground"
 										: "text-muted-foreground hover:text-foreground",
@@ -246,7 +246,7 @@ function DialogBody({
 								setBranchEdit(null);
 							}}
 							className={cn(
-								"flex h-[30px] items-center gap-1.5 rounded-full px-[11px] text-[12.5px] transition-colors",
+								"flex h-[30px] items-center gap-1.5 rounded-md px-[11px] text-[12.5px] transition-colors",
 								p.id === project.id
 									? "bg-primary font-semibold text-primary-foreground"
 									: "bg-secondary text-soft-foreground hover:bg-input hover:text-foreground",
@@ -303,7 +303,7 @@ function DialogBody({
 						{images.map((image, i) => (
 							<span
 								key={`${image.name}-${i}`}
-								className="flex items-center gap-1 rounded-[12px] bg-secondary py-0.5 pr-1 pl-2 text-[11px] text-soft-foreground"
+								className="flex items-center gap-1 rounded-md bg-secondary py-0.5 pr-1 pl-2 text-[11px] text-soft-foreground"
 							>
 								{image.name || "image"}
 								<button
@@ -337,14 +337,14 @@ function DialogBody({
 								}
 							}}
 							aria-label="Branch name"
-							className="min-w-0 flex-1 rounded-[10px] bg-tertiary px-2 py-[3px] font-mono text-[12px] text-foreground outline-none ring-1 ring-primary"
+							className="min-w-0 flex-1 rounded-md bg-tertiary px-2 py-[3px] font-mono text-[12px] text-foreground outline-none ring-1 ring-primary"
 						/>
 					) : (
 						<button
 							type="button"
 							title="Rename the branch"
 							onClick={() => setBranchEdit(branch)}
-							className="min-w-0 truncate rounded-[10px] bg-tertiary px-2 py-[3px] font-mono text-foreground hover:ring-1 hover:ring-input"
+							className="min-w-0 truncate rounded-md bg-tertiary px-2 py-[3px] font-mono text-foreground hover:ring-1 hover:ring-input"
 						>
 							{branch || "a fresh branch"}
 						</button>
@@ -375,7 +375,7 @@ function DialogBody({
 						onClick={queueTonight}
 						title="Don't start it now - the Night Agent runs it first tonight (⌥↵)"
 						className={cn(
-							"ml-auto flex h-[34px] items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium disabled:opacity-40",
+							"ml-auto flex h-[34px] items-center gap-1.5 rounded-md px-3.5 text-[13px] font-medium disabled:opacity-40",
 							BUTTON.secondary,
 						)}
 					>
@@ -386,7 +386,7 @@ function DialogBody({
 						type="button"
 						onClick={submit}
 						className={cn(
-							"h-[34px] rounded-full px-4 text-[13px] font-semibold",
+							"h-[34px] rounded-md px-4 text-[13px] font-semibold",
 							BUTTON.primary,
 						)}
 					>

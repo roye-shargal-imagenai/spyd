@@ -122,7 +122,7 @@ function NightPage() {
 				<header className="flex items-start gap-5">
 					<span
 						className={cn(
-							"flex size-14 shrink-0 items-center justify-center rounded-[20px]",
+							"flex size-14 shrink-0 items-center justify-center rounded-lg",
 							offHours.enabled ? "bg-primary/15" : "bg-secondary",
 						)}
 					>
@@ -134,7 +134,7 @@ function NightPage() {
 						/>
 					</span>
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
-						<h1 className="font-display text-[30px] font-bold leading-tight tracking-[-0.02em]">
+						<h1 className="font-display text-[24px] font-semibold leading-tight tracking-[-0.02em]">
 							Night Agent
 						</h1>
 						<p className="text-[14px] text-muted-foreground">
@@ -149,7 +149,7 @@ function NightPage() {
 						<button
 							type="button"
 							onClick={() => navigate({ to: "/settings/backlog" })}
-							className="h-9 rounded-full px-4 text-[13px] text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+							className="h-9 rounded-md px-4 text-[13px] text-muted-foreground hover:bg-accent/60 hover:text-foreground"
 						>
 							Settings
 						</button>
@@ -177,7 +177,7 @@ function NightPage() {
 				{/* Tonight's plan, in the order it will take them. */}
 				<section className="flex flex-col gap-3">
 					<div className="flex items-baseline justify-between">
-						<h2 className="font-display text-[19px] font-bold tracking-[-0.01em]">
+						<h2 className="font-display text-[16px] font-semibold tracking-[-0.01em]">
 							Tonight's plan
 						</h2>
 						<button
@@ -209,7 +209,7 @@ function NightPage() {
 						</button>
 					</div>
 					{tonight.length === 0 ? (
-						<div className="rounded-[20px] bg-card px-6 py-10 text-center ring-1 ring-inset ring-border">
+						<div className="rounded-lg bg-card px-6 py-10 text-center ring-1 ring-inset ring-border">
 							<HiOutlineMoon className="mx-auto mb-3 size-7 text-faint-foreground" />
 							<p className="text-[14px] font-semibold">
 								{onlyMarked
@@ -244,7 +244,7 @@ function NightPage() {
 						</ol>
 					)}
 					{later.length > 0 && (
-						<details className="group/later rounded-[16px] px-1">
+						<details className="group/later rounded-lg px-1">
 							<summary className="cursor-pointer list-none py-1 text-[12.5px] text-faint-foreground hover:text-muted-foreground">
 								{onlyMarked
 									? `Not marked, so it won't touch them: ${later.length} due soon`
@@ -267,7 +267,7 @@ function NightPage() {
 
 				{/* What it already did. */}
 				<section className="flex flex-col gap-3">
-					<h2 className="font-display text-[19px] font-bold tracking-[-0.01em]">
+					<h2 className="font-display text-[16px] font-semibold tracking-[-0.01em]">
 						From the Night Agent
 					</h2>
 					{lastNight.length === 0 ? (
@@ -281,7 +281,7 @@ function NightPage() {
 									key={entry.pane.id}
 									type="button"
 									onClick={() => openInHome(entry.pane.id)}
-									className="lift flex flex-col gap-2 rounded-[18px] bg-card p-4 text-left ring-1 ring-inset ring-border"
+									className="lift flex flex-col gap-2 rounded-lg bg-card p-4 text-left ring-1 ring-inset ring-border"
 								>
 									<span className="flex items-center gap-2 text-[12px] text-muted-foreground">
 										<StatusGlyph column={entry.column} />
@@ -332,10 +332,10 @@ function PlanRow({
 }) {
 	const Icon = SOURCE_ICON[item.to];
 	return (
-		<li className="group flex items-center gap-3.5 rounded-[18px] bg-card px-4 py-3 ring-1 ring-inset ring-border">
+		<li className="group flex items-center gap-3.5 rounded-lg bg-card px-4 py-3 ring-1 ring-inset ring-border">
 			<span
 				className={cn(
-					"flex size-7 shrink-0 items-center justify-center rounded-full font-display text-[13px] font-bold tabular-nums",
+					"flex size-7 shrink-0 items-center justify-center rounded-full font-display text-[13px] font-semibold tabular-nums",
 					reason === "asked"
 						? "bg-primary text-primary-foreground"
 						: "bg-secondary text-soft-foreground",
@@ -350,13 +350,13 @@ function PlanRow({
 					</span>
 				</FullTitle>
 				<span className="flex flex-wrap items-center gap-1.5 text-[12px]">
-					<span className="flex h-6 items-center gap-1.5 rounded-full bg-secondary px-2.5 font-semibold text-soft-foreground">
+					<span className="flex h-6 items-center gap-1.5 rounded-md bg-secondary px-2.5 font-semibold text-soft-foreground">
 						{Icon && <Icon className="size-3.5" aria-hidden />}
 						{item.source}
 					</span>
 					<span
 						className={cn(
-							"flex h-6 items-center rounded-full px-2.5 font-semibold",
+							"flex h-6 items-center rounded-md px-2.5 font-semibold",
 							REASON[reason].className,
 						)}
 					>
@@ -372,7 +372,7 @@ function PlanRow({
 					type="button"
 					onClick={onUnmark}
 					title="Take it off tonight's plan"
-					className="flex h-8 items-center gap-1 rounded-full px-3 text-[12px] text-muted-foreground opacity-0 transition-opacity hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+					className="flex h-8 items-center gap-1 rounded-md px-3 text-[12px] text-muted-foreground opacity-0 transition-opacity hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
 				>
 					<HiOutlineXMark className="size-3.5" />
 					Not tonight
@@ -383,7 +383,7 @@ function PlanRow({
 					type="button"
 					onClick={onMark}
 					title="Put it first tonight"
-					className="flex h-8 items-center gap-1 rounded-full px-3 text-[12px] text-muted-foreground opacity-0 transition-opacity hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+					className="flex h-8 items-center gap-1 rounded-md px-3 text-[12px] text-muted-foreground opacity-0 transition-opacity hover:bg-accent/60 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
 				>
 					<HiOutlineMoon className="size-3.5" />
 					Do first

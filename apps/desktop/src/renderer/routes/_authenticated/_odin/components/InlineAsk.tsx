@@ -88,7 +88,7 @@ export function InlineAsk({
 
 	const { verb, detail } = describeTool(tool.name, tool.input);
 	return (
-		<div className="flex flex-col gap-2 rounded-[12px] border border-border bg-background/50 px-3 py-2.5">
+		<div className="flex flex-col gap-2 rounded-md border border-border bg-background/50 px-3 py-2.5">
 			<div className="text-[11px] font-semibold uppercase tracking-wide text-faint-foreground">
 				Wants to {verb.toLowerCase()}
 			</div>
@@ -100,7 +100,7 @@ export function InlineAsk({
 					type="button"
 					onClick={() => void send(["1"], "Allowed")}
 					className={cn(
-						"rounded-full px-2.5 py-1 text-[12px] font-semibold",
+						"rounded-md px-2.5 py-1 text-[12px] font-semibold",
 						BUTTON.primary,
 					)}
 				>
@@ -111,7 +111,7 @@ export function InlineAsk({
 					title="Allow this and don't ask again for the same thing in this session"
 					onClick={() => void send(["2"], "Allowed from now on")}
 					className={cn(
-						"rounded-full px-2.5 py-1 text-[12px] font-semibold",
+						"rounded-md px-2.5 py-1 text-[12px] font-semibold",
 						BUTTON.secondary,
 					)}
 				>
@@ -120,7 +120,7 @@ export function InlineAsk({
 				<button
 					type="button"
 					onClick={() => void send(["\x1b"], "Denied")}
-					className="rounded-full px-2.5 py-1 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
+					className="rounded-md px-2.5 py-1 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
 				>
 					Deny
 				</button>

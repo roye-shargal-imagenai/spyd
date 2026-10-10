@@ -35,7 +35,7 @@ export const SESSION_DOT: Record<string, string> = {
 };
 
 const ROW =
-	"flex h-8 w-full items-center gap-2 rounded-[12px] px-2.5 text-left text-[13px] transition-colors hover:bg-accent/60 hover:text-foreground";
+	"flex h-8 w-full items-center gap-2 rounded-md px-2.5 text-left text-[13px] transition-colors hover:bg-accent/60 hover:text-foreground";
 
 /**
  * The repos you keep on this machine, Superset-style: add one from disk once,
@@ -288,7 +288,7 @@ function PendingRow({
 	return (
 		<div
 			title={item.error ?? item.title}
-			className="flex flex-col gap-0.5 rounded-[12px] px-2.5 py-1.5 text-[12px]"
+			className="flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 text-[12px]"
 		>
 			<div className="flex items-center gap-2">
 				{failed ? (

@@ -986,7 +986,7 @@ export function SessionBrief({
 							if (parsed.length) setDraftLink("");
 						}}
 						placeholder="Add a link (+ a name), Enter"
-						className="rounded-[12px] border border-border bg-background px-2 py-1 text-[12px] text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
+						className="rounded-md border border-border bg-background px-2 py-1 text-[12px] text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
 					/>
 				</div>
 				<div className="flex flex-col gap-1 pt-2">
@@ -998,7 +998,7 @@ export function SessionBrief({
 						onChange={(event) => setNotes(paneId, event.target.value)}
 						placeholder="Notes to yourself - saved as you type."
 						rows={4}
-						className="resize-y rounded-[12px] border border-border bg-background px-2 py-1.5 text-[12.5px] leading-relaxed text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
+						className="resize-y rounded-md border border-border bg-background px-2 py-1.5 text-[12.5px] leading-relaxed text-soft-foreground placeholder:text-faint-foreground focus:border-primary focus:outline-none"
 					/>
 				</div>
 			</div>

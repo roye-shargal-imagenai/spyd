@@ -26,7 +26,7 @@ export function PersonChip({
 	const { fg } = personColor(name);
 	return (
 		<span
-			className={`inline-flex min-w-0 items-center gap-1.5 rounded-[12px] bg-secondary px-[7px] py-[1px] text-[11px] font-medium text-soft-foreground ring-1 ring-inset ring-border ${className ?? ""}`}
+			className={`inline-flex min-w-0 items-center gap-1.5 rounded-md bg-secondary px-[7px] py-[1px] text-[11px] font-medium text-soft-foreground ring-1 ring-inset ring-border ${className ?? ""}`}
 			// A breath of the person's colour behind the dot, fading out before
 			// the name - enough to tell people apart, not enough to shout.
 			style={{

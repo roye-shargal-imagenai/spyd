@@ -371,7 +371,7 @@ export function NextInLine() {
 						onToggle={() => setShowHidden(!showHidden)}
 						className="font-normal normal-case tracking-normal"
 					/>
-					<span className="rounded-[12px] bg-secondary px-2 font-medium">
+					<span className="rounded-md bg-secondary px-2 font-medium">
 						{next.length}
 					</span>
 				</span>
@@ -420,7 +420,7 @@ export function NextInLine() {
 			<div
 				key={item.key}
 				className={cn(
-					"group relative flex items-start gap-2 rounded-[12px] border border-border bg-card px-2.5 py-2 transition-colors hover:border-input hover:bg-secondary",
+					"group relative flex items-start gap-2 rounded-md border border-border bg-card px-2.5 py-2 transition-colors hover:border-input hover:bg-secondary",
 					(isAiHidden(item) || duplicate) && "opacity-50",
 				)}
 				title={

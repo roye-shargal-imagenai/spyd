@@ -332,7 +332,7 @@ function AllFeedPage() {
 				{sessions.length > 0 && (
 					<span
 						className={cn(
-							"shrink-0 rounded-[12px] px-1.5 py-[1px] text-[11px] font-semibold",
+							"shrink-0 rounded-md px-1.5 py-[1px] text-[11px] font-semibold",
 							PILL.working,
 						)}
 					>
@@ -440,7 +440,7 @@ function AllFeedPage() {
 							>
 								<span className="size-1.5 animate-pulse rounded-full bg-current" />
 								Live sessions
-								<span className="rounded-[12px] bg-working/12 px-1.5 font-medium">
+								<span className="rounded-md bg-working/12 px-1.5 font-medium">
 									{sessions.length}
 								</span>
 								<span className="text-muted-foreground">
@@ -619,7 +619,7 @@ function AllFeedPage() {
 											<div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px]">
 												<span
 													className={cn(
-														"flex h-6 items-center gap-1.5 rounded-full px-2.5 font-semibold",
+														"flex h-6 items-center gap-1.5 rounded-md px-2.5 font-semibold",
 														SOURCE_CHIP,
 													)}
 												>
@@ -630,7 +630,7 @@ function AllFeedPage() {
 													{item.source}
 												</span>
 												{item.status && (
-													<span className="flex h-6 items-center rounded-full bg-secondary px-2.5 font-medium text-soft-foreground">
+													<span className="flex h-6 items-center rounded-md bg-secondary px-2.5 font-medium text-soft-foreground">
 														{item.status}
 													</span>
 												)}
@@ -796,7 +796,7 @@ function DetailsPanel({
 					type="button"
 					onClick={onClose}
 					aria-label="Close details"
-					className="ml-auto rounded-[12px] px-2 py-0.5 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground"
+					className="ml-auto rounded-md px-2 py-0.5 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground"
 				>
 					✕
 				</button>
@@ -908,7 +908,7 @@ function DoneList({
 							type="button"
 							onClick={() => onUndo(row)}
 							title="Put it back in the queue"
-							className="shrink-0 rounded-full px-2 py-1 text-[12px] font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
+							className="shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground"
 						>
 							Undo
 						</button>

@@ -95,17 +95,17 @@ function HomePage() {
 						move(-1);
 					}
 				}}
-				className="flex w-[340px] shrink-0 flex-col overflow-y-auto rounded-[24px] bg-background px-2 pb-4 ring-1 ring-inset ring-border outline-none"
+				className="flex w-[340px] shrink-0 flex-col overflow-y-auto rounded-md bg-background px-2 pb-4 ring-1 ring-inset ring-border outline-none"
 			>
 				<div className="flex items-baseline justify-between px-2.5 pt-[18px] pb-1">
-					<h1 className="font-display text-[22px] font-bold tracking-[-0.02em]">
+					<h1 className="font-display text-[18px] font-semibold tracking-[-0.02em]">
 						Sessions
 					</h1>
 					<button
 						type="button"
 						onClick={() => useNewWorkspaceDialog.getState().open()}
 						className={cn(
-							"flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold",
+							"flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-semibold",
 							BUTTON.primary,
 						)}
 					>
@@ -144,7 +144,7 @@ function HomePage() {
 				<PastWeekGroup past={past} selectedId={selectedId} />
 			</div>
 
-			<div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] bg-background ring-1 ring-inset ring-border">
+			<div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-background ring-1 ring-inset ring-border">
 				{pastRow ? (
 					<div className="min-h-0 flex-1 overflow-y-auto">
 						<PastDetail key={pastRow.id} row={pastRow} />
@@ -229,7 +229,7 @@ function ListRow({
 			data-pane={entry.pane.id}
 			onClick={onSelect}
 			className={cn(
-				"flex w-full gap-3 rounded-[16px] px-2.5 py-3 text-left transition-colors duration-150",
+				"flex w-full gap-3 rounded-lg px-2.5 py-3 text-left transition-colors duration-150",
 				selected ? "bg-secondary/80" : "hover:bg-accent/60",
 			)}
 		>
@@ -320,7 +320,7 @@ function SessionHeader({ entry }: { entry: SessionEntry }) {
 						}
 						onClick={() => finish(verb === "Approve" ? "Approved" : "Dropped")}
 						className={cn(
-							"rounded-full px-3 py-1 text-[12px] font-medium",
+							"rounded-md px-3 py-1 text-[12px] font-medium",
 							BUTTON.secondary,
 						)}
 					>
@@ -333,8 +333,8 @@ function SessionHeader({ entry }: { entry: SessionEntry }) {
 
 function EmptyHome() {
 	return (
-		<div className="flex h-full flex-col items-center justify-center gap-3 rounded-[24px] bg-background text-center ring-1 ring-inset ring-border">
-			<div className="font-display text-[22px] font-bold tracking-[-0.02em]">
+		<div className="flex h-full flex-col items-center justify-center gap-3 rounded-md bg-background text-center ring-1 ring-inset ring-border">
+			<div className="font-display text-[18px] font-semibold tracking-[-0.02em]">
 				No sessions
 			</div>
 			<p className="max-w-[320px] text-[13px] text-muted-foreground">
@@ -344,7 +344,7 @@ function EmptyHome() {
 				type="button"
 				onClick={() => useNewWorkspaceDialog.getState().open()}
 				className={cn(
-					"mt-2 rounded-full px-4 py-2 text-[13px] font-semibold",
+					"mt-2 rounded-md px-4 py-2 text-[13px] font-semibold",
 					BUTTON.primary,
 				)}
 			>

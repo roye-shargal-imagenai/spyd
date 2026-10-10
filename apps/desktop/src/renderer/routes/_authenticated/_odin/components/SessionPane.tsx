@@ -201,7 +201,7 @@ export function SessionPane({
 								<button
 									type="button"
 									onClick={() => void resume()}
-									className="rounded-full bg-secondary px-4 py-2 text-[13px] font-medium hover:bg-input"
+									className="rounded-md bg-secondary px-4 py-2 text-[13px] font-medium hover:bg-input"
 								>
 									Resume
 								</button>
@@ -226,7 +226,7 @@ export function SessionPane({
 								type="button"
 								onClick={() => setAsTerminal(mode === "terminal")}
 								className={cn(
-									"h-[26px] rounded-full px-3 text-[12px] capitalize transition-colors",
+									"h-[26px] rounded-md px-3 text-[12px] capitalize transition-colors",
 									active
 										? "bg-secondary font-medium text-foreground"
 										: "text-muted-foreground hover:text-foreground",

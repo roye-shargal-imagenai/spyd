@@ -457,7 +457,7 @@ function OdinShell() {
 				title={keys ? `${label} (${keys})` : label}
 				onClick={() => navigate({ to })}
 				className={cn(
-					"flex h-8 w-full items-center gap-2.5 rounded-[12px] px-2.5 text-[13px] transition-colors",
+					"flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors",
 					isActive
 						? "bg-card font-medium text-foreground"
 						: "text-muted-foreground hover:text-foreground",
@@ -485,7 +485,7 @@ function OdinShell() {
 					style={{ width: isMac ? `${84 / zoomFactor}px` : "16px" }}
 				/>
 				<ZoomStable enabled={isMac}>
-					<span className="flex items-center gap-1.5 font-display text-[15px] font-bold tracking-[-0.01em] text-foreground">
+					<span className="flex items-center gap-1.5 font-display text-[15px] font-semibold tracking-[-0.01em] text-foreground">
 						<SpiderMark className="size-[18px]" />
 						{workConfig?.isDev ? "spyd Dev" : "spyd"}
 					</span>
@@ -504,7 +504,7 @@ function OdinShell() {
 							value={activeProfileId}
 							disabled={isSwitchingProfile}
 							onChange={(event) => switchProfile(event.target.value)}
-							className="cursor-pointer rounded-[12px] bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground disabled:opacity-50"
+							className="cursor-pointer rounded-md bg-secondary px-1.5 py-[3px] text-[11px] font-semibold text-muted-foreground outline-none transition-colors hover:text-foreground disabled:opacity-50"
 						>
 							{profiles.map((profile) => {
 								// A native <option> is text and nothing else - no dot, no
@@ -539,7 +539,7 @@ function OdinShell() {
 							onClick={() => switchProfile(profile.id)}
 							title={`Switch to ${profile.name}`}
 							className={cn(
-								"ml-1.5 rounded-full px-2 py-[2px] text-[11px] font-semibold tabular-nums disabled:opacity-50",
+								"ml-1.5 rounded-md px-2 py-[2px] text-[11px] font-semibold tabular-nums disabled:opacity-50",
 								profile.needsYou > 0
 									? PILL.attention
 									: "bg-secondary text-muted-foreground",
@@ -558,7 +558,7 @@ function OdinShell() {
 								<TooltipTrigger asChild>
 									<span
 										className={cn(
-											"rounded-[12px] px-2 py-[3px] text-[11px] font-semibold tabular-nums",
+											"rounded-md px-2 py-[3px] text-[11px] font-semibold tabular-nums",
 											usageTone(
 												Math.max(
 													usage.fiveHour?.percent ?? 0,
@@ -596,7 +596,7 @@ function OdinShell() {
 								<TooltipTrigger asChild>
 									<span
 										className={cn(
-											"rounded-[12px] px-2 py-[3px] text-[11px] font-semibold tabular-nums",
+											"rounded-md px-2 py-[3px] text-[11px] font-semibold tabular-nums",
 											badgeTone(load, limits),
 										)}
 									>
@@ -631,7 +631,7 @@ function OdinShell() {
 						<button
 							type="button"
 							onClick={() => useCommandPalette.getState().setOpen(true)}
-							className="mb-2 flex h-[34px] w-full items-center gap-2 rounded-full border border-secondary bg-background px-3 text-[12px] text-faint-foreground transition-colors hover:border-input hover:text-muted-foreground"
+							className="mb-2 flex h-[34px] w-full items-center gap-2 rounded-md border border-secondary bg-background px-3 text-[12px] text-faint-foreground transition-colors hover:border-input hover:text-muted-foreground"
 						>
 							<HiOutlineMagnifyingGlass className="size-[14px] shrink-0" />
 							<span className="flex-1 text-left">Search or jump to…</span>
@@ -659,7 +659,7 @@ function OdinShell() {
 						className={cn(
 							"h-full overflow-hidden",
 							!onHomePage &&
-								"rounded-[24px] bg-background ring-1 ring-inset ring-border",
+								"rounded-md bg-background ring-1 ring-inset ring-border",
 						)}
 					>
 						<Outlet />
@@ -751,7 +751,7 @@ function NightAgentRailButton() {
 			title={hint}
 			onClick={() => navigate({ to: "/night" })}
 			className={cn(
-				"flex h-8 w-full items-center gap-2.5 rounded-[12px] px-2.5 text-[13px] font-medium transition-colors",
+				"flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium transition-colors",
 				onNight && "ring-1 ring-inset ring-primary/40",
 				isRunning
 					? PILL.brand
@@ -765,7 +765,7 @@ function NightAgentRailButton() {
 			{queued > 0 && (
 				<span
 					className={cn(
-						"shrink-0 rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+						"shrink-0 rounded-md px-1.5 text-[11px] font-semibold tabular-nums",
 						offHours.enabled
 							? "bg-primary/15 text-primary-ink"
 							: "bg-attention/15 text-attention-ink",

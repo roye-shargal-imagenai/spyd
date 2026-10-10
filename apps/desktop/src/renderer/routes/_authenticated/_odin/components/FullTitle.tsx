@@ -44,7 +44,7 @@ export function FullTitle({
 				side="bottom"
 				align="start"
 				sideOffset={6}
-				className="max-w-[460px] rounded-[14px] px-3.5 py-2.5"
+				className="max-w-[460px] rounded-lg px-3.5 py-2.5"
 			>
 				<div className="flex flex-col gap-1">
 					<span className="text-[13px] font-semibold leading-snug">{text}</span>

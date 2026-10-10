@@ -988,7 +988,7 @@ function Composer({
 		<div className="px-4 pb-3 pt-1">
 			<div
 				className={cn(
-					"rounded-[12px] border border-border bg-background px-3 pb-2 pt-2.5 focus-within:border-primary/60",
+					"rounded-md border border-border bg-background px-3 pb-2 pt-2.5 focus-within:border-primary/60",
 					bash && "border-pink-500/60 focus-within:border-pink-500",
 				)}
 			>

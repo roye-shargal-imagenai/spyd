@@ -89,7 +89,7 @@ export function SupersetImport() {
 			title="Import from Superset"
 			description="Pick up a Superset workspace and its Claude conversation"
 			showCloseButton={false}
-			className="top-[18vh] max-w-[640px] translate-y-0 rounded-[12px] border-border bg-popover sm:max-w-[640px]"
+			className="top-[18vh] max-w-[640px] translate-y-0 rounded-md border-border bg-popover sm:max-w-[640px]"
 		>
 			<CommandInput placeholder="Find a Superset workspace by task, repo or branch…" />
 			<CommandList className="max-h-[440px]">
@@ -107,7 +107,7 @@ export function SupersetImport() {
 								key={workspace.id}
 								value={`${workspace.name} ${workspace.projectName} ${workspace.branch} ${workspace.id}`}
 								onSelect={() => void bringOver(workspace)}
-								className="items-start gap-2.5 rounded-[12px] px-2.5 py-2"
+								className="items-start gap-2.5 rounded-md px-2.5 py-2"
 							>
 								<LuGitBranch className="mt-0.5" />
 								<span className="min-w-0 flex-1">
