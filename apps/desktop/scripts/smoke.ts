@@ -341,7 +341,8 @@ await step("Dev Board shows its columns", async () => {
 // Each rail entry and a line only its screen prints.
 const SCREENS: [string, string][] = [
 	["Home", "no sessions"],
-	["Tasks", "waiting on you"],
+	// Tasks opens on Jira, which a throwaway home has never connected.
+	["Tasks", "isn't connected"],
 	["Review", "sweep now"],
 	["Automations", "add automation"],
 	["Insights", "who asks"],
@@ -357,7 +358,7 @@ for (const [label, line] of SCREENS) {
 
 await step("Tasks: every feed tab opens", async () => {
 	await rail("Tasks");
-	await waitForText("waiting on you");
+	await waitForText("isn't connected");
 	// The strip is the parent of its Slack tab; "Tasks" is also a rail label.
 	for (const tab of [
 		"All",
@@ -381,7 +382,7 @@ await step("Tasks: every feed tab opens", async () => {
 });
 
 for (const [label, line] of [
-	["Tasks", "waiting on you"],
+	["Tasks", "isn't connected"],
 	["Dev Board", "next in line"],
 	["Archive", "every session spyd launched"],
 ]) {
@@ -411,6 +412,10 @@ await step("a task written down lands in Tasks", async () => {
 		`[...document.querySelectorAll("button")].filter((e) => __label(e) === "Add task").at(-1).click()`,
 	);
 	await rail("Tasks");
+	await page(`(() => {
+		const strip = __find("button", "Slack").parentElement;
+		__find("button", "All", strip)?.click();
+	})()`);
 	await waitForText(TASK);
 });
 
@@ -440,11 +445,19 @@ await step("a new profile sees none of the first one's tasks", async () => {
 	await click("button", "Switch to");
 	await click("a", "Back");
 	await rail("Tasks");
+	await page(`(() => {
+		const strip = __find("button", "Slack").parentElement;
+		__find("button", "All", strip)?.click();
+	})()`);
 	await waitForText(TASK);
 });
 
 await step("starting a task asks for optional context first", async () => {
 	await rail("Tasks");
+	await page(`(() => {
+		const strip = __find("button", "Slack").parentElement;
+		__find("button", "All", strip)?.click();
+	})()`);
 	await waitForText(TASK);
 	await click("button", "Start session");
 	await click("button", "+ Add context or guidelines (optional)");
@@ -457,6 +470,10 @@ await step("starting a task asks for optional context first", async () => {
 
 await step("Read later moves a task to Reading material and back", async () => {
 	await rail("Tasks");
+	await page(`(() => {
+		const strip = __find("button", "Slack").parentElement;
+		__find("button", "All", strip)?.click();
+	})()`);
 	await waitForText(TASK);
 	const found = await page<boolean>(`(() => {
 		let row = [...document.querySelectorAll("button")].find((e) => e.textContent.trim() === ${JSON.stringify(TASK)});
@@ -477,6 +494,10 @@ await step("Read later moves a task to Reading material and back", async () => {
 
 await step("A task's title opens its details beside the list", async () => {
 	await rail("Tasks");
+	await page(`(() => {
+		const strip = __find("button", "Slack").parentElement;
+		__find("button", "All", strip)?.click();
+	})()`);
 	await waitForText(TASK);
 	// Its label is its title, "Show details"; match on the task text instead.
 	await page(
@@ -505,6 +526,10 @@ await step("A task's title opens its details beside the list", async () => {
 
 await step("Done takes a task off the list", async () => {
 	await rail("Tasks");
+	await page(`(() => {
+		const strip = __find("button", "Slack").parentElement;
+		__find("button", "All", strip)?.click();
+	})()`);
 	await waitForText(TASK);
 	// The title button's text is the task itself; match on that.
 	const found = await page<boolean>(`(() => {

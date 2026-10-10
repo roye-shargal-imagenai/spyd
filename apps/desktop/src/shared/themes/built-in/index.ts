@@ -4,14 +4,17 @@ import {
 	darkTheme,
 	emberTheme,
 	forestTheme,
+	inkTheme,
 	midnightTheme,
 } from "./ember";
-import { lightTheme } from "./light";
+import { lightTheme, paperTheme } from "./light";
 import { monokaiTheme } from "./monokai";
 /**
  * All built-in themes
  */
 export const builtInThemes: Theme[] = [
+	inkTheme,
+	paperTheme,
 	darkTheme,
 	emberTheme,
 	midnightTheme,
@@ -24,7 +27,7 @@ export const builtInThemes: Theme[] = [
 /**
  * Default theme ID
  */
-export const DEFAULT_THEME_ID = "dark";
+export const DEFAULT_THEME_ID = "spyd-ink";
 
 /**
  * Get a built-in theme by ID
@@ -35,6 +38,8 @@ export function getBuiltInTheme(id: string): Theme | undefined {
 
 // Re-export individual themes
 export {
+	inkTheme,
+	paperTheme,
 	crimsonTheme,
 	darkTheme,
 	emberTheme,

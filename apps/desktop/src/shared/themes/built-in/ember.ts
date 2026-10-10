@@ -56,6 +56,25 @@ export const WEB: Surface = {
 	faint: "#8590b3",
 };
 
+/**
+ * Warm charcoal, after Claude's own dark mode: dark without being black,
+ * cream text instead of white, and panels only a shade apart - calm enough
+ * to read tickets and threads in all day.
+ */
+export const INK: Surface = {
+	page: "#262624",
+	card: "#30302e",
+	popover: "#30302e",
+	raised: "#353532",
+	hover: "#3a3a37",
+	chrome: "#1f1e1d",
+	border: "#3a3936",
+	input: "#4a4945",
+	text: "#f4f3ee",
+	muted: "#b9b6ab",
+	faint: "#94918a",
+};
+
 function spydDark({
 	id,
 	name,
@@ -168,6 +187,16 @@ function spydDark({
 }
 
 /** The default: the suit - Spider red on deep navy. */
+/** The default: Claude-dark charcoal with a soft Spider-Man blue for the next click. */
+export const inkTheme = spydDark({
+	id: "spyd-ink",
+	name: "Spider ink",
+	surface: INK,
+	accent: "#5272ee",
+	accentForeground: "#ffffff",
+	selection: "82, 114, 238",
+});
+
 export const darkTheme = spydDark({
 	id: "dark",
 	name: "Spider",

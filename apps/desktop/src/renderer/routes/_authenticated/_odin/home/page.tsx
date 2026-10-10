@@ -122,7 +122,7 @@ function HomePage() {
 							<h2
 								className={cn(
 									"sticky top-0 z-10 flex items-baseline gap-2 bg-background/95 px-2.5 pt-[18px] pb-1.5 text-[12px] font-semibold backdrop-blur",
-									urgent ? "text-primary-ink" : "text-muted-foreground",
+									urgent ? "text-attention-ink" : "text-muted-foreground",
 								)}
 							>
 								{group.title}

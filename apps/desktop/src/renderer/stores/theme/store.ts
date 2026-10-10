@@ -16,8 +16,8 @@ import { applyUIColors, toXtermTheme, updateThemeClass } from "./utils";
 export const SYSTEM_THEME_ID = "system";
 
 /** Built-in fallback theme IDs for system mode */
-const DEFAULT_LIGHT_THEME_ID = "light";
-const DEFAULT_DARK_THEME_ID = "dark";
+const DEFAULT_LIGHT_THEME_ID = "spyd-paper";
+const DEFAULT_DARK_THEME_ID = "spyd-ink";
 
 interface ThemeState {
 	/** Current active theme ID (can be "system" or a specific theme ID) */
@@ -399,8 +399,22 @@ export const useThemeStore = create<ThemeState>()(
 				},
 			}),
 			{
-				name: "theme-storage",
+								name: "theme-storage",
 				storage: trpcThemeStorage,
+								// v2: Spider ink became the default. Whoever was on an earlier
+				// default (the dark Spider, then Paper) moves with it, once; a
+				// theme you picked yourself stays.
+				version: 2,
+				migrate: (persisted, version) => {
+					const state = persisted as { activeThemeId?: string } | undefined;
+					if (
+						version < 2 &&
+						(state?.activeThemeId === "dark" ||
+							state?.activeThemeId === "spyd-paper")
+					)
+						return { ...state, activeThemeId: "spyd-ink" };
+					return state as never;
+				},
 				partialize: (state) => ({
 					activeThemeId: state.activeThemeId,
 					customThemes: state.customThemes,

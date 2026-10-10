@@ -17,44 +17,44 @@
 :root {
 	/* Fallbacks = the built-in Spider theme (shared/themes/built-in/ember.ts),
 	   so the first paint before the theme store hydrates already matches. */
-	--background: #0f1630;
-	--foreground: #f3f5fb;
-	--card: #15203f;
-	--card-foreground: #f3f5fb;
-	--popover: #15203f;
-	--popover-foreground: #f3f5fb;
-	--primary: #e8303f;
+	--background: #262624;
+	--foreground: #f4f3ee;
+	--card: #30302e;
+	--card-foreground: #f4f3ee;
+	--popover: #30302e;
+	--popover-foreground: #f4f3ee;
+	--primary: #5272ee;
 	--primary-foreground: #ffffff;
-	--secondary: #22305c;
-	--secondary-foreground: #f3f5fb;
-	--muted: #22305c;
-	--muted-foreground: #a9b3cf;
-	--accent: #1c2a52;
-	--accent-foreground: #f3f5fb;
-	--tertiary: #070b17;
-	--tertiary-active: #22305c;
+	--secondary: #353532;
+	--secondary-foreground: #f4f3ee;
+	--muted: #353532;
+	--muted-foreground: #b9b6ab;
+	--accent: #3a3936;
+	--accent-foreground: #f4f3ee;
+	--tertiary: #1f1e1d;
+	--tertiary-active: #353532;
 	--destructive: #ff7d92;
 	--destructive-foreground: #fff1f3;
-	--border: #1c2a52;
-	--input: #2a3a6b;
-	--ring: #e8303f;
-	--chart-1: #e8303f;
+	--border: #3a3936;
+	--input: #4a4945;
+	--ring: #5272ee;
+	--chart-1: #5272ee;
 	--chart-2: #2dd4bf;
 	--chart-3: #1ed760;
 	--chart-4: #ffb020;
 	--chart-5: #ff7d92;
 	--radius: 0.875rem;
-	--sidebar: #070b17;
-	--sidebar-foreground: #f3f5fb;
-	--sidebar-primary: #e8303f;
+	--sidebar: #1f1e1d;
+	--sidebar-foreground: #f4f3ee;
+	--sidebar-primary: #5272ee;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #22305c;
-	--sidebar-accent-foreground: #f3f5fb;
-	--sidebar-border: #1c2a52;
-	--sidebar-ring: #e8303f;
-	--highlight-match: rgba(232, 48, 63, 0.2);
-	--highlight-active: rgba(232, 48, 63, 0.45);
-	--highlight: #e8303f;
+	--sidebar-accent: #353532;
+	--sidebar-accent-foreground: #f4f3ee;
+	--sidebar-border: #3a3936;
+	--sidebar-ring: #5272ee;
+	--highlight-match: rgba(82, 114, 238, 0.2);
+	--highlight-active: rgba(82, 114, 238, 0.45);
+	--highlight: #5272ee;
 	--highlight-foreground: #ffffff;
 	/* Sidebar row fills: low-opacity foreground washes so they track any theme */
 	--fill-hover: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -64,21 +64,21 @@
 	   surfaces, but a state reads the same everywhere. Each hue means one
 	   thing - never use one for decoration:
 	     working   - an agent is running (suit blue)
-	     attention - waiting on you, a warning (amber)
+	     attention - waiting on you, a warning (soft coral)
 	     success   - finished, done, connected (green)
 	     danger    - failed, overdue, destructive (red)
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
 	   foreground and muted-foreground: soft (body copy) and faint (tags,
 	   separators, placeholders). */
-	--soft-foreground: #ccd3e6;
-	--faint-foreground: #8590b3;
-	--working: #7cb7ff;
-	--attention: #ffb020;
-	--success: #1ed760;
+	--soft-foreground: #dcd9cf;
+	--faint-foreground: #94918a;
+	--working: #7fb0ff;
+	--attention: #f0857a;
+	--success: #7ccf98;
 	--danger: #ff7d92;
 	/* Links: periwinkle, so a link is never mistaken for the accent button
 	   or a teal working status. */
-	--link: #b4bdfd;
+	--link: #9db2ff;
 	/* Each hue's "ink": the hue lifted toward white, for text sitting on its
 	   own tint - the light label on a pill, the top of a glossy button. */
 	--primary-ink: color-mix(in oklab, var(--primary) 52%, white);
@@ -90,53 +90,54 @@
 
 /* Light theme fallback values - applied before hydration if user has light theme saved */
 :root.light {
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
-	--tertiary: oklch(0.95 0.003 40);
-	--tertiary-active: oklch(0.9 0.003 40);
-	--destructive: oklch(0.577 0.245 27.325);
-	--destructive-foreground: oklch(0.985 0 0);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
-	--highlight-match: rgba(255, 211, 61, 0.35);
-	--highlight-active: rgba(255, 150, 50, 0.55);
-	--highlight: oklch(0.646 0.222 41.116);
-	--highlight-foreground: oklch(0.985 0 0);
+	/* Fallbacks = the Spider pastel theme (shared/themes/built-in/light.ts). */
+	--background: #f8faff;
+	--foreground: #1b2340;
+	--card: #ffffff;
+	--card-foreground: #1b2340;
+	--popover: #ffffff;
+	--popover-foreground: #1b2340;
+	--primary: #2453c9;
+	--primary-foreground: #ffffff;
+	--secondary: #e4ebfa;
+	--secondary-foreground: #1b2340;
+	--muted: #e4ebfa;
+	--muted-foreground: #4a5372;
+	--accent: #dde6f8;
+	--accent-foreground: #1b2340;
+	--tertiary: #c9d5f0;
+	--tertiary-active: #b7c6ea;
+	--destructive: #d6334f;
+	--destructive-foreground: #ffffff;
+	--border: #d6dff0;
+	--input: #bccbe6;
+	--ring: #2453c9;
+	--chart-1: #2453c9;
+	--chart-2: #2f80ed;
+	--chart-3: #16a34a;
+	--chart-4: #d97706;
+	--chart-5: #e11d48;
+	--sidebar: #c9d5f0;
+	--sidebar-foreground: #1b2340;
+	--sidebar-primary: #2453c9;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: #b7c6ea;
+	--sidebar-accent-foreground: #1b2340;
+	--sidebar-border: #d6dff0;
+	--sidebar-ring: #2453c9;
+	--highlight-match: rgba(36, 83, 201, 0.16);
+	--highlight-active: rgba(36, 83, 201, 0.32);
+	--highlight: #2453c9;
+	--highlight-foreground: #ffffff;
 	--fill-hover: color-mix(in oklab, var(--foreground) 4%, transparent);
 	--fill-selected: color-mix(in oklab, var(--foreground) 6%, transparent);
-	--soft-foreground: oklch(0.32 0 0);
-	--faint-foreground: oklch(0.62 0 0);
-	--working: #2f7fe0;
-	--attention: #b7791f;
-	--success: #1f9d63;
+	--soft-foreground: #34405e;
+	--faint-foreground: #636c8b;
+	--working: #2f80ed;
+	--attention: #e0435c;
+	--success: #13945f;
 	--danger: #d6334f;
-	--link: #0e7490;
+	--link: #2f5fd0;
 	--primary-ink: color-mix(in oklab, var(--primary) 70%, black);
 	--working-ink: color-mix(in oklab, var(--working) 70%, black);
 	--attention-ink: color-mix(in oklab, var(--attention) 70%, black);

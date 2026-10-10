@@ -129,13 +129,13 @@ function MomentCard({
 			<div
 				className={cn(
 					"flex items-start gap-3 rounded-[20px] bg-card/95 p-3.5 pr-3 shadow-[0_20px_50px_-18px_rgba(0,0,0,0.75)] ring-1 ring-inset backdrop-blur",
-					needs ? "ring-primary/45" : "ring-input",
+					needs ? "ring-attention/45" : "ring-input",
 				)}
 			>
 				<span
 					className={cn(
 						"flex size-9 shrink-0 items-center justify-center rounded-full",
-						needs ? "bg-primary/15" : "bg-success/12",
+						needs ? "bg-attention/15" : "bg-success/12",
 					)}
 				>
 					<SpiderMark className={cn("size-5", needs ? "moment-wiggle" : "")} />
@@ -144,7 +144,7 @@ function MomentCard({
 					<span
 						className={cn(
 							"text-[11.5px] font-semibold",
-							needs ? "text-primary-ink" : "text-success-ink",
+							needs ? "text-attention-ink" : "text-success-ink",
 						)}
 					>
 						{needs ? "Needs you" : "Finished"}

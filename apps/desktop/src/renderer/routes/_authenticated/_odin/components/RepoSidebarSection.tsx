@@ -29,7 +29,7 @@ import { useSupersetImport } from "./SupersetImport";
 /** What a session's dot looks like, by the board column it's in. */
 export const SESSION_DOT: Record<string, string> = {
 	working: "bg-working animate-pulse",
-	permission: "bg-primary",
+	permission: "bg-attention",
 	review: "border border-success",
 	idle: "bg-faint-foreground/60",
 };
@@ -190,7 +190,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 										<span
 											role="img"
 											aria-label="A session needs you"
-											className="size-1.5 shrink-0 rounded-full bg-primary"
+											className="size-1.5 shrink-0 rounded-full bg-attention"
 										/>
 									)}
 									{sessions.length > 0 && (

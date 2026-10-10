@@ -64,7 +64,7 @@ describe("resolveTerminalThemeType", () => {
 		expect(lightResult).toBe("light");
 	});
 
-	it("falls back to dark for unknown themes", () => {
+	it("falls back to the default theme's type for unknown themes", () => {
 		const result = resolveTerminalThemeType({
 			persistedThemeState: createThemeState({ activeThemeId: "unknown-theme" }),
 		});

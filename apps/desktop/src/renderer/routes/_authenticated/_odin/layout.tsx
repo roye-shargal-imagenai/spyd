@@ -107,7 +107,7 @@ const RAIL_ITEMS = [
 		Icon: HiOutlineHome,
 	},
 	{
-		to: "/all" as const,
+		to: "/jira" as const,
 		hotkey: "ODIN_ALL" as const,
 		label: "Tasks",
 		Icon: HiOutlineClipboardDocumentCheck,
@@ -367,7 +367,7 @@ function OdinShell() {
 		),
 		ODIN_ALL: useHotkey(
 			"ODIN_ALL",
-			() => navigate({ to: "/all" }),
+			() => navigate({ to: "/jira" }),
 			NAV_HOTKEY_OPTIONS,
 		),
 		ODIN_AUTOMATIONS: useHotkey(
@@ -443,9 +443,9 @@ function OdinShell() {
 		| typeof INSIGHTS_ITEM
 		| typeof HISTORY_ITEM
 		| typeof SETTINGS_ITEM) => {
-		// Tasks stands for every feed: lit on any of them, and always opening on
-		// All - every source at once is the answer to "what's waiting on me".
-		const isFeeds = to === "/all";
+		// Tasks stands for every feed: lit on any of them, and opening on Jira -
+		// the sprint board is where the day's work starts. All is one tab over.
+		const isFeeds = to === "/jira";
 		const isActive = isFeeds ? isFeedRoute : !!matchRoute({ to, fuzzy: true });
 		const keys = railHotkeys[hotkey].text;
 		return (

@@ -13,7 +13,7 @@ import { useOpenInHome } from "./SessionPane";
 /**
  * A session's state as a shape, so it reads without colour too:
  *   working  - a small spinner
- *   needs you - a solid dot in the accent's light tint (the loudest thing on screen)
+ *   needs you - a solid amber dot (the loudest thing on screen)
  *   ready    - a hollow green ring: it finished, have a look
  *   idle     - nothing
  */
@@ -35,7 +35,7 @@ export function StatusGlyph({
 			{column === "working" ? (
 				<span className="size-2.5 animate-spin rounded-full border-[1.5px] border-working border-t-transparent" />
 			) : column === "permission" ? (
-				<span className="size-2 rounded-full bg-primary-ink" />
+				<span className="size-2 rounded-full bg-attention" />
 			) : column === "review" ? (
 				<span className="size-2 rounded-full border-[1.5px] border-success" />
 			) : null}
