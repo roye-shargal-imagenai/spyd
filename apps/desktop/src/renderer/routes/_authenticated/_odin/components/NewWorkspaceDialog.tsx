@@ -14,6 +14,10 @@ import {
 } from "react-icons/hi2";
 import { LuGitBranch } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
+import {
+	CLAUDE_MODELS,
+	useClaudeCommand,
+} from "renderer/stores/claude-command";
 import { create } from "zustand";
 import { useOdinProfile } from "../hooks/useOdinProfile";
 import { useOdinTasks } from "../hooks/useOdinTasks";
@@ -359,6 +363,7 @@ function DialogBody({
 					<span className="shrink-0 text-faint-foreground">
 						from {baseBranch}
 					</span>
+					<ModelPicker />
 				</div>
 
 				<div className="flex items-center gap-3.5 border-t border-secondary bg-tertiary/60 py-3 pr-4 pl-[22px] text-[12px] text-faint-foreground">
@@ -404,5 +409,29 @@ function DialogBody({
 				</div>
 			</div>
 		</>
+	);
+}
+
+/** Which Claude the workspace starts with; the pick sticks for later ones. */
+function ModelPicker() {
+	const model = useClaudeCommand((state) => state.model);
+	const setModel = useClaudeCommand((state) => state.setModel);
+	return (
+		<select
+			aria-label="Model"
+			title="Model for new sessions - remembered"
+			value={model}
+			onChange={(event) => setModel(event.target.value)}
+			className={cn(
+				"ml-auto shrink-0 cursor-default rounded-md bg-tertiary px-2 py-[3px] text-[12px] outline-none hover:ring-1 hover:ring-input [color-scheme:dark]",
+				model ? "text-foreground" : "text-muted-foreground",
+			)}
+		>
+			{CLAUDE_MODELS.map((option) => (
+				<option key={option.value} value={option.value}>
+					{option.label}
+				</option>
+			))}
+		</select>
 	);
 }
