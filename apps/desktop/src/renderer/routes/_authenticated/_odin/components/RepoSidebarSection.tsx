@@ -36,7 +36,7 @@ export const SESSION_DOT: Record<string, string> = {
 };
 
 const ROW =
-	"flex h-8 w-full items-center gap-2 rounded-md px-2.5 text-left text-[13px] transition-colors hover:bg-accent/60 hover:text-foreground";
+	"flex h-7 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] transition-colors hover:bg-white/[0.05] hover:text-foreground";
 
 /**
  * The repos you keep on this machine, Superset-style: add one from disk once,
@@ -175,7 +175,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									onClick={() => toggle(project.id)}
 									className={cn(
 										ROW,
-										"h-[30px] min-w-0 flex-1 text-soft-foreground",
+										"h-[26px] min-w-0 flex-1 text-soft-foreground",
 										isOpen && "text-foreground",
 									)}
 								>
