@@ -12,7 +12,6 @@ import {
 } from "react";
 import { LuChevronRight, LuSquareTerminal } from "react-icons/lu";
 import { MarkdownRenderer } from "renderer/components/MarkdownRenderer";
-import { isHotkey } from "renderer/hotkeys";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { draftFor, useChatDrafts } from "renderer/stores/chat-drafts";
 import { useCompacting } from "renderer/stores/compacting";
@@ -1325,9 +1324,8 @@ export function ChatView({
 			className="flex min-h-0 flex-1 flex-col"
 			onKeyDown={(event) => {
 				const el = scrollRef.current;
-				const top = isHotkey("CHAT_TO_TOP", event.nativeEvent);
-				if (!el || (!top && !isHotkey("CHAT_TO_BOTTOM", event.nativeEvent)))
-					return;
+				const top = event.key === "PageUp";
+				if (!el || (!top && event.key !== "PageDown")) return;
 				event.preventDefault();
 				el.scrollTop = top ? 0 : el.scrollHeight;
 			}}
@@ -1831,7 +1829,7 @@ function Composer({
 								void send();
 							}
 						}}
-						placeholder={bash ? "Run a shell command" : "Reply to Claude"}
+						placeholder={bash ? "Run a shell command" : placeholder}
 						className={cn(
 							"block max-h-[220px] w-full resize-none bg-transparent text-[13.5px] leading-relaxed text-foreground outline-none placeholder:text-faint-foreground",
 							bash && "font-mono",
@@ -1842,12 +1840,12 @@ function Composer({
 					<button
 						type="button"
 						title="Show sessions as their terminal (Settings > Appearance)"
-							className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-secondary hover:text-foreground"
-						>
-							<LuSquareTerminal className="size-3.5" />
-							Terminal View
-						</button>
-					)}
+						onClick={() => setChat(false)}
+						className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-secondary hover:text-foreground"
+					>
+						<LuSquareTerminal className="size-3.5" />
+						Terminal View
+					</button>
 					{bash ? (
 						<span className="text-[11px] text-pink-500">
 							Bash mode · Backspace on empty to exit

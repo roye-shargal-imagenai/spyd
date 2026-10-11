@@ -200,7 +200,8 @@ export const ROW_PRIMARY_BUTTON = `shrink-0 rounded-md px-3 py-1 text-xs font-se
 export const ROW_START_BUTTON = `${ROW_REVEAL} shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-[filter] disabled:opacity-40 ${BUTTON.primary}`;
 
 /** Same, for a row whose session is live - blue, the board's "working". */
-export const ROW_LIVE_BUTTON = "shrink-0 rounded-md border border-border px-3 py-1 text-xs font-medium text-working-ink transition-colors hover:bg-secondary";
+export const ROW_LIVE_BUTTON =
+	"shrink-0 rounded-md border border-border px-3 py-1 text-xs font-medium text-working-ink transition-colors hover:bg-secondary";
 
 /** Low-signal row metadata - a date, a project key. Text, not another chip. */
 export const ROW_META = "text-[11px] text-muted-foreground";

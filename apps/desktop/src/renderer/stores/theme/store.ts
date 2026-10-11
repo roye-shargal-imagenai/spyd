@@ -399,9 +399,9 @@ export const useThemeStore = create<ThemeState>()(
 				},
 			}),
 			{
-								name: "theme-storage",
+				name: "theme-storage",
 				storage: trpcThemeStorage,
-								// v2: Spider ink became the default. Whoever was on an earlier
+				// v2: Spider ink became the default. Whoever was on an earlier
 				// default (the dark Spider, then Paper) moves with it, once; a
 				// theme you picked yourself stays.
 				version: 2,
