@@ -361,6 +361,14 @@ export function summarizeTranscript(
 	};
 }
 
+/** Whether `cwd` is one of `dirs` or somewhere under one. */
+export function isInside(cwd: string | null, dirs: string[]): boolean {
+	if (!cwd) return false;
+	return dirs.some(
+		(dir) => cwd === dir || cwd.startsWith(dir.endsWith("/") ? dir : `${dir}/`),
+	);
+}
+
 function titleFor(
 	cardTitle: string | null,
 	aiTitle: string | null,
@@ -371,6 +379,46 @@ function titleFor(
 	if (aiTitle) return aiTitle;
 	if (prompt) return oneLine(prompt).slice(0, 120);
 	return `session ${sessionId.slice(0, 8)}`;
+}
+
+/**
+ * The newest conversation Claude ran in `dir`, by its transcript - what
+ * Settings > Storage offers to resume when a worktree has nothing on Home.
+ * Claude files transcripts under the folder's path with every
+ * non-alphanumeric character turned into a hyphen.
+ */
+export async function latestSessionIn(
+	dir: string,
+	root: string = projectsRoot(),
+): Promise<{ sessionId: string; title: string; updatedAt: number } | null> {
+	const folder = join(root, dir.replace(/[^a-zA-Z0-9]/g, "-"));
+	let newest: { name: string; at: number } | null = null;
+	try {
+		for (const name of await readdir(folder)) {
+			if (!name.endsWith(".jsonl")) continue;
+			const at = (await stat(join(folder, name))).mtimeMs;
+			if (!newest || at > newest.at) newest = { name, at };
+		}
+		if (!newest) return null;
+		const sessionId = newest.name.slice(0, -".jsonl".length);
+		const summary = summarizeTranscript(
+			await readFile(join(folder, newest.name), "utf-8"),
+			[],
+		);
+		if (!summary.aiTitle && !summary.prompt) return null;
+		return {
+			sessionId,
+			title: titleFor(
+				summary.cardTitle,
+				summary.aiTitle,
+				summary.prompt,
+				sessionId,
+			),
+			updatedAt: newest.at,
+		};
+	} catch {
+		return null; // no transcripts for this folder
+	}
 }
 
 /**
@@ -421,6 +469,7 @@ export async function searchSessions({
 	maxFiles = 400,
 	root = projectsRoot(),
 	people = new Map(),
+	odinDirs = [],
 	cursor = 0,
 }: {
 	query?: string;
@@ -431,6 +480,11 @@ export async function searchSessions({
 	root?: string;
 	/** session id → who asked, for the sessions Odin launched off a feed. */
 	people?: Map<string, SessionPerson>;
+	/**
+	 * Folders only Odin works in - its worktrees. A session there is Odin's
+	 * even when you typed the prompt yourself, which the launch marker misses.
+	 */
+	odinDirs?: string[];
 } = {}): Promise<{
 	sessions: SessionSummary[];
 	scanned: number;
@@ -483,7 +537,7 @@ export async function searchSessions({
 			if (!summary.aiTitle && !summary.prompt) continue;
 			// Not launched from Odin - a conversation from some other terminal,
 			// which this board never tracked and can't resume into a card.
-			if (!summary.fromOdin) continue;
+			if (!summary.fromOdin && !isInside(summary.cwd, odinDirs)) continue;
 			// Matched only in injected context or tool output - not a real hit.
 			if (
 				terms.length > 0 &&

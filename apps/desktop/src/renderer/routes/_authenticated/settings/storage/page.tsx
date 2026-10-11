@@ -3,9 +3,11 @@ import { cn } from "@odin/ui/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import type { WorktreeUsage } from "lib/trpc/routers/workspaces/procedures/delete";
 import { useEffect, useMemo, useState } from "react";
-import { HiCheck, HiOutlineTrash } from "react-icons/hi2";
+import { HiArrowPath, HiCheck, HiOutlineTrash } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useTabsStore } from "renderer/stores/tabs/store";
 import { BUTTON } from "../../_odin/components/pill";
+import { useResumeSession } from "../../_odin/hooks/useResumeSession";
 import { SettingsPage } from "../components/SettingsPage";
 
 export const Route = createFileRoute("/_authenticated/settings/storage/")({
@@ -43,6 +45,17 @@ const isStale = (w: WorktreeUsage) =>
 		w.prState === "merged" ||
 		w.prState === "closed");
 
+/** Whether a session on Home is working in this worktree right now. */
+function useOnHome(): (w: WorktreeUsage) => boolean {
+	const panes = useTabsStore((s) => s.panes);
+	return (w) =>
+		Object.values(panes).some((pane) => {
+			if (pane.type !== "terminal" || pane.completed) return false;
+			const cwd = pane.odinCwd ?? pane.cwd ?? pane.initialCwd ?? "";
+			return cwd === w.path || cwd.startsWith(`${w.path}/`);
+		});
+}
+
 const sum = (rows: WorktreeUsage[]) =>
 	rows.reduce((total, w) => total + (w.bytes ?? 0), 0);
 
@@ -54,6 +67,8 @@ function StorageSettingsPage() {
 	});
 	const deleteWorkspace = electronTrpc.workspaces.delete.useMutation();
 	const deleteWorktree = electronTrpc.workspaces.deleteWorktree.useMutation();
+	const onHome = useOnHome();
+	const { resume, isResuming } = useResumeSession();
 
 	// Oldest first: that's what you're here to clear out.
 	const rows = useMemo(
@@ -260,6 +275,21 @@ function StorageSettingsPage() {
 								checked={selected.has(w.worktreeId)}
 								disabled={busy}
 								onToggle={() => toggle(w.worktreeId)}
+								// Its conversation ended but the folder stayed: offer it back.
+								onResume={
+									w.lastSession && !onHome(w)
+										? () => {
+												const last = w.lastSession;
+												if (last)
+													void resume({
+														sessionId: last.sessionId,
+														cwd: w.path,
+														title: last.title,
+													});
+											}
+										: undefined
+								}
+								resuming={isResuming}
 							/>
 						))}
 					</div>
@@ -280,14 +310,19 @@ function WorktreeRow({
 	checked,
 	disabled,
 	onToggle,
+	onResume,
+	resuming,
 }: {
 	worktree: WorktreeUsage;
 	checked: boolean;
 	disabled: boolean;
 	onToggle: () => void;
+	onResume?: () => void;
+	resuming: boolean;
 }) {
 	const tags = [
 		w.liveTerminals > 0 && { label: "Running", tone: "text-working-ink" },
+		onResume && { label: "Not on Home", tone: "text-muted-foreground" },
 		w.hasChanges && { label: "Unsaved changes", tone: "text-attention-ink" },
 		w.hasUnpushedCommits && {
 			label: "Unpushed commits",
@@ -341,6 +376,26 @@ function WorktreeRow({
 					))}
 				</span>
 			</span>
+			{onResume && (
+				<button
+					type="button"
+					disabled={resuming || disabled}
+					title={`Not on Home - resume "${w.lastSession?.title ?? w.name}"`}
+					onClick={(event) => {
+						// Inside the row's label: don't tick the checkbox too.
+						event.preventDefault();
+						event.stopPropagation();
+						onResume();
+					}}
+					className={cn(
+						"flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-medium disabled:opacity-40",
+						BUTTON.secondary,
+					)}
+				>
+					<HiArrowPath className="size-3.5" />
+					Resume
+				</button>
+			)}
 			<span className="w-16 shrink-0 text-right text-[13px] tabular-nums text-soft-foreground">
 				{formatBytes(w.bytes)}
 			</span>

@@ -7,6 +7,7 @@ import { useBacklogReview } from "./useBacklogReview";
 import { useSetSlackDone } from "./useOdinFeeds";
 import { useOdinProfile } from "./useOdinProfile";
 import { usePaneMeta } from "./usePaneMeta";
+import { useResumeSession } from "./useResumeSession";
 
 /** What Done needs off a row: its All-feed key, and enough to list it later. */
 export interface Doable {
@@ -29,13 +30,30 @@ export function endSession(paneId: string) {
 
 /**
  * The X on a session row: end it and put it away. Its conversation stays on
- * disk, so the Archive can bring it back.
+ * disk, so Undo - or the Archive, any time later - resumes it right where it
+ * left off.
  */
-export function archiveSession(paneId: string, title: string) {
-	endSession(paneId);
-	toast.success(`Archived - ${title.slice(0, 50)}`, {
-		description: "Resume it any time from the Archive.",
-	});
+export function useArchiveSession() {
+	const { resume } = useResumeSession();
+	return (paneId: string, title: string) => {
+		const pane = useTabsStore.getState().panes[paneId];
+		const sessionId =
+			pane?.claudeSessionId ??
+			usePaneMeta.getState().sessionIdByPane[paneId] ??
+			null;
+		const cwd = pane?.odinCwd ?? pane?.cwd ?? pane?.initialCwd ?? null;
+		endSession(paneId);
+		toast.success(`Archived - ${title.slice(0, 50)}`, {
+			description: "Resume it any time from the Archive.",
+			duration: 8_000,
+			...(sessionId && {
+				action: {
+					label: "Undo",
+					onClick: () => void resume({ sessionId, cwd, title }),
+				},
+			}),
+		});
+	};
 }
 
 /**

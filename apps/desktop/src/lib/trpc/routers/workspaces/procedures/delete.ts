@@ -7,6 +7,7 @@ import { projects, workspaces, worktrees } from "@odin/local-db";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { track } from "main/lib/analytics";
+import { latestSessionIn } from "main/lib/claude-sessions";
 import { localDb } from "main/lib/local-db";
 import { workspaceInitManager } from "main/lib/workspace-init-manager";
 import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
@@ -85,6 +86,8 @@ export interface WorktreeUsage {
 	hasUnpushedCommits: boolean;
 	liveTerminals: number;
 	prState: "open" | "draft" | "merged" | "closed" | null;
+	/** The newest conversation that ran here - resumable when Home lost it. */
+	lastSession: { sessionId: string; title: string; updatedAt: number } | null;
 }
 
 export const createDeleteProcedures = () => {
@@ -112,17 +115,19 @@ export const createDeleteProcedures = () => {
 				try {
 					touched = statSync(row.path).mtimeMs;
 				} catch {}
-				const [bytes, hasChanges, unpushed, liveTerminals] = await Promise.all([
-					folderBytes(row.path),
-					hasUncommittedChanges(row.path).catch(() => true),
-					hasUnpushedCommits(row.path).catch(() => true),
-					workspace
-						? getWorkspaceRuntimeRegistry()
-								.getForWorkspaceId(workspace.id)
-								.terminal.getSessionCountByWorkspaceId(workspace.id)
-								.catch(() => 0)
-						: Promise.resolve(0),
-				]);
+				const [bytes, hasChanges, unpushed, liveTerminals, lastSession] =
+					await Promise.all([
+						folderBytes(row.path),
+						hasUncommittedChanges(row.path).catch(() => true),
+						hasUnpushedCommits(row.path).catch(() => true),
+						workspace
+							? getWorkspaceRuntimeRegistry()
+									.getForWorkspaceId(workspace.id)
+									.terminal.getSessionCountByWorkspaceId(workspace.id)
+									.catch(() => 0)
+							: Promise.resolve(0),
+						latestSessionIn(row.path),
+					]);
 				return {
 					worktreeId: row.id,
 					workspaceId: workspace?.id ?? null,
@@ -141,6 +146,7 @@ export const createDeleteProcedures = () => {
 					hasUnpushedCommits: unpushed,
 					liveTerminals,
 					prState: row.githubStatus?.pr?.state ?? null,
+					lastSession,
 				};
 			});
 		}),

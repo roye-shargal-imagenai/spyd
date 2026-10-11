@@ -1,8 +1,11 @@
-import { workLog } from "@odin/local-db";
+import { join } from "node:path";
+import { workLog, worktrees } from "@odin/local-db";
 import { desc } from "drizzle-orm";
+import { ODIN_HOME_DIR } from "main/lib/app-environment";
 import { appState } from "main/lib/app-state";
 import type { SessionPerson } from "main/lib/claude-sessions";
 import { localDb } from "main/lib/local-db";
+import { WORKTREES_DIR_NAME } from "shared/constants";
 import { profileOf } from "shared/odin-profile";
 
 /**
@@ -75,4 +78,23 @@ export function sessionProfileOf(): (sessionId: string) => string {
 		console.warn("[session-people] work log unreadable:", error);
 	}
 	return (sessionId) => profiles.get(sessionId) ?? profileOf(null);
+}
+
+/**
+ * Every folder only Odin works in: its worktrees, wherever a project keeps
+ * them. A conversation that ran in one is Odin's, so the Archive lists it -
+ * including one you started by typing the prompt yourself.
+ */
+export function odinWorktreeDirs(): string[] {
+	const dirs = [join(ODIN_HOME_DIR, WORKTREES_DIR_NAME)];
+	try {
+		for (const row of localDb
+			.select({ path: worktrees.path })
+			.from(worktrees)
+			.all())
+			dirs.push(row.path);
+	} catch (error) {
+		console.warn("[session-people] worktrees unreadable:", error);
+	}
+	return dirs;
 }

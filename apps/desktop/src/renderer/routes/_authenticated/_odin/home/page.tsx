@@ -19,7 +19,7 @@ import {
 } from "../components/RecentSessions";
 import { StatusGlyph, useSidebarSessions } from "../components/SessionList";
 import { SessionPane, useHomeSelection } from "../components/SessionPane";
-import { archiveSession, endSession } from "../hooks/useDone";
+import { endSession } from "../hooks/useDone";
 import { usePaneMeta } from "../hooks/usePaneMeta";
 import { usePendingFocus } from "../hooks/usePendingFocus";
 import { useSessionGist } from "../hooks/useSessionGist";
@@ -323,7 +323,7 @@ function ListRow({
 						>
 							{entry.title}
 						</span>
-						<span className="shrink-0 text-[12px] tabular-nums text-faint-foreground group-hover/row:invisible">
+						<span className="shrink-0 text-[12px] tabular-nums text-faint-foreground transition-[visibility] group-hover/row:invisible group-hover/row:delay-500">
 							{ago(entry.pane.odinStatusAt)}
 						</span>
 					</span>
@@ -340,8 +340,8 @@ function ListRow({
 				</span>
 			</button>
 			<ArchiveButton
+				paneId={entry.pane.id}
 				title={entry.title}
-				onArchive={() => archiveSession(entry.pane.id, entry.title)}
 				className="absolute top-[7px] right-1.5"
 			/>
 		</div>

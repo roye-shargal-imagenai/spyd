@@ -415,11 +415,14 @@ export const createTerminalRouter = () => {
 			)
 			.query(async ({ input }) => {
 				const { searchSessions } = await import("main/lib/claude-sessions");
-				const { sessionPeople } = await import("./session-people");
+				const { sessionPeople, odinWorktreeDirs } = await import(
+					"./session-people"
+				);
 				return searchSessions({
 					...input,
 					cursor: input.cursor ?? 0,
 					people: sessionPeople(),
+					odinDirs: odinWorktreeDirs(),
 				});
 			}),
 

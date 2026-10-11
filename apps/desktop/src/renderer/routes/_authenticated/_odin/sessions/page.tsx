@@ -1,17 +1,14 @@
-import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLaunchTaskSession } from "renderer/hooks/useLaunchTaskSession";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { ROW_PRIMARY_BUTTON, useSearchHotkey } from "../components/FeedChrome";
 import { PersonChip } from "../components/PersonChip";
 import { BUTTON, PILL } from "../components/pill";
 import { Highlight, TranscriptView } from "../components/TranscriptView";
-import { useOdinWorkspace } from "../hooks/useOdinWorkspace";
 import { usePaneMeta } from "../hooks/usePaneMeta";
-import { usePendingFocus } from "../hooks/usePendingFocus";
+import { useResumeSession } from "../hooks/useResumeSession";
 import { liveConversationIds } from "./live-sessions";
 import { provenanceLabel } from "./provenance";
 import { agoLabel, repoLabel } from "./row-labels";
@@ -62,8 +59,7 @@ function SessionsPage() {
 	const [draft, setDraft] = useState(handoff.q ?? "");
 	const [query, setQuery] = useState(handoff.q?.trim() ?? "");
 	const [openRow, setOpenRow] = useState<SessionRow | null>(null);
-	const { ensureWorkspace } = useOdinWorkspace();
-	const { launch, isLaunching } = useLaunchTaskSession();
+	const { resume: resumeSession, isResuming: isLaunching } = useResumeSession();
 	const { ref: inputRef, hint } = useSearchHotkey();
 
 	// Search all again while already here: take its query over.
@@ -173,42 +169,14 @@ function SessionsPage() {
 		return () => observer.disconnect();
 	}, [hasNextPage, isFetching, fetchNextPage]);
 
-	/**
-	 * Resume a found session: a fresh pane running `claude --resume <id>` in the
-	 * session's own directory (its original pane is long gone), then over to the
-	 * board where every live session lives.
-	 */
-	const resume = async (row: SessionRow) => {
-		if (!row.cwd) {
-			toast.error(
-				"This transcript has no recorded directory - can't resume it",
-			);
-			return;
-		}
-		const ensured = await ensureWorkspace(row.cwd);
-		if (!ensured.ok) {
-			toast.error(ensured.error);
-			return;
-		}
-		const result = await launch({
-			workspaceId: ensured.workspace.id,
+	/** Resume a found session - its original pane is long gone. */
+	const resume = (row: SessionRow) =>
+		resumeSession({
+			sessionId: row.sessionId,
+			cwd: row.cwd,
 			title: row.title,
-			description: null,
-			resumeSessionId: row.sessionId,
-			// `claude --resume <id>` only finds the conversation from the directory
-			// it ran in, and the workspace is the repo root - a session that ran in
-			// a worktree or a subdirectory resumed into "No conversation found".
-			repoPath: row.cwd,
-			brief: row.prompt,
+			prompt: row.prompt,
 		});
-		if (!result.ok) {
-			toast.error(result.error);
-			return;
-		}
-		usePendingFocus.getState().focus(result.paneId);
-		toast.success(`Resuming "${row.title}"`);
-		navigate({ to: "/home" });
-	};
 
 	return (
 		<div className="flex h-full flex-col">

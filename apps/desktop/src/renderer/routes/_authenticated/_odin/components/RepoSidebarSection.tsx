@@ -12,7 +12,6 @@ import {
 } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
-import { archiveSession } from "../hooks/useDone";
 import { usePendingFocus } from "../hooks/usePendingFocus";
 import { useSessionGist } from "../hooks/useSessionGist";
 import type { SessionEntry } from "../hooks/useSessionSections";
@@ -291,8 +290,8 @@ function SidebarSessionRow({
 				</span>
 			</button>
 			<ArchiveButton
+				paneId={entry.pane.id}
 				title={entry.title}
-				onArchive={() => archiveSession(entry.pane.id, entry.title)}
 				className="absolute top-[3px] right-1"
 			/>
 		</div>

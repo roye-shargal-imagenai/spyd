@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { PR_RULES_HEADER } from "shared/odin-rules";
 import {
 	activeLoop,
+	latestSessionIn,
 	parseTranscript,
 	queryTerms,
 	readTranscript,
@@ -399,6 +400,31 @@ describe("searchSessions", () => {
 			"Fix NERDtree invalid path error",
 		);
 		expect(sessions).toHaveLength(2);
+	});
+
+	test("lists a typed session that ran in an Odin worktree", async () => {
+		const root = fixtureRoot();
+		const project = join(root, "-Users-dan-dev-private-odin");
+		// Started from New workspace with your own words - no launch marker, but
+		// it ran in a folder only Odin works in, so the Archive must keep it.
+		writeFileSync(
+			join(project, "ffff1111-2222-3333-4444-555566667777.jsonl"),
+			[user("PR 123 color models table"), assistant("On it.")].join("\n"),
+		);
+		const titles = async (odinDirs: string[]) =>
+			(await searchSessions({ root, odinDirs })).sessions.map((s) => s.title);
+		expect(await titles([])).not.toContain("PR 123 color models table");
+		expect(await titles([CWD])).toContain("PR 123 color models table");
+		expect(await titles([`${CWD}-other`])).not.toContain(
+			"PR 123 color models table",
+		);
+	});
+
+	test("latestSessionIn finds the newest conversation in a folder", async () => {
+		const root = fixtureRoot();
+		const latest = await latestSessionIn(CWD, root);
+		expect(latest?.title).toBeTruthy();
+		expect(await latestSessionIn("/nowhere/at/all", root)).toBeNull();
 	});
 
 	test("finds a session by who asked, though the name is nowhere in it", async () => {

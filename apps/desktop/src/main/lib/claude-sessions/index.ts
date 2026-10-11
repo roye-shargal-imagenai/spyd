@@ -1,6 +1,7 @@
 export { BEAT_MS, readAttention, recordBeat } from "./attention";
 export {
 	firstPrompt,
+	latestSessionIn,
 	listTranscripts,
 	type PendingTool,
 	parseTranscript,
