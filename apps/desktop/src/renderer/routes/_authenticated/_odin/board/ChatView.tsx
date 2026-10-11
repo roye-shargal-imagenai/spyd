@@ -796,10 +796,7 @@ export function ChatView({
 			>
 				<div className="flex flex-col gap-2.5">
 					{starting ? (
-						<div className="flex items-center gap-3 text-[12.5px] text-working">
-							<OdinMark className="animate-[odin-nod_1.6s_ease-in-out_infinite]" />
-							Starting session…
-						</div>
+						<StartingNote />
 					) : (
 						missing &&
 						items.length === 0 && (
@@ -1102,6 +1099,29 @@ function Composer({
 					)}
 				</div>
 			</div>
+		</div>
+	);
+}
+
+/**
+ * A live session with nothing said yet. Claude is up within a second or two;
+ * past that it's waiting on you, not the other way round - so say that
+ * instead of spinning forever over an empty conversation.
+ */
+function StartingNote() {
+	const [waited, setWaited] = useState(false);
+	useEffect(() => {
+		const timer = setTimeout(() => setWaited(true), 2500);
+		return () => clearTimeout(timer);
+	}, []);
+	return waited ? (
+		<div className="text-[12.5px] text-muted-foreground">
+			Claude is ready. Say what to do below.
+		</div>
+	) : (
+		<div className="flex items-center gap-3 text-[12.5px] text-working">
+			<OdinMark className="animate-[odin-nod_1.6s_ease-in-out_infinite]" />
+			Starting session…
 		</div>
 	);
 }

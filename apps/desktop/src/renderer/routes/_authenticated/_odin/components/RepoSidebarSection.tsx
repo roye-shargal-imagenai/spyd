@@ -13,6 +13,7 @@ import {
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { usePendingFocus } from "../hooks/usePendingFocus";
+import { useSessionGist } from "../hooks/useSessionGist";
 import type { SessionEntry } from "../hooks/useSessionSections";
 import {
 	type PendingWorkspace,
@@ -143,7 +144,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 						onClick={() => openNew.mutate()}
 						className="flex size-[22px] items-center justify-center rounded-full hover:bg-accent/60 hover:text-foreground disabled:opacity-50"
 					>
-						<HiOutlinePlus className="size-3.5" />
+						<HiOutlinePlus className="size-3" strokeWidth={2.2} />
 					</button>
 				</span>
 			</div>
@@ -204,9 +205,9 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									aria-label={`New workspace in ${project.name}`}
 									title={`New workspace in ${project.name} (⌥-click to describe it first)`}
 									onClick={(event) => newWorkspace(project, event)}
-									className="-ml-8 flex size-[26px] shrink-0 items-center justify-center rounded-full text-faint-foreground opacity-0 transition-[opacity,color] hover:bg-primary hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100"
+									className="-ml-8 flex size-[22px] shrink-0 items-center justify-center rounded-[5px] border border-border bg-secondary text-muted-foreground opacity-0 transition-[opacity,color,background-color] hover:border-transparent hover:bg-primary hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100"
 								>
-									<HiOutlinePlus className="size-3.5" />
+									<HiOutlinePlus className="size-3" strokeWidth={2.2} />
 								</button>
 							</div>
 							{isOpen && (
@@ -234,27 +235,11 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 										</button>
 									)}
 									{sessions.map((entry) => (
-										<button
+										<SidebarSessionRow
 											key={entry.pane.id}
-											type="button"
-											title={entry.title}
-											onClick={() => openSession(entry.pane.id)}
-											className={cn(
-												ROW,
-												"h-7 text-[12px] text-soft-foreground",
-											)}
-										>
-											<span
-												aria-hidden
-												className={cn(
-													"size-[7px] shrink-0 rounded-full",
-													SESSION_DOT[entry.column] ?? SESSION_DOT.idle,
-												)}
-											/>
-											<span className="min-w-0 flex-1 truncate">
-												{entry.title}
-											</span>
-										</button>
+											entry={entry}
+											onOpen={() => openSession(entry.pane.id)}
+										/>
 									))}
 								</div>
 							)}
@@ -264,6 +249,44 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 
 			<NewWorkspaceDialog projects={projects} />
 		</div>
+	);
+}
+
+/** A session under its repo: its name, and a line of what it's doing. */
+function SidebarSessionRow({
+	entry,
+	onOpen,
+}: {
+	entry: SessionEntry;
+	onOpen: () => void;
+}) {
+	const gist = useSessionGist(entry);
+	return (
+		<button
+			type="button"
+			title={gist ? `${entry.title}\n${gist}` : entry.title}
+			onClick={onOpen}
+			className={cn(
+				ROW,
+				"h-auto min-h-7 items-start py-1 text-[12px] text-soft-foreground",
+			)}
+		>
+			<span
+				aria-hidden
+				className={cn(
+					"mt-[5px] size-[7px] shrink-0 rounded-full",
+					SESSION_DOT[entry.column] ?? SESSION_DOT.idle,
+				)}
+			/>
+			<span className="flex min-w-0 flex-1 flex-col">
+				<span className="truncate">{entry.title}</span>
+				{gist && (
+					<span className="truncate text-[11px] text-faint-foreground">
+						{gist}
+					</span>
+				)}
+			</span>
+		</button>
 	);
 }
 

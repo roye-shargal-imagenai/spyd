@@ -165,6 +165,7 @@ export function SessionPane({
 	// Opening an ended session is asking to work in it: bring it back once,
 	// on arrival, instead of showing a dead end.
 	const [autoTried, setAutoTried] = useState(false);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: once per pane, on arrival
 	useEffect(() => {
 		if (daemon === undefined || alive || autoTried || !tab) return;
 		setAutoTried(true);
@@ -179,20 +180,25 @@ export function SessionPane({
 				return resume();
 			})
 			.catch(() => {});
-		// biome-ignore lint/correctness/useExhaustiveDependencies: once per pane, on arrival
-	}, [daemon, alive, tab, autoTried, resume]);
+	}, [daemon, alive, tab, autoTried]);
 
 	// A live PTY must mount clean: a cached xterm or a cold-restore marker
 	// from an earlier view leaves it read-only and keystrokes vanish (the
 	// Dev Board's drawer does the same before it opens one).
-	const [mounted, setMounted] = useState(false);
+	// Keyed on `alive` too: a new session turns alive after this pane is up,
+	// and cleaning after the terminal had mounted wiped the one it just drew
+	// - blank until you left the page and came back. So the terminal waits
+	// for the clean that matches its current state.
+	const cleanKey = `${pane.id}:${alive ? 1 : 0}`;
+	const [cleanedKey, setCleanedKey] = useState<string | null>(null);
+	const mounted = cleanedKey === cleanKey;
 	useEffect(() => {
 		if (pane.type === "terminal" && alive) {
 			coldRestoreState.delete(pane.id);
 			terminalCache.dispose(pane.id);
 		}
-		setMounted(true);
-	}, [pane.id, pane.type, alive]);
+		setCleanedKey(cleanKey);
+	}, [cleanKey, pane.id, pane.type, alive]);
 
 	const interrupt = () => {
 		write.mutate({ paneId: pane.id, data: "\x03" });

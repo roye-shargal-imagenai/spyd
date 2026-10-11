@@ -31,6 +31,8 @@ export interface PendingWorkspace {
 	error?: string;
 	/** What the worktree job is doing right now, in its own words. */
 	detail?: string;
+	/** The worktree job's own stage (syncing, creating_worktree, ...). */
+	stage?: string;
 }
 
 /**
@@ -87,8 +89,10 @@ export function useStartWorkspace() {
 			});
 			// No progress = the init job finished and was cleared.
 			if (!progress || progress.step === "ready") return null;
-			if (progress.message)
-				usePendingWorkspaces.getState().patch(id, { detail: progress.message });
+			usePendingWorkspaces.getState().patch(id, {
+				detail: progress.message,
+				stage: progress.step,
+			});
 			if (progress.step === "failed")
 				return progress.error ?? progress.message ?? "Worktree setup failed";
 		}
@@ -101,6 +105,12 @@ export function useStartWorkspace() {
 		const store = usePendingWorkspaces.getState();
 		const fail = (error: string) => store.patch(id, { step: "failed", error });
 		store.patch(id, { step: "worktree", error: undefined });
+		// Where the seconds go, in the console: the open flow has to be fast.
+		const t0 = performance.now();
+		const lap = (what: string) =>
+			console.info(
+				`[new-session] ${what} at ${((performance.now() - t0) / 1000).toFixed(1)}s`,
+			);
 		try {
 			const created = await create.mutateAsync({
 				projectId: project.id,
@@ -112,6 +122,7 @@ export function useStartWorkspace() {
 				const error = await waitUntilReady(id, created.workspace.id);
 				if (error) return fail(error);
 			}
+			lap("worktree ready");
 			void utils.workspaces.getAll.invalidate();
 			store.patch(id, { step: "agent", detail: "Opening Claude" });
 			const title = sessionTitle(prompt, created.workspace.branch);
@@ -125,6 +136,7 @@ export function useStartWorkspace() {
 				noPrompt: !prompt && images.length === 0,
 			});
 			if (!result.ok) return fail(result.error);
+			lap("claude started");
 			usePaneMeta.getState().setBrief(result.paneId, prompt || title);
 			usePaneMeta.getState().setTitle(result.paneId, title);
 			usePaneMeta.getState().setSessionId(result.paneId, result.sessionId);

@@ -27,23 +27,26 @@ export function PendingSession({ item }: { item: PendingWorkspace }) {
 	}, [failed]);
 	const seconds = ((Date.now() - started) / 1000).toFixed(1);
 	const { project, branch } = item.request;
-	const steps: {
-		key: PendingWorkspace["step"];
-		label: string;
-		command: string;
-	}[] = [
+	const base = project.defaultBranch ?? "main";
+	const where = `~/.odin/worktrees/${project.name}/${branch || "<branch>"}`;
+	const steps: { label: string; command: string }[] = [
+		{ label: "Sync with remote", command: `git fetch origin ${base}` },
 		{
-			key: "worktree",
 			label: "Create the worktree",
-			command: `git fetch origin && git worktree add ~/.odin/worktrees/${project.name}/${branch || "<new-branch>"}`,
+			command: `git worktree add -b ${branch || "<branch>"} ${where} origin/${base}`,
 		},
-		{
-			key: "agent",
-			label: "Start Claude",
-			command: claudeCli(),
-		},
+		{ label: "Copy config", command: "cp .env* .odin/ into the worktree" },
+		{ label: "Start Claude", command: claudeCli() },
 	];
-	const at = steps.findIndex((step) => step.key === item.step);
+	// Which step is running, from the worktree job's own stage.
+	const at =
+		item.step === "agent"
+			? 3
+			: item.stage === "copying_config" || item.stage === "finalizing"
+				? 2
+				: item.stage === "creating_worktree"
+					? 1
+					: 0;
 	return (
 		<div className="flex h-full min-h-0 flex-col">
 			<div className="shrink-0 border-b border-border px-[18px] py-3">
@@ -58,7 +61,7 @@ export function PendingSession({ item }: { item: PendingWorkspace }) {
 					const done = !failed && i < at;
 					const now = !failed && i === at;
 					return (
-						<div key={step.key} className="flex flex-col gap-1">
+						<div key={step.label} className="flex flex-col gap-1">
 							<div
 								className={cn(
 									"flex items-center gap-2",

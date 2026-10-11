@@ -2,9 +2,10 @@ import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { HiPlus } from "react-icons/hi2";
+import { HiChevronRight, HiPlus } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { openUrl } from "renderer/stores/in-app-browser";
+import { create } from "zustand";
 import { InlineAsk } from "../components/InlineAsk";
 import { useNewWorkspaceDialog } from "../components/NewWorkspaceDialog";
 import { PENDING, PendingSession } from "../components/PendingSession";
@@ -20,6 +21,7 @@ import { SessionPane, useHomeSelection } from "../components/SessionPane";
 import { endSession } from "../hooks/useDone";
 import { usePaneMeta } from "../hooks/usePaneMeta";
 import { usePendingFocus } from "../hooks/usePendingFocus";
+import { useSessionGist } from "../hooks/useSessionGist";
 import type { SessionEntry } from "../hooks/useSessionSections";
 import { usePendingWorkspaces } from "../hooks/useStartWorkspace";
 
@@ -42,6 +44,20 @@ const GROUPS: { column: string; title: string }[] = [
 	{ column: "idle", title: "Idle" },
 ];
 
+/** Which Home groups are folded shut. Per window, like scroll position. */
+const useFoldedGroups = create<{
+	folded: string[];
+	toggle: (column: string) => void;
+}>((set) => ({
+	folded: [],
+	toggle: (column) =>
+		set((s) => ({
+			folded: s.folded.includes(column)
+				? s.folded.filter((c) => c !== column)
+				: [...s.folded, column],
+		})),
+}));
+
 function HomePage() {
 	const { sessions, ready } = useSidebarSessions();
 	const selectedId = useHomeSelection((s) => s.paneId);
@@ -60,6 +76,8 @@ function HomePage() {
 			? null
 			: (sessions.find((s) => s.pane.id === selectedId) ?? sessions[0] ?? null);
 	const listRef = useRef<HTMLDivElement>(null);
+	const folded = useFoldedGroups((s) => s.folded);
+	const toggleGroup = useFoldedGroups((s) => s.toggle);
 
 	// Something elsewhere (Tasks, a toast) asked to open a session: open it here.
 	const pendingPaneId = usePendingFocus((s) => s.paneId);
@@ -159,25 +177,37 @@ function HomePage() {
 					const urgent = group.column === "permission";
 					return (
 						<section key={group.column}>
-							<h2
+							<button
+								type="button"
+								onClick={() => toggleGroup(group.column)}
+								aria-expanded={!folded.includes(group.column)}
 								className={cn(
-									"sticky top-0 z-10 flex items-baseline gap-2 bg-background/95 px-2.5 pt-[18px] pb-1.5 text-[12px] font-semibold backdrop-blur",
-									urgent ? "text-attention-ink" : "text-muted-foreground",
+									"group/head sticky top-0 z-10 flex w-full items-center gap-1.5 bg-background/95 px-2.5 pt-4 pb-1.5 text-left text-[12px] font-semibold backdrop-blur transition-colors",
+									urgent
+										? "text-attention-ink"
+										: "text-muted-foreground hover:text-foreground",
 								)}
 							>
-								{group.title}
-								<span className="font-normal tabular-nums text-faint-foreground">
+								<HiChevronRight
+									className={cn(
+										"size-3 shrink-0 opacity-60 transition-transform duration-150 group-hover/head:opacity-100",
+										!folded.includes(group.column) && "rotate-90",
+									)}
+								/>
+								<span className="flex-1">{group.title}</span>
+								<span className="rounded-[4px] bg-secondary px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground">
 									{items.length}
 								</span>
-							</h2>
-							{items.map((entry) => (
-								<ListRow
-									key={entry.pane.id}
-									entry={entry}
-									selected={entry.pane.id === selected?.pane.id}
-									onSelect={() => select(entry.pane.id)}
-								/>
-							))}
+							</button>
+							{!folded.includes(group.column) &&
+								items.map((entry) => (
+									<ListRow
+										key={entry.pane.id}
+										entry={entry}
+										selected={entry.pane.id === selected?.pane.id}
+										onSelect={() => select(entry.pane.id)}
+									/>
+								))}
 						</section>
 					);
 				})}
@@ -264,6 +294,7 @@ function ListRow({
 	onSelect: () => void;
 }) {
 	const { repo } = useWork(entry);
+	const gist = useSessionGist(entry);
 	const waiting = entry.column === "permission";
 	return (
 		<button
@@ -271,8 +302,10 @@ function ListRow({
 			data-pane={entry.pane.id}
 			onClick={onSelect}
 			className={cn(
-				"flex w-full gap-3 rounded-lg px-2.5 py-3 text-left transition-colors duration-150",
-				selected ? "bg-secondary/80" : "hover:bg-accent/60",
+				"relative flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left transition-colors duration-150",
+				selected
+					? "bg-secondary before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-highlight"
+					: "hover:bg-accent/60",
 			)}
 		>
 			<StatusGlyph column={entry.column} className="mt-[5px]" />
@@ -290,7 +323,12 @@ function ListRow({
 						{ago(entry.pane.odinStatusAt)}
 					</span>
 				</span>
-				<span className="truncate text-[12px] text-faint-foreground">
+				{gist && (
+					<span className="line-clamp-2 text-[12px] leading-snug text-muted-foreground">
+						{gist}
+					</span>
+				)}
+				<span className="truncate text-[11.5px] text-faint-foreground">
 					{[repo, STATE[entry.column], SOURCE[entry.section]]
 						.filter(Boolean)
 						.join(" · ")}
