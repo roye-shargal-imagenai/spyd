@@ -36,7 +36,7 @@ export const SESSION_DOT: Record<string, string> = {
 };
 
 const ROW =
-	"flex h-7 w-full items-center gap-2 rounded-[6px] px-2 text-left text-[13px] transition-colors hover:bg-white/[0.05] hover:text-foreground";
+	"flex h-6 w-full items-center gap-2 rounded-[5px] px-2 text-left text-[13px] transition-colors hover:bg-white/[0.05] hover:text-foreground";
 
 /**
  * The repos you keep on this machine, Superset-style: add one from disk once,
@@ -175,7 +175,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									onClick={() => toggle(project.id)}
 									className={cn(
 										ROW,
-										"h-[26px] min-w-0 flex-1 text-soft-foreground",
+										"h-[22px] min-w-0 flex-1 text-soft-foreground",
 										isOpen && "text-foreground",
 									)}
 								>
@@ -205,7 +205,7 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									aria-label={`New workspace in ${project.name}`}
 									title={`New workspace in ${project.name} (⌥-click to describe it first)`}
 									onClick={(event) => newWorkspace(project, event)}
-									className="-ml-8 flex size-[22px] shrink-0 items-center justify-center rounded-[5px] border border-border bg-secondary text-muted-foreground opacity-0 transition-[opacity,color,background-color] hover:border-transparent hover:bg-primary hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100"
+									className="-ml-7 flex size-[18px] shrink-0 items-center justify-center rounded-[5px] border border-border bg-secondary text-muted-foreground opacity-0 transition-[opacity,color,background-color] hover:border-transparent hover:bg-primary hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100"
 								>
 									<HiOutlinePlus className="size-3" strokeWidth={2.2} />
 								</button>
