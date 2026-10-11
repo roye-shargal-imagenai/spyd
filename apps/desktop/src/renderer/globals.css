@@ -72,10 +72,10 @@
 	   separators, placeholders). */
 	--soft-foreground: #d1d1d6;
 	--faint-foreground: #8e8e93;
-	--working: #409cff;
+	--working: #5eb0ff;
 	--attention: #ff9f0a;
 	--success: #30d158;
-	--danger: #ff6961;
+	--danger: #ff7b73;
 	/* Links: periwinkle, so a link is never mistaken for the accent button
 	   or a teal working status. */
 	--link: #64d2ff;
