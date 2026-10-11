@@ -7,7 +7,6 @@ import { coldRestoreState } from "renderer/screens/main/components/WorkspaceView
 import { Terminal } from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/Terminal";
 import * as terminalCache from "renderer/screens/main/components/WorkspaceView/ContentView/TabsContent/Terminal/v1-terminal-cache";
 import { claudeCli } from "renderer/stores/claude-command";
-import { useSessionView } from "renderer/stores/session-view";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { create } from "zustand";
 import { ChatView } from "../board/ChatView";
@@ -74,8 +73,9 @@ export function SessionPane({
 	const tab = useTabsStore((s) => s.tabs.find((t) => t.id === pane.tabId));
 	const mirrored = usePaneMeta((s) => s.sessionIdByPane[pane.id]);
 	const sessionId = pane.claudeSessionId ?? mirrored ?? null;
-	const chat = useSessionView((s) => s.chat);
-	const [chosenTerminal, chooseTerminal] = useState(!chat);
+	// Home opens a session on its terminal, the way Superset does; Chat is
+	// one click away.
+	const [chosenTerminal, chooseTerminal] = useState(true);
 	const terminalFirst = useTerminalFirst((s) => s.ids.includes(pane.id));
 	const asTerminal = chosenTerminal || terminalFirst;
 	const setAsTerminal = (terminal: boolean) => {
