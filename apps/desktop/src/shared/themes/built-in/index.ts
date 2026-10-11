@@ -4,6 +4,7 @@ import {
 	darkTheme,
 	emberTheme,
 	forestTheme,
+	graphiteTheme,
 	inkTheme,
 	midnightTheme,
 } from "./ember";
@@ -15,6 +16,7 @@ import { monokaiTheme } from "./monokai";
 export const builtInThemes: Theme[] = [
 	inkTheme,
 	paperTheme,
+	graphiteTheme,
 	darkTheme,
 	emberTheme,
 	midnightTheme,
@@ -38,6 +40,7 @@ export function getBuiltInTheme(id: string): Theme | undefined {
 
 // Re-export individual themes
 export {
+	graphiteTheme,
 	inkTheme,
 	paperTheme,
 	crimsonTheme,

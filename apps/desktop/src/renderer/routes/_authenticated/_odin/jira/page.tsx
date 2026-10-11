@@ -389,7 +389,7 @@ function MyJiraPage() {
 								) : null;
 							})()}
 						</div>
-						<div className="flex flex-col gap-1.5">
+						<div className="flex flex-col gap-px">
 							{rows.map((issue) => {
 								const activePaneId = livePaneByKey.get(issue.key) ?? null;
 								const date = shortDate(issue.updated);
@@ -431,7 +431,7 @@ function MyJiraPage() {
 														type="button"
 														onClick={() => openUrl(issue.url)}
 														title="Open in Jira"
-														className="flex h-6 items-center gap-1 rounded-md bg-secondary px-2.5 font-mono text-[11.5px] font-semibold text-soft-foreground transition-colors hover:bg-input hover:text-foreground"
+														className="flex h-6 items-center gap-1 rounded-md pr-1.5 font-mono text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
 													>
 														<SiJira
 															className="size-3 text-[#4c9aff]"

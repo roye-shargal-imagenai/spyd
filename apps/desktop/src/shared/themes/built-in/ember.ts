@@ -74,6 +74,24 @@ export const INK: Surface = {
 	faint: "#80808b",
 };
 
+/**
+ * Superset's own Dark, token for token: warm near-black, the sidebar a step
+ * up, borders and fills one shared warm grey.
+ */
+export const CHARCOAL: Surface = {
+	page: "#151110",
+	card: "#201e1c",
+	popover: "#201e1c",
+	raised: "#2a2827",
+	hover: "#252220",
+	chrome: "#1a1716",
+	border: "#2a2827",
+	input: "#2a2827",
+	text: "#eae8e6",
+	muted: "#a8a5a3",
+	faint: "#7f7b78",
+};
+
 function spydDark({
 	id,
 	name,
@@ -81,10 +99,16 @@ function spydDark({
 	accentForeground,
 	selection,
 	surface = GREY,
+	button,
 }: {
 	id: string;
 	name: string;
 	surface?: Surface;
+	/**
+	 * The primary button, when it isn't the accent. Superset's is plain
+	 * foreground-on-page, so the accent is left to mark selection and state.
+	 */
+	button?: { background: string; foreground: string; ring: string };
 	accent: string;
 	/** Text on a solid accent button - dark on a light accent, white on a deep one. */
 	accentForeground: string;
@@ -106,8 +130,8 @@ function spydDark({
 			popover: surface.popover,
 			popoverForeground: surface.text,
 
-			primary: accent,
-			primaryForeground: accentForeground,
+			primary: button?.background ?? accent,
+			primaryForeground: button?.foreground ?? accentForeground,
 
 			// The raised neutral every quiet button and chip sits on.
 			secondary: surface.raised,
@@ -128,7 +152,7 @@ function spydDark({
 			// Borders are barely there - spacing does the separating.
 			border: surface.border,
 			input: surface.input,
-			ring: accent,
+			ring: button?.ring ?? accent,
 
 			sidebar: surface.chrome,
 			sidebarForeground: surface.text,
@@ -185,10 +209,23 @@ function spydDark({
 	};
 }
 
-/** The default: the suit - Spider red on deep navy. */
-/** The default: graphite with a refined Spider-Man blue for the next click. */
+/**
+ * The default: Superset's Dark - warm charcoal, light-on-dark buttons - with
+ * Spider-Man blue kept for what's selected or live.
+ */
 export const inkTheme = spydDark({
 	id: "spyd-ink",
+	name: "Charcoal",
+	surface: CHARCOAL,
+	accent: "#5b7cf5",
+	accentForeground: "#ffffff",
+	selection: "91, 124, 245",
+	button: { background: "#eae8e6", foreground: "#151110", ring: "#3a3837" },
+});
+
+/** The previous default: cool graphite with a blue primary button. */
+export const graphiteTheme = spydDark({
+	id: "spyd-graphite",
 	name: "Graphite",
 	surface: INK,
 	accent: "#5470f0",

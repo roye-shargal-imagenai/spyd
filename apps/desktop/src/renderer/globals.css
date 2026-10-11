@@ -15,46 +15,46 @@
  * This ensures the app looks correct during initial load before hydration.
  */
 :root {
-	/* Fallbacks = the built-in Spider theme (shared/themes/built-in/ember.ts),
+	/* Fallbacks = the built-in Charcoal theme (shared/themes/built-in/ember.ts),
 	   so the first paint before the theme store hydrates already matches. */
-	--background: #1d1d21;
-	--foreground: #ececef;
-	--card: #24242a;
-	--card-foreground: #ececef;
-	--popover: #24242a;
-	--popover-foreground: #ececef;
-	--primary: #5470f0;
-	--primary-foreground: #ffffff;
-	--secondary: #2a2a30;
-	--secondary-foreground: #ececef;
-	--muted: #2a2a30;
-	--muted-foreground: #a3a3ad;
-	--accent: #2e2e35;
-	--accent-foreground: #ececef;
-	--tertiary: #161619;
-	--tertiary-active: #2a2a30;
+	--background: #151110;
+	--foreground: #eae8e6;
+	--card: #201e1c;
+	--card-foreground: #eae8e6;
+	--popover: #201e1c;
+	--popover-foreground: #eae8e6;
+	--primary: #eae8e6;
+	--primary-foreground: #151110;
+	--secondary: #2a2827;
+	--secondary-foreground: #eae8e6;
+	--muted: #2a2827;
+	--muted-foreground: #a8a5a3;
+	--accent: #252220;
+	--accent-foreground: #eae8e6;
+	--tertiary: #1a1716;
+	--tertiary-active: #2a2827;
 	--destructive: #ff7d92;
 	--destructive-foreground: #fff1f3;
-	--border: #2c2c33;
-	--input: #3d3d46;
-	--ring: #5470f0;
-	--chart-1: #5470f0;
+	--border: #2a2827;
+	--input: #2a2827;
+	--ring: #3a3837;
+	--chart-1: #5b7cf5;
 	--chart-2: #2dd4bf;
 	--chart-3: #1ed760;
 	--chart-4: #ffb020;
 	--chart-5: #ff7d92;
 	--radius: 0.5rem;
-	--sidebar: #161619;
-	--sidebar-foreground: #ececef;
-	--sidebar-primary: #5470f0;
+	--sidebar: #1a1716;
+	--sidebar-foreground: #eae8e6;
+	--sidebar-primary: #5b7cf5;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #2a2a30;
-	--sidebar-accent-foreground: #ececef;
-	--sidebar-border: #2c2c33;
-	--sidebar-ring: #5470f0;
-	--highlight-match: rgba(84, 112, 240, 0.2);
-	--highlight-active: rgba(84, 112, 240, 0.45);
-	--highlight: #5470f0;
+	--sidebar-accent: #2a2827;
+	--sidebar-accent-foreground: #eae8e6;
+	--sidebar-border: #2a2827;
+	--sidebar-ring: #5b7cf5;
+	--highlight-match: rgba(91, 124, 245, 0.2);
+	--highlight-active: rgba(91, 124, 245, 0.45);
+	--highlight: #5b7cf5;
 	--highlight-foreground: #ffffff;
 	/* Sidebar row fills: low-opacity foreground washes so they track any theme */
 	--fill-hover: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -70,8 +70,8 @@
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
 	   foreground and muted-foreground: soft (body copy) and faint (tags,
 	   separators, placeholders). */
-	--soft-foreground: #d4d4da;
-	--faint-foreground: #80808b;
+	--soft-foreground: #d3d0cd;
+	--faint-foreground: #7f7b78;
 	--working: #6ea8fe;
 	--attention: #f2786f;
 	--success: #5cc98a;
@@ -186,10 +186,9 @@
 }
 
 @theme inline {
-	--font-display:
-		"Geist Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-	--font-sans:
-		"Geist Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	/* The system face, as Superset uses: SF Pro on a Mac. */
+	--font-display: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--font-sans: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	--ease-spyd: cubic-bezier(0.22, 1, 0.36, 1);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

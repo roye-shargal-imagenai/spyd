@@ -8,15 +8,15 @@
  */
 export const PILL = {
 	/** Odin's own doing - Night Agent, auto-started, automations, merged. */
-	brand: "bg-primary/15 text-primary-ink",
+	brand: "bg-primary/10 text-primary-ink",
 	/** In flight - a running agent, a live session. */
-	working: "bg-working/15 text-working-ink",
+	working: "bg-working/10 text-working-ink",
 	/** Waiting on you, or about to be a problem. */
-	attention: "bg-attention/15 text-attention-ink",
+	attention: "bg-attention/10 text-attention-ink",
 	/** Finished, open, passing. */
-	success: "bg-success/15 text-success-ink",
+	success: "bg-success/10 text-success-ink",
 	/** Failed, high priority, over a limit. */
-	danger: "bg-danger/15 text-danger-ink",
+	danger: "bg-danger/10 text-danger-ink",
 	/** Louder than danger: overdue is the one that has to win the row. */
 	alarm: "bg-danger text-white",
 	/** A fact, not a flag. */
@@ -31,12 +31,12 @@ export const PILL = {
  * item or toggle.
  */
 export const BUTTON = {
-	primary: "bg-primary text-primary-foreground hover:brightness-110",
+	primary: "bg-primary text-primary-foreground hover:opacity-90",
 	secondary:
 		"bg-secondary text-soft-foreground ring-1 ring-inset ring-border hover:bg-accent hover:text-foreground",
-	done: "bg-success/15 text-success-ink ring-1 ring-inset ring-success/25 hover:bg-success/25",
+	done: "bg-success/10 text-success-ink ring-1 ring-inset ring-success/25 hover:bg-success/25",
 	remind:
-		"bg-attention/15 text-attention-ink ring-1 ring-inset ring-attention/25 hover:bg-attention/25",
+		"bg-attention/10 text-attention-ink ring-1 ring-inset ring-attention/25 hover:bg-attention/25",
 	selected: "bg-primary/12 text-primary-ink ring-1 ring-inset ring-primary/25",
 } as const;
 

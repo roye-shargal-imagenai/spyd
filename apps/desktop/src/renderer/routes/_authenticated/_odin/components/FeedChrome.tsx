@@ -2,7 +2,7 @@ import { cn } from "@odin/ui/utils";
 import { type ReactNode, useRef } from "react";
 import { useHotkey } from "renderer/hotkeys";
 import { FeedTabs } from "./FeedTabs";
-import { BUTTON, PILL, ROW_REVEAL } from "./pill";
+import { BUTTON, ROW_REVEAL } from "./pill";
 
 /**
  * One header row per feed. Every view used to stack two bars - the sources on
@@ -200,7 +200,7 @@ export const ROW_PRIMARY_BUTTON = `shrink-0 rounded-md px-3 py-1 text-xs font-se
 export const ROW_START_BUTTON = `${ROW_REVEAL} shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-[filter] disabled:opacity-40 ${BUTTON.primary}`;
 
 /** Same, for a row whose session is live - blue, the board's "working". */
-export const ROW_LIVE_BUTTON = `shrink-0 rounded-md px-3 py-1 text-xs font-semibold transition-colors ${PILL.working} hover:bg-working/20`;
+export const ROW_LIVE_BUTTON = "shrink-0 rounded-md border border-border px-3 py-1 text-xs font-medium text-working-ink transition-colors hover:bg-secondary";
 
 /** Low-signal row metadata - a date, a project key. Text, not another chip. */
 export const ROW_META = "text-[11px] text-muted-foreground";
@@ -243,8 +243,9 @@ export const ROW_LINK_BUTTON = `${ROW_REVEAL} whitespace-nowrap rounded-md px-2.
  * which read as a different app per tab. One set of numbers, shared.
  */
 export const FEED_LIST =
-	"flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-[18px] pb-[18px] pt-2";
+	"flex min-h-0 flex-1 flex-col gap-px overflow-y-auto px-[18px] pb-[18px] pt-2";
+/** A flat list row, as Superset draws them: no box, a fill on hover. */
 export const FEED_ROW =
-	"group rounded-md border border-border bg-card px-3.5 py-2 shadow-[inset_0_1px_0_rgb(255_255_255/0.035)] transition-colors hover:border-primary/30 hover:bg-secondary/60";
+	"group rounded-md px-3 py-2.5 transition-colors hover:bg-accent";
 /** A full-width box in the list - not connected, nothing picked, failed. */
 export const FEED_NOTICE_BOX = "rounded-md px-3.5 py-2.5 text-xs";
