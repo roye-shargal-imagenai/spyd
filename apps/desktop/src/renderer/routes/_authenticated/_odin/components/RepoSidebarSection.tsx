@@ -2,7 +2,7 @@ import type { SelectProject } from "@odin/local-db";
 import { toast } from "@odin/ui/sonner";
 import { cn } from "@odin/ui/utils";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	HiChevronRight,
 	HiOutlineArrowDownTray,
@@ -269,7 +269,6 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 
 const STEP_LABEL: Record<PendingWorkspace["step"], string> = {
 	worktree: "Creating worktree…",
-	setup: "Running setup…",
 	agent: "Starting agent…",
 	failed: "Failed",
 };
@@ -285,6 +284,15 @@ function PendingRow({
 	onDismiss: () => void;
 }) {
 	const failed = item.step === "failed";
+	// Seconds on the clock, so a slow step reads as slow, not as stuck.
+	const [started] = useState(() => Date.now());
+	const [, tick] = useState(0);
+	useEffect(() => {
+		if (failed) return;
+		const timer = setInterval(() => tick((n) => n + 1), 1000);
+		return () => clearInterval(timer);
+	}, [failed]);
+	const seconds = Math.round((Date.now() - started) / 1000);
 	return (
 		<div
 			title={item.error ?? item.title}
@@ -310,8 +318,11 @@ function PendingRow({
 				<span
 					className={cn("min-w-0 flex-1 truncate", failed && "text-danger-ink")}
 				>
-					{failed ? (item.error ?? "Failed") : STEP_LABEL[item.step]}
+					{failed
+						? (item.error ?? "Failed")
+						: (item.detail ?? STEP_LABEL[item.step])}
 				</span>
+				{!failed && <span className="shrink-0 tabular-nums">{seconds}s</span>}
 				{failed && (
 					<>
 						<button

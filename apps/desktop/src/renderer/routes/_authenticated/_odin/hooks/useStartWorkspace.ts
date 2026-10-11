@@ -5,7 +5,7 @@ import { useLaunchTaskSession } from "renderer/hooks/useLaunchTaskSession";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { create } from "zustand";
 import { type PromptImage, sessionTitle } from "../components/OdinPromptDialog";
-import { useHomeSelection } from "../components/SessionPane";
+import { useHomeSelection, useTerminalFirst } from "../components/SessionPane";
 import { usePaneMeta } from "./usePaneMeta";
 
 const READY_POLL_MS = 400;
@@ -27,8 +27,10 @@ export interface PendingWorkspace {
 	id: string;
 	request: WorkspaceRequest;
 	title: string;
-	step: "worktree" | "setup" | "agent" | "failed";
+	step: "worktree" | "agent" | "failed";
 	error?: string;
+	/** What the worktree job is doing right now, in its own words. */
+	detail?: string;
 }
 
 /**
@@ -72,6 +74,7 @@ export function useStartWorkspace() {
 	const navigate = useNavigate();
 
 	const waitUntilReady = async (
+		id: string,
 		workspaceId: string,
 	): Promise<string | null> => {
 		for (
@@ -84,6 +87,8 @@ export function useStartWorkspace() {
 			});
 			// No progress = the init job finished and was cleared.
 			if (!progress || progress.step === "ready") return null;
+			if (progress.message)
+				usePendingWorkspaces.getState().patch(id, { detail: progress.message });
 			if (progress.step === "failed")
 				return progress.error ?? progress.message ?? "Worktree setup failed";
 		}
@@ -104,23 +109,11 @@ export function useStartWorkspace() {
 				prompt: prompt || undefined,
 			});
 			if (created.isInitializing) {
-				const error = await waitUntilReady(created.workspace.id);
+				const error = await waitUntilReady(id, created.workspace.id);
 				if (error) return fail(error);
 			}
 			void utils.workspaces.getAll.invalidate();
-			// The repo's own setup (deps, .env) first, so the agent's first
-			// build works. A failure is said, not fatal - the agent can fix it.
-			if (created.initialCommands?.length) {
-				store.patch(id, { step: "setup" });
-				const setup = await utils.client.workspaces.runSetup.mutate({
-					workspaceId: created.workspace.id,
-				});
-				if ("failed" in setup && setup.failed)
-					toast.warning(`Setup step failed: ${setup.failed}`, {
-						description: setup.output,
-					});
-			}
-			store.patch(id, { step: "agent" });
+			store.patch(id, { step: "agent", detail: "Opening Claude" });
 			const title = sessionTitle(prompt, created.workspace.branch);
 			const result = await launch({
 				workspaceId: created.workspace.id,
@@ -136,6 +129,22 @@ export function useStartWorkspace() {
 			usePaneMeta.getState().setTitle(result.paneId, title);
 			usePaneMeta.getState().setSessionId(result.paneId, result.sessionId);
 			store.remove(id);
+			if (!prompt && images.length === 0)
+				useTerminalFirst.getState().add(result.paneId);
+			// The repo's own setup (deps, .env) runs beside the agent, the way
+			// Superset runs it in a tab: waiting on it held the session back
+			// for as long as an install took. A failure is said, not fatal.
+			if (created.initialCommands?.length) {
+				void utils.client.workspaces.runSetup
+					.mutate({ workspaceId: created.workspace.id })
+					.then((setup) => {
+						if ("failed" in setup && setup.failed)
+							toast.warning(`Setup step failed: ${setup.failed}`, {
+								description: setup.output,
+							});
+					})
+					.catch(() => {});
+			}
 			if (request.openWhenReady) {
 				useHomeSelection.getState().select(result.paneId, "session");
 				navigate({ to: "/home" });

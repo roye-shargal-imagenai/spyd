@@ -3,7 +3,6 @@ import { cn } from "@odin/ui/utils";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { JiraIssueRow, PullRequestRow } from "lib/trpc/routers/work";
 import { useMemo, useState } from "react";
-import { SiJira } from "react-icons/si";
 import { ConnectNotice } from "renderer/components/ConnectProvider/ConnectProvider";
 import { useLaunchTaskSession } from "renderer/hooks/useLaunchTaskSession";
 import { openUrl } from "renderer/stores/in-app-browser";
@@ -11,21 +10,17 @@ import { useTabsStore } from "renderer/stores/tabs/store";
 import { DoneButton } from "../components/DoneButton";
 import {
 	FEED_LIST,
-	FEED_ROW,
 	FeedDivider,
 	FeedHeader,
 	FeedSearch,
 	FeedSelect,
 	FilterPill,
-	ROW_LIVE_BUTTON,
-	ROW_PRIMARY_SLOT,
 	ROW_START_BUTTON,
 	SyncButton,
 } from "../components/FeedChrome";
 import { FeedError } from "../components/FeedError";
 import { FullTitle } from "../components/FullTitle";
-import { PersonChip } from "../components/PersonChip";
-import { PILL } from "../components/pill";
+import { personColor } from "../components/PersonChip";
 import { DueChip, OverdueMark } from "../components/Reminders";
 import { askSessionContext } from "../components/SessionContextDialog";
 import { TonightToggle } from "../components/TonightToggle";
@@ -75,12 +70,6 @@ const statusTone = (status: string): Tone => {
 	if (/review|qa|verif|test|approv/.test(s)) return "review";
 	return "idle";
 };
-const TONE_CHIP: Record<Tone, string> = {
-	review: PILL.working,
-	parked: PILL.attention,
-	idle: "bg-secondary text-muted-foreground",
-};
-
 function shortDate(iso: string | null): string | null {
 	if (!iso) return null;
 	const d = new Date(iso);
@@ -95,12 +84,6 @@ const ROLE_TABS = [
 	{ id: "all" as const, label: "All" },
 ];
 
-/** The "why is this here" chip on every row - unless a PR on it waits on my review. */
-const ROLE_BADGE = {
-	assigned: { label: "mine", className: PILL.neutral },
-	reported: { label: "I filed", className: PILL.neutral },
-	mentioned: { label: "@me", className: PILL.attention },
-};
 type Role = (typeof ROLE_TABS)[number]["id"];
 
 function MyJiraPage() {
@@ -389,136 +372,152 @@ function MyJiraPage() {
 								) : null;
 							})()}
 						</div>
-						<div className="flex flex-col gap-px">
-							{rows.map((issue) => {
-								const activePaneId = livePaneByKey.get(issue.key) ?? null;
-								const date = shortDate(issue.updated);
-								const tone = statusTone(issue.status);
-								const reviewPull = reviewPullByKey.get(issue.key);
-								return (
-									<div
-										key={issue.key}
-										className={cn(
-											FEED_ROW,
-											activePaneId && "border-l-2 border-l-working",
-											!activePaneId && tone === "parked" && "opacity-60",
-										)}
-									>
-										{/* Two lines, read top to bottom: what the ticket is, then
-										    where it stands. The actions wait at the right edge. */}
-										<div className="flex items-start gap-3">
-											<StatusIcon
-												category={issue.statusCategory}
-												status={issue.status}
-											/>
-											<div className="flex min-w-0 flex-1 flex-col gap-1.5">
-												<FullTitle
-													text={issue.title}
-													detail={[issue.key, issue.status, issue.sprint?.name]
-														.filter(Boolean)
-														.join(" · ")}
-												>
-													<span className="line-clamp-2 text-[14px] font-semibold leading-snug text-foreground [overflow-wrap:anywhere]">
-														<OverdueMark
-															itemKey={`jira:${issue.key}`}
-															upstream={issue.dueDate}
-														/>
-														{issue.title}
-													</span>
-												</FullTitle>
-												<div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px]">
+						{(groupBy === "sprint"
+							? phasesOf(rows)
+							: [{ phase: null as Phase | null, rows }]
+						).map(({ phase, rows: phaseRows }) => (
+							<div key={phase ?? "all"} className="mb-3">
+								{phase && (
+									<div className="flex h-8 items-center gap-2 rounded-md bg-secondary/50 px-3 text-[12px]">
+										<PhaseIcon phase={phase} />
+										<span className="font-medium text-foreground">
+											{PHASE_LABEL[phase]}
+										</span>
+										<span className="text-faint-foreground">
+											{phaseRows.length}
+										</span>
+									</div>
+								)}
+								<div className="flex flex-col">
+									{phaseRows.map((issue) => {
+										const activePaneId = livePaneByKey.get(issue.key) ?? null;
+										const date = shortDate(issue.updated);
+										const tone = statusTone(issue.status);
+										const reviewPull = reviewPullByKey.get(issue.key);
+										const hot =
+											!!issue.mention ||
+											(!!issue.priority && isHotPriority(issue.priority));
+										return (
+											<div
+												key={issue.key}
+												className={cn(
+													"group flex flex-col border-b border-border/60 px-3 py-[7px] transition-colors last:border-b-0 hover:bg-accent/60",
+													!activePaneId && tone === "parked" && "opacity-60",
+												)}
+											>
+												{/* One line, read left to right: where it stands, which
+						    ticket, what it is, then who and when. The actions
+						    appear on hover at the right edge. */}
+												<div className="flex h-[26px] items-center gap-3 text-[13px]">
+													<StatusIcon
+														category={issue.statusCategory}
+														status={issue.status}
+													/>
 													<button
 														type="button"
 														onClick={() => openUrl(issue.url)}
 														title="Open in Jira"
-														className="flex h-6 items-center gap-1 rounded-md pr-1.5 font-mono text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+														className="w-[78px] shrink-0 truncate text-left font-mono text-[11.5px] text-faint-foreground transition-colors hover:text-foreground"
 													>
-														<SiJira
-															className="size-3 text-[#4c9aff]"
-															aria-hidden
-														/>
 														{issue.key}
 													</button>
-													<span
-														className={cn(
-															"flex h-6 items-center rounded-md px-2.5 font-semibold",
-															TONE_CHIP[tone],
-														)}
+													<FullTitle
+														text={issue.title}
+														detail={[
+															issue.key,
+															issue.status,
+															issue.sprint?.name,
+														]
+															.filter(Boolean)
+															.join(" · ")}
 													>
-														{issue.status}
-													</span>
-													{(issue.mention ||
-														(issue.priority &&
-															isHotPriority(issue.priority))) && (
-														<span
-															className={cn(
-																"flex h-6 items-center rounded-md px-2.5 font-semibold",
-																PILL.danger,
-															)}
-														>
-															{issue.mention ? "High" : issue.priority}
+														<span className="min-w-0 flex-1 truncate font-medium text-foreground">
+															<OverdueMark
+																itemKey={`jira:${issue.key}`}
+																upstream={issue.dueDate}
+															/>
+															{issue.title}
 														</span>
-													)}
-													{activePaneId && (
-														<span
-															className={cn(
-																"flex h-6 items-center gap-1.5 rounded-md px-2.5 font-semibold",
-																PILL.working,
-															)}
-														>
-															<span className="size-1.5 animate-pulse rounded-full bg-current" />
-															Live
-														</span>
-													)}
-													{reviewPull ? (
-														<button
-															type="button"
-															onClick={() => openUrl(reviewPull.url)}
-															title={`Waiting on your review: ${reviewPull.repo}#${reviewPull.number} ${reviewPull.title}`}
-															className={cn(
-																"flex h-6 items-center rounded-md px-2.5 font-semibold",
-																PILL.attention,
-															)}
-														>
-															Review waiting
-														</button>
-													) : (
-														issue.role !== "assigned" && (
-															<span
-																className={cn(
-																	"flex h-6 items-center rounded-md px-2.5",
-																	ROLE_BADGE[issue.role].className,
-																)}
+													</FullTitle>
+													<div className="flex shrink-0 items-center gap-2 text-[11.5px]">
+														{activePaneId && (
+															<button
+																type="button"
+																onClick={() => {
+																	usePendingFocus
+																		.getState()
+																		.focus(activePaneId);
+																	navigate({ to: "/home" });
+																}}
+																title="Go to its session"
+																className="flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-medium text-working-ink transition-colors hover:bg-working/10"
 															>
-																{ROLE_BADGE[issue.role].label}
+																<span className="size-1.5 animate-pulse rounded-full bg-working" />
+																Live
+															</button>
+														)}
+														{reviewPull && (
+															<button
+																type="button"
+																onClick={() => openUrl(reviewPull.url)}
+																title={`Waiting on your review: ${reviewPull.repo}#${reviewPull.number} ${reviewPull.title}`}
+																className="rounded-md px-1.5 py-0.5 font-medium text-attention-ink transition-colors hover:bg-attention/10"
+															>
+																Review waiting
+															</button>
+														)}
+														{hot && (
+															<span
+																title={issue.priority ?? "Mentioned"}
+																className="font-medium text-danger-ink"
+															>
+																{issue.mention ? "@me" : "High"}
 															</span>
-														)
-													)}
-													{issue.reporter && (
-														<PersonChip
-															name={issue.reporter}
-															className="max-w-[160px] truncate"
+														)}
+														{phase && phase !== "review" && (
+															<span className="text-faint-foreground">
+																{issue.status}
+															</span>
+														)}
+														<DueChip
+															itemKey={`jira:${issue.key}`}
+															title={`${issue.key}: ${issue.title}`}
+															upstream={issue.dueDate}
 														/>
-													)}
-													{date && (
-														<span
-															title={issue.updated ?? undefined}
-															className="px-1 text-faint-foreground"
-														>
-															updated {date}
-														</span>
-													)}
-													<DueChip
-														itemKey={`jira:${issue.key}`}
-														title={`${issue.key}: ${issue.title}`}
-														upstream={issue.dueDate}
-													/>
+														{issue.reporter && <Avatar name={issue.reporter} />}
+														{date && (
+															<span
+																title={`Updated ${issue.updated ?? ""}`}
+																className="w-[46px] text-right tabular-nums text-faint-foreground"
+															>
+																{date}
+															</span>
+														)}
+													</div>
+													<div className="flex shrink-0 items-center gap-1">
+														<TonightToggle itemKey={`jira:${issue.key}`} />
+														{!activePaneId && (
+															<button
+																type="button"
+																disabled={isLaunching}
+																onClick={() => void handleStart(issue)}
+																className={ROW_START_BUTTON}
+															>
+																{launchingKey === issue.key
+																	? "Starting…"
+																	: "Start"}
+															</button>
+														)}
+														<DoneButton
+															onClick={() => markDone(doable(issue))}
+														/>
+													</div>
 												</div>
 												{/* A mention row exists because of one comment - so it
-												    shows that comment, not just the ticket it sits on. */}
+						    shows that comment, not just the ticket it sits on. */}
 												{issue.mention && (
-													<div className="line-clamp-2 cursor-text select-text text-[12px] leading-relaxed text-muted-foreground">
-														<span className="font-semibold text-soft-foreground">
+													<div className="ml-[118px] line-clamp-1 cursor-text select-text pb-0.5 text-[12px] text-muted-foreground">
+														<span className="font-medium text-soft-foreground">
 															{issue.mention.author ?? "Someone"}
 															{": "}
 														</span>
@@ -526,40 +525,11 @@ function MyJiraPage() {
 													</div>
 												)}
 											</div>
-											<div className="flex shrink-0 items-center gap-1.5 pt-0.5">
-												<TonightToggle itemKey={`jira:${issue.key}`} />
-												<span className={ROW_PRIMARY_SLOT}>
-													{activePaneId ? (
-														<button
-															type="button"
-															onClick={() => {
-																usePendingFocus.getState().focus(activePaneId);
-																navigate({ to: "/home" });
-															}}
-															className={ROW_LIVE_BUTTON}
-														>
-															Go to session →
-														</button>
-													) : (
-														<button
-															type="button"
-															disabled={isLaunching}
-															onClick={() => void handleStart(issue)}
-															className={ROW_START_BUTTON}
-														>
-															{launchingKey === issue.key
-																? "Starting…"
-																: "Start session"}
-														</button>
-													)}
-												</span>
-												<DoneButton onClick={() => markDone(doable(issue))} />
-											</div>
-										</div>
-									</div>
-								);
-							})}
-						</div>
+										);
+									})}
+								</div>
+							</div>
+						))}
 					</div>
 				))}
 			</div>
@@ -652,6 +622,62 @@ function SprintHeading({
 	);
 }
 
+type Phase = "review" | "progress" | "todo" | "done";
+const PHASES: Phase[] = ["review", "progress", "todo", "done"];
+const PHASE_LABEL: Record<Phase, string> = {
+	review: "In review",
+	progress: "In progress",
+	todo: "To do",
+	done: "Done",
+};
+
+function phaseOf(row: IssueRow): Phase {
+	const c = row.statusCategory.toLowerCase();
+	if (c === "done") return "done";
+	if (c === "in progress")
+		return /review|qa|test/i.test(row.status) ? "review" : "progress";
+	return "todo";
+}
+
+/** A sprint's rows the way Jira's board columns read: review, doing, to do, done. */
+function phasesOf(rows: IssueRow[]): { phase: Phase; rows: IssueRow[] }[] {
+	return PHASES.map((phase) => ({
+		phase,
+		rows: rows.filter((row) => phaseOf(row) === phase),
+	})).filter((group) => group.rows.length > 0);
+}
+
+function PhaseIcon({ phase }: { phase: Phase }) {
+	return (
+		<StatusIcon
+			category={
+				phase === "done" ? "done" : phase === "todo" ? "to do" : "in progress"
+			}
+			status={phase === "review" ? "review" : PHASE_LABEL[phase]}
+		/>
+	);
+}
+
+/** Who filed it, as initials in their colour - the name is on hover. */
+function Avatar({ name }: { name: string }) {
+	const { fg } = personColor(name);
+	const initials = name
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part[0]?.toUpperCase())
+		.join("");
+	return (
+		<span
+			title={name}
+			className="flex size-5 shrink-0 items-center justify-center rounded-full text-[9.5px] font-semibold text-background"
+			style={{ backgroundColor: fg }}
+		>
+			{initials}
+		</span>
+	);
+}
+
 /**
  * Where a ticket stands, at a glance and without reading: an empty ring to
  * do, a half-filled blue one in progress, a filled one in review, a green
@@ -673,10 +699,10 @@ function StatusIcon({
 			role="img"
 			aria-label={status}
 			title={status}
-			className="mt-0.5 flex size-[22px] shrink-0 items-center justify-center"
+			className="flex size-[15px] shrink-0 items-center justify-center"
 		>
 			{done ? (
-				<svg viewBox="0 0 22 22" className="size-[22px]" aria-hidden="true">
+				<svg viewBox="0 0 22 22" className="size-[15px]" aria-hidden="true">
 					<circle cx="11" cy="11" r="10" className="fill-success" />
 					<path
 						d="M6.5 11.5l3 3 6-6.5"
@@ -688,7 +714,7 @@ function StatusIcon({
 					/>
 				</svg>
 			) : doing ? (
-				<svg viewBox="0 0 22 22" className="size-[22px]" aria-hidden="true">
+				<svg viewBox="0 0 22 22" className="size-[15px]" aria-hidden="true">
 					<circle
 						cx="11"
 						cy="11"
@@ -704,7 +730,7 @@ function StatusIcon({
 					)}
 				</svg>
 			) : (
-				<svg viewBox="0 0 22 22" className="size-[22px]" aria-hidden="true">
+				<svg viewBox="0 0 22 22" className="size-[15px]" aria-hidden="true">
 					<circle
 						cx="11"
 						cy="11"

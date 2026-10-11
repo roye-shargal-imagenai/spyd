@@ -31,6 +31,22 @@ export const useHomeSelection = create<{
 	setView: (view) => set({ view }),
 }));
 
+/**
+ * Sessions that open on the terminal whatever the chat setting: an empty
+ * workspace has no conversation yet, so its chat could only say "Starting"
+ * until you typed - into a terminal it was hiding. In memory, bounded.
+ */
+export const useTerminalFirst = create<{
+	ids: string[];
+	add: (paneId: string) => void;
+	remove: (paneId: string) => void;
+}>((set) => ({
+	ids: [],
+	add: (paneId) => set((s) => ({ ids: [...s.ids.slice(-49), paneId] })),
+	remove: (paneId) =>
+		set((s) => ({ ids: s.ids.filter((id) => id !== paneId) })),
+}));
+
 /** Open a session in Home, live - from anywhere in the app. */
 export function useOpenInHome() {
 	const navigate = useNavigate();
@@ -59,7 +75,13 @@ export function SessionPane({
 	const mirrored = usePaneMeta((s) => s.sessionIdByPane[pane.id]);
 	const sessionId = pane.claudeSessionId ?? mirrored ?? null;
 	const chat = useSessionView((s) => s.chat);
-	const [asTerminal, setAsTerminal] = useState(!chat);
+	const [chosenTerminal, chooseTerminal] = useState(!chat);
+	const terminalFirst = useTerminalFirst((s) => s.ids.includes(pane.id));
+	const asTerminal = chosenTerminal || terminalFirst;
+	const setAsTerminal = (terminal: boolean) => {
+		if (!terminal) useTerminalFirst.getState().remove(pane.id);
+		chooseTerminal(terminal);
+	};
 	const { data: daemon } = electronTrpc.terminal.listDaemonSessions.useQuery(
 		undefined,
 		{ refetchInterval: 5_000 },
@@ -71,7 +93,6 @@ export function SessionPane({
 	const utils = electronTrpc.useUtils();
 	const kill = electronTrpc.terminal.kill.useMutation();
 	const [resuming, setResuming] = useState(false);
-	const [lost, setLost] = useState(false);
 	const cwd = pane.odinCwd ?? pane.cwd ?? pane.initialCwd ?? undefined;
 
 	/**
@@ -83,23 +104,28 @@ export function SessionPane({
 		if (resuming || !tab) return;
 		setResuming(true);
 		try {
+			// Claude writes a transcript only once something is said, so a
+			// session that ended before its first message has none. There's
+			// nothing to lose there: start it fresh in the same place rather
+			// than showing a dead end.
+			let fresh = false;
 			if (sessionId) {
 				try {
 					await utils.client.terminal.readClaudeTranscript.query({ sessionId });
 				} catch (error) {
-					if (String(error).includes("No transcript on this machine")) {
-						setLost(true);
-						return;
-					}
+					if (String(error).includes("No transcript on this machine"))
+						fresh = true;
 				}
 			}
 			const diedWorking =
 				useTabsStore.getState().panes[pane.id]?.status === "working";
-			const command = `${
-				sessionId
-					? `${claudeCli()} --resume ${sessionId}`
-					: `${claudeCli()} --continue`
-			}${diedWorking ? " Continue" : ""}`;
+			const command = fresh
+				? claudeCli()
+				: `${
+						sessionId
+							? `${claudeCli()} --resume ${sessionId}`
+							: `${claudeCli()} --continue`
+					}${diedWorking ? " Continue" : ""}`;
 			await kill.mutateAsync({ paneId: pane.id }).catch(() => {});
 			coldRestoreState.delete(pane.id);
 			terminalCache.dispose(pane.id);
@@ -181,33 +207,21 @@ export function SessionPane({
 					</div>
 				)}
 				<div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
-					{lost ? (
-						<>
-							<div className="text-[15px] font-semibold">
-								This conversation isn't on this Mac anymore
-							</div>
-							<p className="max-w-[360px] text-[13px] text-muted-foreground">
-								Claude has no transcript for it, so there's nothing to reopen.
-								Start a new session from the same task instead.
-							</p>
-						</>
-					) : (
-						<>
-							<span className="size-5 animate-spin rounded-full border-2 border-faint-foreground border-t-transparent" />
-							<div className="text-[14px] font-medium text-muted-foreground">
-								{resuming ? "Bringing the session back…" : "Reconnecting…"}
-							</div>
-							{!resuming && (
-								<button
-									type="button"
-									onClick={() => void resume()}
-									className="rounded-md bg-secondary px-4 py-2 text-[13px] font-medium hover:bg-input"
-								>
-									Resume
-								</button>
-							)}
-						</>
-					)}
+					<>
+						<span className="size-5 animate-spin rounded-full border-2 border-faint-foreground border-t-transparent" />
+						<div className="text-[14px] font-medium text-muted-foreground">
+							{resuming ? "Bringing the session back…" : "Reconnecting…"}
+						</div>
+						{!resuming && (
+							<button
+								type="button"
+								onClick={() => void resume()}
+								className="rounded-md bg-secondary px-4 py-2 text-[13px] font-medium hover:bg-input"
+							>
+								Resume
+							</button>
+						)}
+					</>
 				</div>
 			</div>
 		);

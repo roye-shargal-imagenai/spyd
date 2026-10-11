@@ -1,4 +1,11 @@
-import { chmodSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+	chmodSync,
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	renameSync,
+	writeFileSync,
+} from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { DEFAULT_PROFILE_ID, PROFILE_RESTORE_MS } from "shared/odin-profile";
@@ -176,7 +183,14 @@ interface RootConfig {
  * read as the single `default` profile; it's rewritten in that shape by the
  * next write, so there is no separate migration step to run or to fail.
  */
+/**
+ * Set when the last read found a file it couldn't parse. Readers carry on
+ * with nothing connected; the write that follows is refused (see writeRoot).
+ */
+let lastReadUnparseable = false;
+
 function readRoot(): RootConfig {
+	lastReadUnparseable = false;
 	let raw: Record<string, unknown> = {};
 	try {
 		raw = JSON.parse(readFileSync(configPath(), "utf-8")) as Record<
@@ -184,6 +198,10 @@ function readRoot(): RootConfig {
 			unknown
 		>;
 	} catch {
+		// A file that exists but won't parse - caught mid-write by another
+		// app - is not an empty config. Reading it as {} let the next write
+		// save {} over every token, which signed Slack out out of nowhere.
+		lastReadUnparseable = existsSync(configPath());
 		raw = {};
 	}
 
@@ -254,6 +272,11 @@ function readRoot(): RootConfig {
 }
 
 function writeRoot(root: RootConfig): void {
+	if (lastReadUnparseable) {
+		throw new Error(
+			"odin.json could not be read just now - not overwriting it. Try again.",
+		);
+	}
 	const path = configPath();
 	mkdirSync(dirname(path), { recursive: true });
 	const body = {
@@ -262,9 +285,17 @@ function writeRoot(root: RootConfig): void {
 		profiles: root.profiles,
 		deletedProfiles: root.deletedProfiles,
 	};
-	writeFileSync(path, `${JSON.stringify(body, null, 2)}\n`, "utf-8");
+	// Write beside it and rename over it: a rename is atomic, so the dev app,
+	// the packaged app and the CLI - all reading this file - never see it
+	// half-written.
+	const tmp = `${path}.${process.pid}.tmp`;
+	writeFileSync(tmp, `${JSON.stringify(body, null, 2)}\n`, {
+		encoding: "utf-8",
+		mode: 0o600,
+	});
 	// It holds API tokens - keep it owner-only like the rest of ~/.odin.
-	chmodSync(path, 0o600);
+	chmodSync(tmp, 0o600);
+	renameSync(tmp, path);
 }
 
 /** The active profile's credentials, plus the machine-wide keys. */

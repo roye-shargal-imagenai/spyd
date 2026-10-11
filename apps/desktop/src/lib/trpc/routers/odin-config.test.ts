@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import {
 	mkdirSync,
 	mkdtempSync,
+	readFileSync,
 	rmSync,
 	statSync,
 	writeFileSync,
@@ -47,6 +48,17 @@ describe("updateOdinConfig", () => {
 		// Tokens live here - the file must not be world-readable.
 		const mode = statSync(process.env.ODIN_CONFIG_PATH as string).mode & 0o777;
 		expect(mode).toBe(0o600);
+	});
+
+	test("a half-written file is never saved over as empty", () => {
+		updateOdinConfig({ slackToken: "xoxp-1" });
+		const path = process.env.ODIN_CONFIG_PATH as string;
+		writeFileSync(path, '{"profiles": [');
+		// Readers see nothing connected for the moment...
+		expect(readOdinConfig().slackToken).toBeUndefined();
+		// ...but a write must not turn that moment into a lost token.
+		expect(() => updateOdinConfig({ notionToken: "ntn_1" })).toThrow();
+		expect(readFileSync(path, "utf-8")).toBe('{"profiles": [');
 	});
 
 	test("merges instead of replacing", () => {

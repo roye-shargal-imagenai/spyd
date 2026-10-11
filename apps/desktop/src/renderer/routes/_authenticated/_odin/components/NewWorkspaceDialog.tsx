@@ -171,7 +171,14 @@ function DialogBody({
 	};
 	const submit = () => {
 		// The branch is named from what you typed, not the mode's brief.
-		start({ project, prompt: withMode(mode, prompt), images, branch });
+		start({
+			project,
+			prompt: withMode(mode, prompt),
+			images,
+			branch,
+			// Land in it: the session opens the moment it's up.
+			openWhenReady: true,
+		});
 		setDraft(project.id, "");
 		useNewWorkspaceDialog.setState({ lastProjectId: project.id });
 		close();
