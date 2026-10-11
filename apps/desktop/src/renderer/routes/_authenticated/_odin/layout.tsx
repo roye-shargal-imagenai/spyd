@@ -111,7 +111,7 @@ const RAIL_ITEMS = [
 		to: "/jira" as const,
 		hotkey: "ODIN_ALL" as const,
 		label: "Tasks",
-		tint: "#ff9f0a",
+		tint: "#7d7aff",
 		Icon: HiOutlineClipboardDocumentCheck,
 	},
 	// Also its own entry rather than a feed tab. The strip answers "what's

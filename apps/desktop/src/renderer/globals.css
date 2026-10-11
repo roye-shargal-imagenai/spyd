@@ -64,7 +64,7 @@
 	   surfaces, but a state reads the same everywhere. Each hue means one
 	   thing - never use one for decoration:
 	     working   - an agent is running (Apple blue)
-	     attention - waiting on you, a warning (Apple orange)
+	     attention - waiting on you, a warning (Apple indigo)
 	     success   - finished, done, connected (green)
 	     danger    - failed, overdue, destructive (red)
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
@@ -73,7 +73,7 @@
 	--soft-foreground: #d1d1d6;
 	--faint-foreground: #8e8e93;
 	--working: #5eb0ff;
-	--attention: #ff9f0a;
+	--attention: #a09dff;
 	--success: #30d158;
 	--danger: #ff7b73;
 	/* Links: periwinkle, so a link is never mistaken for the accent button
@@ -134,7 +134,7 @@
 	--soft-foreground: #34405e;
 	--faint-foreground: #636c8b;
 	--working: #2f80ed;
-	--attention: #e0435c;
+	--attention: #a09dff;
 	--success: #13945f;
 	--danger: #d6334f;
 	--link: #2f5fd0;
