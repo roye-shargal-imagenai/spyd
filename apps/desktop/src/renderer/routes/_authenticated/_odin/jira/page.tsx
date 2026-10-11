@@ -5,6 +5,7 @@ import type { JiraIssueRow, PullRequestRow } from "lib/trpc/routers/work";
 import { useMemo, useState } from "react";
 import { ConnectNotice } from "renderer/components/ConnectProvider/ConnectProvider";
 import { useLaunchTaskSession } from "renderer/hooks/useLaunchTaskSession";
+import { electronTrpc } from "renderer/lib/electron-trpc";
 import { openUrl } from "renderer/stores/in-app-browser";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { DoneButton } from "../components/DoneButton";
@@ -20,7 +21,6 @@ import {
 } from "../components/FeedChrome";
 import { FeedError } from "../components/FeedError";
 import { FullTitle } from "../components/FullTitle";
-import { personColor } from "../components/PersonChip";
 import { DueChip, OverdueMark } from "../components/Reminders";
 import { askSessionContext } from "../components/SessionContextDialog";
 import { TonightToggle } from "../components/TonightToggle";
@@ -30,6 +30,7 @@ import { useOdinFeeds } from "../hooks/useOdinFeeds";
 import { useOdinWorkspace } from "../hooks/useOdinWorkspace";
 import { usePendingFocus } from "../hooks/usePendingFocus";
 import { reviewPullFor } from "./review-pull";
+import { Avatar, TeamPicker, useJiraTeam } from "./team";
 
 /** A row as Done wants it: its All-feed key, and enough to list it later. */
 const doable = (issue: { key: string; title: string; url: string }) => ({
@@ -82,6 +83,7 @@ const ROLE_TABS = [
 	{ id: "reported" as const, label: "I filed" },
 	{ id: "mentioned" as const, label: "Mentions" },
 	{ id: "all" as const, label: "All" },
+	{ id: "team" as const, label: "My team" },
 ];
 
 type Role = (typeof ROLE_TABS)[number]["id"];
@@ -94,7 +96,10 @@ function MyJiraPage() {
 	// Free text over key, title, reporter, status and project.
 	const [search, setSearch] = useState("");
 	// Sprints, the way Jira's board lists them, or by where each ticket stands.
-	const [groupBy, setGroupBy] = useState<"sprint" | "status">("sprint");
+	const [groupBy, setGroupBy] = useState<GroupBy>("sprint");
+	const team = useJiraTeam((s) => s.members);
+	const [editingTeam, setEditingTeam] = useState(false);
+	const isTeam = role === "team";
 	const needle = search.trim().toLowerCase();
 	// Same feeds the shell warms on boot - rows are usually already cached.
 	const {
@@ -108,6 +113,15 @@ function MyJiraPage() {
 	const { launch, isLaunching, launchingKey } = useLaunchTaskSession();
 	const navigate = useNavigate();
 	const panes = useTabsStore((s) => s.panes);
+	const teamQuery = electronTrpc.work.teamJiraIssues.useQuery(
+		{ accountIds: team.map((m) => m.accountId) },
+		{
+			enabled: config?.hasJira === true && team.length > 0,
+			refetchInterval: 120_000,
+			staleTime: 120_000,
+			placeholderData: (prev) => prev,
+		},
+	);
 
 	// Done tickets drop out before the role tabs are counted.
 	const { isDone, markDone } = useDone();
@@ -118,20 +132,30 @@ function MyJiraPage() {
 			),
 		[issuesQuery.data, isDone],
 	);
+	const teamIssues = useMemo(
+		() =>
+			(teamQuery.data?.issues ?? []).filter((issue) => !isDone(doable(issue))),
+		[teamQuery.data, isDone],
+	);
 	const roleCounts = useMemo(
 		() => ({
 			assigned: allIssues.filter((i) => i.role === "assigned").length,
 			reported: allIssues.filter((i) => i.role === "reported").length,
 			mentioned: allIssues.filter((i) => i.role === "mentioned").length,
 			all: allIssues.length,
+			team: teamIssues.length,
 		}),
-		[allIssues],
+		[allIssues, teamIssues],
 	);
 	// BUGT tickets are ones I filed, not ones assigned to me - hence the split.
 	const issues = useMemo(
 		() =>
-			role === "all" ? allIssues : allIssues.filter((i) => i.role === role),
-		[allIssues, role],
+			role === "team"
+				? teamIssues
+				: role === "all"
+					? allIssues
+					: allIssues.filter((i) => i.role === role),
+		[allIssues, teamIssues, role],
 	);
 
 	// Issue key → the pane of the session running on it (pane task titles are
@@ -148,12 +172,12 @@ function MyJiraPage() {
 	const reviewPullByKey = useMemo(() => {
 		const pulls = pullsQuery.data?.pulls ?? [];
 		const map = new Map<string, PullRequestRow>();
-		for (const issue of allIssues) {
+		for (const issue of [...allIssues, ...teamIssues]) {
 			const pull = reviewPullFor(issue.key, pulls);
 			if (pull) map.set(issue.key, pull);
 		}
 		return map;
-	}, [allIssues, pullsQuery.data]);
+	}, [allIssues, teamIssues, pullsQuery.data]);
 
 	const projects = useMemo(() => {
 		const counts = new Map<string, number>();
@@ -169,7 +193,7 @@ function MyJiraPage() {
 			.filter(
 				(issue) =>
 					!needle ||
-					`${issue.key} ${issue.title} ${issue.reporter ?? ""} ${issue.status} ${issue.project}`
+					`${issue.key} ${issue.title} ${issue.reporter ?? ""} ${issue.assignee ?? ""} ${issue.status} ${issue.project}`
 						.toLowerCase()
 						.includes(needle),
 			);
@@ -188,6 +212,31 @@ function MyJiraPage() {
 					: 1;
 		for (const rows of byCategory.values())
 			rows.sort((a, b) => rank(a) - rank(b));
+		if (groupBy === "people") {
+			// Each teammate in the order you added them, even with nothing open.
+			const byPerson = new Map<string, IssueGroup>(
+				team.map((member) => [
+					member.accountId,
+					{
+						id: `person:${member.accountId}`,
+						label: member.name,
+						sprint: null,
+						inProgress: false,
+						rows: [],
+					},
+				]),
+			);
+			for (const issue of filtered)
+				byPerson.get(issue.assigneeId ?? "")?.rows.push(issue);
+			const groups = [...byPerson.values()];
+			for (const group of groups)
+				group.rows.sort(
+					(a, b) =>
+						categoryRank(a.statusCategory) - categoryRank(b.statusCategory) ||
+						rank(a) - rank(b),
+				);
+			return groups;
+		}
 		if (groupBy === "status")
 			return [...byCategory.entries()]
 				.sort((a, b) => categoryRank(a[0]) - categoryRank(b[0]))
@@ -233,7 +282,7 @@ function MyJiraPage() {
 					rank(a) - rank(b),
 			);
 		return groups;
-	}, [issues, projectFilter, needle, livePaneByKey, groupBy]);
+	}, [issues, projectFilter, needle, livePaneByKey, groupBy, team]);
 
 	const handleStart = async (issue: (typeof issues)[number]) => {
 		const title = `${issue.key}: ${issue.title}`;
@@ -271,6 +320,8 @@ function MyJiraPage() {
 						onClick={() => {
 							setRole(tab.id);
 							setProjectFilter("");
+							if (tab.id === "team") setGroupBy("people");
+							else if (groupBy === "people") setGroupBy("sprint");
 						}}
 					>
 						{tab.label}
@@ -281,7 +332,10 @@ function MyJiraPage() {
 						aria-label="Group issues by"
 						className="m-0 flex gap-0.5 rounded-full border-0 bg-tertiary p-[3px]"
 					>
-						{(["sprint", "status"] as const).map((mode) => (
+						{(isTeam
+							? (["people", "sprint", "status"] as const)
+							: (["sprint", "status"] as const)
+						).map((mode) => (
 							<button
 								key={mode}
 								type="button"
@@ -294,7 +348,7 @@ function MyJiraPage() {
 										: "text-muted-foreground hover:text-foreground",
 								)}
 							>
-								{mode === "sprint" ? "Sprints" : "Status"}
+								{GROUP_LABEL[mode]}
 							</button>
 						))}
 					</fieldset>
@@ -317,7 +371,22 @@ function MyJiraPage() {
 							))}
 						</FeedSelect>
 					)}
-					<SyncButton isSyncing={isSyncing} onClick={() => void syncAll()} />
+					{isTeam && team.length > 0 && (
+						<button
+							type="button"
+							onClick={() => setEditingTeam((v) => !v)}
+							className="h-[26px] rounded-md px-2.5 text-[12px] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground"
+						>
+							Edit team
+						</button>
+					)}
+					<SyncButton
+						isSyncing={isSyncing || teamQuery.isFetching}
+						onClick={() => {
+							void syncAll();
+							if (isTeam) void teamQuery.refetch();
+						}}
+					/>
 				</div>
 			</FeedHeader>
 
@@ -328,8 +397,11 @@ function MyJiraPage() {
 						text="Jira isn't connected - sign in to see the issues assigned to you."
 					/>
 				)}
-				<FeedError error={issuesQuery.error} />
-				{issuesQuery.data && issues.length === 0 && (
+				<FeedError error={isTeam ? teamQuery.error : issuesQuery.error} />
+				{isTeam && (team.length === 0 || editingTeam) && (
+					<TeamPicker onDone={() => setEditingTeam(false)} />
+				)}
+				{!isTeam && issuesQuery.data && issues.length === 0 && (
 					<div className="px-2 py-8 text-center text-xs text-muted-foreground">
 						Nothing assigned to you 🎉
 					</div>
@@ -341,14 +413,16 @@ function MyJiraPage() {
 				)}
 
 				{groups.map(({ id, label, sprint, inProgress, rows }) => (
-					<div key={id} className={cn("mb-1", groupBy === "sprint" && "mb-4")}>
+					<div key={id} className={cn("mb-1", groupBy !== "status" && "mb-4")}>
 						{groupBy === "sprint" ? (
 							<SprintHeading label={label} sprint={sprint} rows={rows} />
+						) : groupBy === "people" ? (
+							<PersonHeading name={label} rows={rows} />
 						) : null}
 						<div
 							className={cn(
 								"flex items-center gap-2 py-1 pl-1 text-[11px] font-medium uppercase tracking-[.3px] text-muted-foreground",
-								groupBy === "sprint" && "hidden",
+								groupBy !== "status" && "hidden",
 							)}
 						>
 							<span
@@ -372,7 +446,7 @@ function MyJiraPage() {
 								) : null;
 							})()}
 						</div>
-						{(groupBy === "sprint"
+						{(groupBy !== "status"
 							? phasesOf(rows)
 							: [{ phase: null as Phase | null, rows }]
 						).map(({ phase, rows: phaseRows }) => (
@@ -484,7 +558,13 @@ function MyJiraPage() {
 															title={`${issue.key}: ${issue.title}`}
 															upstream={issue.dueDate}
 														/>
-														{issue.reporter && <Avatar name={issue.reporter} />}
+														{isTeam && groupBy !== "people"
+															? issue.assignee && (
+																	<Avatar name={issue.assignee} />
+																)
+															: issue.reporter && (
+																	<Avatar name={issue.reporter} />
+																)}
 														{date && (
 															<span
 																title={`Updated ${issue.updated ?? ""}`}
@@ -538,6 +618,43 @@ function MyJiraPage() {
 }
 
 type IssueRow = JiraIssueRow;
+
+type GroupBy = "people" | "sprint" | "status";
+const GROUP_LABEL: Record<GroupBy, string> = {
+	people: "People",
+	sprint: "Sprints",
+	status: "Status",
+};
+
+/** A teammate's heading: who, and where their open work stands. */
+function PersonHeading({ name, rows }: { name: string; rows: IssueRow[] }) {
+	const count = (phase: Phase) =>
+		rows.filter((row) => phaseOf(row) === phase).length;
+	const review = count("review");
+	const progress = count("progress");
+	const todo = count("todo");
+	return (
+		<div className="sticky top-0 z-10 -mx-1 mb-2 flex items-center gap-2.5 bg-background/95 px-1 pt-3 pb-2 backdrop-blur">
+			<Avatar name={name} className="size-7 text-[11px]" />
+			<div className="flex min-w-0 flex-col">
+				<h2 className="truncate font-display text-[15px] font-semibold tracking-[-0.01em]">
+					{name}
+				</h2>
+				<span className="text-[12px] text-faint-foreground">
+					{rows.length === 0
+						? "Nothing open"
+						: [
+								progress > 0 && `${progress} in progress`,
+								review > 0 && `${review} in review`,
+								todo > 0 && `${todo} to do`,
+							]
+								.filter(Boolean)
+								.join(" · ")}
+				</span>
+			</div>
+		</div>
+	);
+}
 
 interface IssueGroup {
 	id: string;
@@ -655,26 +772,6 @@ function PhaseIcon({ phase }: { phase: Phase }) {
 			}
 			status={phase === "review" ? "review" : PHASE_LABEL[phase]}
 		/>
-	);
-}
-
-/** Who filed it, as initials in their colour - the name is on hover. */
-function Avatar({ name }: { name: string }) {
-	const { fg } = personColor(name);
-	const initials = name
-		.split(/\s+/)
-		.filter(Boolean)
-		.slice(0, 2)
-		.map((part) => part[0]?.toUpperCase())
-		.join("");
-	return (
-		<span
-			title={name}
-			className="flex size-5 shrink-0 items-center justify-center rounded-full text-[9.5px] font-semibold text-background"
-			style={{ backgroundColor: fg }}
-		>
-			{initials}
-		</span>
 	);
 }
 

@@ -1,7 +1,9 @@
-import { existsSync, realpathSync } from "node:fs";
+import { execFile } from "node:child_process";
+import { existsSync, realpathSync, statSync } from "node:fs";
 import { resolve } from "node:path";
+import { promisify } from "node:util";
 import type { SelectWorktree } from "@odin/local-db";
-import { worktrees } from "@odin/local-db";
+import { projects, workspaces, worktrees } from "@odin/local-db";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { track } from "main/lib/analytics";
@@ -37,8 +39,112 @@ const normalizePath = (p: string): string => {
 	}
 };
 
+/** Disk used by a folder, in bytes; null when `du` can't say in time. */
+async function folderBytes(path: string): Promise<number | null> {
+	try {
+		const { stdout } = await promisify(execFile)("du", ["-sk", path], {
+			timeout: 60_000,
+		});
+		const kb = Number.parseInt(stdout.split("\t")[0] ?? "", 10);
+		return Number.isFinite(kb) ? kb * 1024 : null;
+	} catch {
+		return null;
+	}
+}
+
+/** Run `fn` over `items`, `limit` at a time - du on many worktrees at once thrashes the disk. */
+async function mapLimit<T, R>(
+	items: T[],
+	limit: number,
+	fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+	const results: R[] = new Array(items.length);
+	let next = 0;
+	await Promise.all(
+		Array.from({ length: Math.min(limit, items.length) }, async () => {
+			while (next < items.length) {
+				const index = next++;
+				results[index] = await fn(items[index] as T);
+			}
+		}),
+	);
+	return results;
+}
+
+export interface WorktreeUsage {
+	worktreeId: string;
+	workspaceId: string | null;
+	name: string;
+	branch: string;
+	project: string;
+	path: string;
+	bytes: number | null;
+	/** Last time anything happened in it: opened, updated, or files touched. */
+	lastActiveAt: number;
+	hasChanges: boolean;
+	hasUnpushedCommits: boolean;
+	liveTerminals: number;
+	prState: "open" | "draft" | "merged" | "closed" | null;
+}
+
 export const createDeleteProcedures = () => {
 	return router({
+		/**
+		 * Every worktree spyd made, with how much disk it holds and whether
+		 * deleting it would lose anything - Settings > Storage's cleanup list.
+		 */
+		worktreeUsage: publicProcedure.query(async (): Promise<WorktreeUsage[]> => {
+			const rows = localDb.select().from(worktrees).all();
+			const allWorkspaces = localDb.select().from(workspaces).all();
+			const projectNames = new Map(
+				localDb
+					.select({ id: projects.id, name: projects.name })
+					.from(projects)
+					.all()
+					.map((p) => [p.id, p.name]),
+			);
+			const live = rows.filter((row) => existsSync(row.path));
+			return mapLimit(live, 4, async (row) => {
+				const workspace = allWorkspaces.find(
+					(w) => w.worktreeId === row.id && !w.deletingAt,
+				);
+				let touched = 0;
+				try {
+					touched = statSync(row.path).mtimeMs;
+				} catch {}
+				const [bytes, hasChanges, unpushed, liveTerminals] = await Promise.all([
+					folderBytes(row.path),
+					hasUncommittedChanges(row.path).catch(() => true),
+					hasUnpushedCommits(row.path).catch(() => true),
+					workspace
+						? getWorkspaceRuntimeRegistry()
+								.getForWorkspaceId(workspace.id)
+								.terminal.getSessionCountByWorkspaceId(workspace.id)
+								.catch(() => 0)
+						: Promise.resolve(0),
+				]);
+				return {
+					worktreeId: row.id,
+					workspaceId: workspace?.id ?? null,
+					name: workspace?.name ?? row.branch,
+					branch: row.branch,
+					project: projectNames.get(row.projectId) ?? "",
+					path: row.path,
+					bytes,
+					lastActiveAt: Math.max(
+						workspace?.lastOpenedAt ?? 0,
+						workspace?.updatedAt ?? 0,
+						row.createdAt ?? 0,
+						touched,
+					),
+					hasChanges,
+					hasUnpushedCommits: unpushed,
+					liveTerminals,
+					prState: row.githubStatus?.pr?.state ?? null,
+				};
+			});
+		}),
+
 		canDelete: publicProcedure
 			.input(
 				z.object({
