@@ -146,8 +146,10 @@ export function useStartWorkspace() {
 					.catch(() => {});
 			}
 			if (request.openWhenReady) {
-				useHomeSelection.getState().select(result.paneId, "session");
-				navigate({ to: "/home" });
+				// Still on its pending page: swap in the live session. Moved on:
+				// leave you where you are.
+				if (useHomeSelection.getState().paneId === `pending:${id}`)
+					useHomeSelection.getState().select(result.paneId, "session");
 			} else {
 				toast.success(`${created.workspace.branch} is up in ${project.name}`);
 			}
@@ -167,6 +169,12 @@ export function useStartWorkspace() {
 				: request.branch || "New workspace",
 			step: "worktree",
 		});
+		// Open it now, like Superset: the session's page appears on Enter and
+		// fills in as the worktree and Claude come up.
+		if (request.openWhenReady) {
+			useHomeSelection.getState().select(`pending:${id}`, "session");
+			navigate({ to: "/home" });
+		}
 		void run(id, request);
 	};
 

@@ -7,6 +7,7 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
 import { openUrl } from "renderer/stores/in-app-browser";
 import { InlineAsk } from "../components/InlineAsk";
 import { useNewWorkspaceDialog } from "../components/NewWorkspaceDialog";
+import { PENDING, PendingSession } from "../components/PendingSession";
 import { BUTTON } from "../components/pill";
 import {
 	PAST,
@@ -20,6 +21,7 @@ import { endSession } from "../hooks/useDone";
 import { usePaneMeta } from "../hooks/usePaneMeta";
 import { usePendingFocus } from "../hooks/usePendingFocus";
 import type { SessionEntry } from "../hooks/useSessionSections";
+import { usePendingWorkspaces } from "../hooks/useStartWorkspace";
 
 export const Route = createFileRoute("/_authenticated/_odin/home/")({
 	component: HomePage,
@@ -48,9 +50,15 @@ function HomePage() {
 	const pastRow = selectedId?.startsWith(PAST)
 		? (past.find((row) => `${PAST}${row.id}` === selectedId) ?? null)
 		: null;
-	const selected = pastRow
-		? null
-		: (sessions.find((s) => s.pane.id === selectedId) ?? sessions[0] ?? null);
+	const pendingItems = usePendingWorkspaces((s) => s.items);
+	const pendingRow = selectedId?.startsWith(PENDING)
+		? (pendingItems.find((item) => `${PENDING}${item.id}` === selectedId) ??
+			null)
+		: null;
+	const selected =
+		pastRow || pendingRow
+			? null
+			: (sessions.find((s) => s.pane.id === selectedId) ?? sessions[0] ?? null);
 	const listRef = useRef<HTMLDivElement>(null);
 
 	// Something elsewhere (Tasks, a toast) asked to open a session: open it here.
@@ -113,6 +121,38 @@ function HomePage() {
 						New
 					</button>
 				</div>
+				{pendingItems.length > 0 && (
+					<section>
+						<h2 className="sticky top-0 z-10 flex items-baseline gap-2 bg-background/95 px-2.5 pt-[18px] pb-1.5 text-[12px] font-semibold text-muted-foreground backdrop-blur">
+							Starting
+						</h2>
+						{pendingItems.map((item) => (
+							<button
+								key={item.id}
+								type="button"
+								onClick={() => select(`${PENDING}${item.id}`, "session")}
+								className={cn(
+									"flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px]",
+									selectedId === `${PENDING}${item.id}`
+										? "bg-secondary/80"
+										: "hover:bg-accent/60",
+								)}
+							>
+								{item.step === "failed" ? (
+									<span className="size-2 shrink-0 rounded-full bg-danger" />
+								) : (
+									<span className="size-2.5 shrink-0 animate-spin rounded-full border border-working border-t-transparent" />
+								)}
+								<span className="min-w-0 flex-1 truncate font-medium">
+									{item.title}
+								</span>
+								<span className="shrink-0 text-[11px] text-faint-foreground">
+									{item.request.project.name}
+								</span>
+							</button>
+						))}
+					</section>
+				)}
 				{GROUPS.map((group) => {
 					const items = sessions.filter((s) => s.column === group.column);
 					if (items.length === 0) return null;
@@ -145,7 +185,9 @@ function HomePage() {
 			</div>
 
 			<div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-background ring-1 ring-inset ring-border">
-				{pastRow ? (
+				{pendingRow ? (
+					<PendingSession key={pendingRow.id} item={pendingRow} />
+				) : pastRow ? (
 					<div className="min-h-0 flex-1 overflow-y-auto">
 						<PastDetail key={pastRow.id} row={pastRow} />
 					</div>
