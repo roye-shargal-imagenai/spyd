@@ -246,7 +246,7 @@ export function SearchAll({ onClose }: { onClose: () => void }) {
 	const goToPane = (paneId: string) =>
 		go(() => {
 			usePendingFocus.getState().focus(paneId);
-			navigate({ to: "/board" });
+			navigate({ to: "/home" });
 		});
 	const openHistory = (sessionId: string) =>
 		go(() =>
@@ -417,7 +417,7 @@ export function SearchAll({ onClose }: { onClose: () => void }) {
 							setExpanded(new Set());
 							setMenuFor(null);
 						}}
-						placeholder="Search feeds, the board and every past session"
+						placeholder="Search tasks, sessions and every past session"
 						className="text-[13px]"
 					/>
 					<CommandList className="max-h-[64vh] p-1">
