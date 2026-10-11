@@ -115,8 +115,14 @@ export interface JiraIssueRow {
 	created?: string | null;
 	/** Jira's own Due Date, `YYYY-MM-DD`. Null on the tickets nobody dated. */
 	dueDate: string | null;
-	/** Why it's in my list: assigned to me, filed by me, or a comment @s me. */
-	role: "assigned" | "reported" | "mentioned";
+	/**
+	 * Why it's in my list: assigned to me, filed by me, or a comment @s me -
+	 * or "team": assigned to someone on my team.
+	 */
+	role: "assigned" | "reported" | "mentioned" | "team";
+	/** Who it's assigned to, for the team view. */
+	assignee?: string | null;
+	assigneeId?: string | null;
 	/** What was said to me, on the rows that are here because of a mention. */
 	mention: JiraMention | null;
 	/** The ticket's description as plain text, capped - for the hover card. */
@@ -291,6 +297,7 @@ interface JiraSearchResponse {
 			project?: { key?: string; name?: string };
 			issuetype?: { name?: string };
 			reporter?: { displayName?: string };
+			assignee?: { displayName?: string; accountId?: string } | null;
 			updated?: string;
 			created?: string;
 			duedate?: string;
@@ -315,6 +322,151 @@ interface GithubSearchResponse {
 		repository_url?: string;
 		body?: string | null;
 	}[];
+}
+
+/**
+ * One Jira search session: the site, auth and sprint field resolved once,
+ * then `search(role, jql)` as many times as the caller needs. Shared by my
+ * own tickets and my team's.
+ */
+async function openJiraSearch(includeDone = false) {
+	const request = await jiraRequestContext();
+	if (!request) {
+		throw new TRPCError({
+			code: "PRECONDITION_FAILED",
+			message: "Jira isn't connected - sign in from Settings → Connections.",
+		});
+	}
+	const openOnly = includeDone ? "" : " AND statusCategory != Done";
+	const headers = {
+		Authorization: request.authorization,
+		Accept: "application/json",
+	};
+	// Who currentUser() resolved to, so the mention rows can point at
+	// the comment that named me. Started here rather than awaited, so
+	// it rides alongside the searches instead of delaying them.
+	const myAccountId = fetch(`${request.base}/rest/api/3/myself`, {
+		headers,
+	})
+		.then(async (response) =>
+			response.ok
+				? ((await response.json()) as { accountId?: string }).accountId
+				: null,
+		)
+		.catch(() => null);
+
+	let sprintFieldRequest = sprintFieldBySite.get(request.base);
+	if (!sprintFieldRequest) {
+		sprintFieldRequest = fetch(`${request.base}/rest/api/3/field`, {
+			headers,
+		})
+			.then(async (response) => {
+				if (!response.ok) return null;
+				const fields = (await response.json()) as {
+					id: string;
+					schema?: { custom?: string };
+				}[];
+				return (
+					fields.find(
+						(field) =>
+							field.schema?.custom === "com.pyxis.greenhopper.jira:gh-sprint",
+					)?.id ?? null
+				);
+			})
+			.catch(() => null);
+		sprintFieldBySite.set(request.base, sprintFieldRequest);
+	}
+	const sprintField = await sprintFieldRequest;
+
+	const search = async (
+		role: JiraIssueRow["role"],
+		match: string,
+	): Promise<JiraIssueRow[]> => {
+		const jql = `${match}${openOnly} ORDER BY updated DESC`;
+		// Comment bodies are only worth their weight on the mention rows,
+		// where they are the point.
+		const fields = `summary,status,priority,project,issuetype,reporter,assignee,updated,created,duedate,description${sprintField ? `,${sprintField}` : ""}${role === "mentioned" ? ",comment" : ""}`;
+		const response = await fetch(
+			`${request.base}/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=100&fields=${fields}`,
+			{ headers },
+		);
+		if (!response.ok) {
+			throw feedError("Jira", response.status, await response.text());
+		}
+		const payload = (await response.json()) as JiraSearchResponse;
+		const accountId = role === "mentioned" ? await myAccountId : null;
+		const rows = (payload.issues ?? []).map((issue) => ({
+			key: issue.key,
+			url: `${request.siteUrl}/browse/${issue.key}`,
+			title: issue.fields?.summary ?? "(no summary)",
+			status: issue.fields?.status?.name ?? "Unknown",
+			statusCategory: issue.fields?.status?.statusCategory?.name ?? "Unknown",
+			priority: issue.fields?.priority?.name ?? null,
+			project:
+				issue.fields?.project?.name ??
+				issue.fields?.project?.key ??
+				issue.key.split("-")[0],
+			issueType: issue.fields?.issuetype?.name ?? null,
+			reporter: issue.fields?.reporter?.displayName ?? null,
+			assignee: issue.fields?.assignee?.displayName ?? null,
+			assigneeId: issue.fields?.assignee?.accountId ?? null,
+			updated: issue.fields?.updated ?? null,
+			created: issue.fields?.created ?? null,
+			dueDate: issue.fields?.duedate ?? null,
+			sprint: sprintField ? currentSprint(issue.fields?.[sprintField]) : null,
+			role,
+			// ponytail: capped at 3000 chars so a few hundred tickets stay a
+			// small payload; the hover only shows that much anyway.
+			description:
+				adfToText(issue.fields?.description, "\n")
+					.replace(/\n{3,}/g, "\n\n")
+					.trim()
+					.slice(0, 3000) || null,
+			mention: accountId
+				? latestMention(issue.fields?.comment?.comments ?? [], accountId)
+				: null,
+		}));
+		// Jira indexes a comment's author along with its body, so
+		// `comment ~ currentUser()` also returns tickets I merely
+		// commented on. Only the ones that actually name me belong here.
+		return role === "mentioned" ? rows.filter((row) => row.mention) : rows;
+	};
+
+	/**
+	 * A due date Jira keeps but doesn't show is dropped (see below).
+	 */
+	const dropHiddenDueDates = async (issues: JiraIssueRow[]) => {
+		// A due date Jira keeps but doesn't show: an issue type whose
+		// screen has no Due date field still returns the stored value (an
+		// epic created with one, say). Only a date you can see in Jira
+		// counts. The screen is per project and issue type, so one editmeta
+		// call per pair; a failed check keeps the date.
+		await Promise.all(
+			issues
+				.filter((issue) => issue.dueDate)
+				.map(async (issue) => {
+					const screen = `${request.base}|${issue.project}|${issue.issueType}`;
+					let shown = dueOnScreen.get(screen);
+					if (!shown) {
+						shown = fetch(
+							`${request.base}/rest/api/3/issue/${issue.key}/editmeta`,
+							{ headers },
+						)
+							.then(async (response) =>
+								response.ok
+									? "duedate" in
+										(((await response.json()) as { fields?: object }).fields ??
+											{})
+									: true,
+							)
+							.catch(() => true);
+						dueOnScreen.set(screen, shown);
+					}
+					if (!(await shown)) issue.dueDate = null;
+				}),
+		);
+	};
+	return { request, headers, search, dropHiddenDueDates };
 }
 
 export const createWorkRouter = () => {
@@ -456,113 +608,9 @@ export const createWorkRouter = () => {
 					.default({}),
 			)
 			.query(async ({ input }): Promise<{ issues: JiraIssueRow[] }> => {
-				const request = await jiraRequestContext();
-				if (!request) {
-					throw new TRPCError({
-						code: "PRECONDITION_FAILED",
-						message:
-							"Jira isn't connected - sign in from Settings → Connections.",
-					});
-				}
-				const openOnly = input.includeDone ? "" : " AND statusCategory != Done";
-				const headers = {
-					Authorization: request.authorization,
-					Accept: "application/json",
-				};
-				// Who currentUser() resolved to, so the mention rows can point at
-				// the comment that named me. Started here rather than awaited, so
-				// it rides alongside the searches instead of delaying them.
-				const myAccountId = fetch(`${request.base}/rest/api/3/myself`, {
-					headers,
-				})
-					.then(async (response) =>
-						response.ok
-							? ((await response.json()) as { accountId?: string }).accountId
-							: null,
-					)
-					.catch(() => null);
-
-				let sprintFieldRequest = sprintFieldBySite.get(request.base);
-				if (!sprintFieldRequest) {
-					sprintFieldRequest = fetch(`${request.base}/rest/api/3/field`, {
-						headers,
-					})
-						.then(async (response) => {
-							if (!response.ok) return null;
-							const fields = (await response.json()) as {
-								id: string;
-								schema?: { custom?: string };
-							}[];
-							return (
-								fields.find(
-									(field) =>
-										field.schema?.custom ===
-										"com.pyxis.greenhopper.jira:gh-sprint",
-								)?.id ?? null
-							);
-						})
-						.catch(() => null);
-					sprintFieldBySite.set(request.base, sprintFieldRequest);
-				}
-				const sprintField = await sprintFieldRequest;
-
-				const search = async (
-					role: JiraIssueRow["role"],
-					match: string,
-				): Promise<JiraIssueRow[]> => {
-					const jql = `${match}${openOnly} ORDER BY updated DESC`;
-					// Comment bodies are only worth their weight on the mention rows,
-					// where they are the point.
-					const fields = `summary,status,priority,project,issuetype,reporter,assignee,updated,created,duedate,description${sprintField ? `,${sprintField}` : ""}${role === "mentioned" ? ",comment" : ""}`;
-					const response = await fetch(
-						`${request.base}/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=100&fields=${fields}`,
-						{ headers },
-					);
-					if (!response.ok) {
-						throw feedError("Jira", response.status, await response.text());
-					}
-					const payload = (await response.json()) as JiraSearchResponse;
-					const accountId = role === "mentioned" ? await myAccountId : null;
-					const rows = (payload.issues ?? []).map((issue) => ({
-						key: issue.key,
-						url: `${request.siteUrl}/browse/${issue.key}`,
-						title: issue.fields?.summary ?? "(no summary)",
-						status: issue.fields?.status?.name ?? "Unknown",
-						statusCategory:
-							issue.fields?.status?.statusCategory?.name ?? "Unknown",
-						priority: issue.fields?.priority?.name ?? null,
-						project:
-							issue.fields?.project?.name ??
-							issue.fields?.project?.key ??
-							issue.key.split("-")[0],
-						issueType: issue.fields?.issuetype?.name ?? null,
-						reporter: issue.fields?.reporter?.displayName ?? null,
-						updated: issue.fields?.updated ?? null,
-						created: issue.fields?.created ?? null,
-						dueDate: issue.fields?.duedate ?? null,
-						sprint: sprintField
-							? currentSprint(issue.fields?.[sprintField])
-							: null,
-						role,
-						// ponytail: capped at 3000 chars so a few hundred tickets stay a
-						// small payload; the hover only shows that much anyway.
-						description:
-							adfToText(issue.fields?.description, "\n")
-								.replace(/\n{3,}/g, "\n\n")
-								.trim()
-								.slice(0, 3000) || null,
-						mention: accountId
-							? latestMention(issue.fields?.comment?.comments ?? [], accountId)
-							: null,
-					}));
-					// Jira indexes a comment's author along with its body, so
-					// `comment ~ currentUser()` also returns tickets I merely
-					// commented on. Only the ones that actually name me belong here.
-					return role === "mentioned"
-						? rows.filter((row) => row.mention)
-						: rows;
-				};
-
+				const { search, dropHiddenDueDates } = await openJiraSearch(
+					input.includeDone,
+				);
 				const [assigned, reported, mentioned] = await Promise.all([
 					search("assigned", "assignee = currentUser()"),
 					search("reported", "reporter = currentUser()"),
@@ -585,37 +633,61 @@ export const createWorkRouter = () => {
 					seen.add(issue.key);
 					issues.push({ ...issue, mention: mentions.get(issue.key) ?? null });
 				}
-				// A due date Jira keeps but doesn't show: an issue type whose
-				// screen has no Due date field still returns the stored value (an
-				// epic created with one, say). Only a date you can see in Jira
-				// counts. The screen is per project and issue type, so one editmeta
-				// call per pair; a failed check keeps the date.
-				await Promise.all(
-					issues
-						.filter((issue) => issue.dueDate)
-						.map(async (issue) => {
-							const screen = `${request.base}|${issue.project}|${issue.issueType}`;
-							let shown = dueOnScreen.get(screen);
-							if (!shown) {
-								shown = fetch(
-									`${request.base}/rest/api/3/issue/${issue.key}/editmeta`,
-									{ headers },
-								)
-									.then(async (response) =>
-										response.ok
-											? "duedate" in
-												(((await response.json()) as { fields?: object })
-													.fields ?? {})
-											: true,
-									)
-									.catch(() => true);
-								dueOnScreen.set(screen, shown);
-							}
-							if (!(await shown)) issue.dueDate = null;
-						}),
-				);
+				await dropHiddenDueDates(issues);
 				return { issues };
 			}),
+
+		/**
+		 * My team's open tickets: everything assigned to the people I picked.
+		 * One search per person, so nobody's tickets fall off the 100 cap.
+		 */
+		teamJiraIssues: publicProcedure
+			.input(z.object({ accountIds: z.array(z.string().regex(/^[\w:-]+$/)) }))
+			.query(async ({ input }): Promise<{ issues: JiraIssueRow[] }> => {
+				if (input.accountIds.length === 0) return { issues: [] };
+				const { search, dropHiddenDueDates } = await openJiraSearch();
+				const perPerson = await Promise.all(
+					input.accountIds.map((id) => search("team", `assignee = "${id}"`)),
+				);
+				const issues = perPerson.flat();
+				await dropHiddenDueDates(issues);
+				return { issues };
+			}),
+
+		/** People on the Jira site matching a name, for picking a team. */
+		jiraPeople: publicProcedure
+			.input(z.object({ query: z.string() }))
+			.query(
+				async ({
+					input,
+				}): Promise<
+					{ accountId: string; name: string; avatarUrl: string | null }[]
+				> => {
+					const query = input.query.trim();
+					if (query.length < 2) return [];
+					const { request, headers } = await openJiraSearch();
+					const response = await fetch(
+						`${request.base}/rest/api/3/user/search?query=${encodeURIComponent(query)}&maxResults=10`,
+						{ headers },
+					);
+					if (!response.ok)
+						throw feedError("Jira", response.status, await response.text());
+					const users = (await response.json()) as {
+						accountId: string;
+						accountType?: string;
+						active?: boolean;
+						displayName?: string;
+						avatarUrls?: Record<string, string>;
+					}[];
+					return users
+						.filter((u) => u.accountType === "atlassian" && u.active !== false)
+						.map((u) => ({
+							accountId: u.accountId,
+							name: u.displayName ?? u.accountId,
+							avatarUrl: u.avatarUrls?.["48x48"] ?? null,
+						}));
+				},
+			),
 
 		/**
 		 * Status of the Jira tickets a session links, keyed by issue key - the
