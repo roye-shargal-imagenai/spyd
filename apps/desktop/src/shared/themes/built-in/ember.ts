@@ -92,6 +92,25 @@ export const CHARCOAL: Surface = {
 	faint: "#7f7b78",
 };
 
+/**
+ * macOS dark, from Apple's own system greys: content on gray6, the sidebar a
+ * step lighter the way a vibrant Mac sidebar reads, separators and fills
+ * from the same ladder. Grey, not black.
+ */
+export const MAC: Surface = {
+	page: "#1c1c1e",
+	card: "#2c2c2e",
+	popover: "#2c2c2e",
+	raised: "#3a3a3c",
+	hover: "#2c2c2e",
+	chrome: "#252527",
+	border: "#38383a",
+	input: "#3a3a3c",
+	text: "#f5f5f7",
+	muted: "#aeaeb2",
+	faint: "#8e8e93",
+};
+
 function spydDark({
 	id,
 	name,
@@ -210,16 +229,27 @@ function spydDark({
 }
 
 /**
- * The default: Superset's Dark - warm charcoal, light-on-dark buttons - with
- * Spider-Man blue kept for what's selected or live.
+ * The default: macOS dark - Apple's system greys and blue, light-on-dark
+ * buttons like Superset's.
  */
 export const inkTheme = spydDark({
 	id: "spyd-ink",
+	name: "Mac",
+	surface: MAC,
+	accent: "#0a84ff",
+	accentForeground: "#ffffff",
+	selection: "10, 132, 255",
+	button: { background: "#f5f5f7", foreground: "#1c1c1e", ring: "#48484a" },
+});
+
+/** Superset's own Dark, warm charcoal, for when you want it near-black. */
+export const charcoalTheme = spydDark({
+	id: "spyd-charcoal",
 	name: "Charcoal",
 	surface: CHARCOAL,
-	accent: "#5b7cf5",
+	accent: "#0a84ff",
 	accentForeground: "#ffffff",
-	selection: "91, 124, 245",
+	selection: "10, 132, 255",
 	button: { background: "#eae8e6", foreground: "#151110", ring: "#3a3837" },
 });
 

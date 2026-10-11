@@ -302,10 +302,10 @@ function ListRow({
 			data-pane={entry.pane.id}
 			onClick={onSelect}
 			className={cn(
-				"relative flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left transition-colors duration-150",
+				"relative flex w-full gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors duration-150",
 				selected
 					? "bg-secondary before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-highlight"
-					: "hover:bg-accent/60",
+					: "hover:bg-accent/35",
 			)}
 		>
 			<StatusGlyph column={entry.column} className="mt-[5px]" />
@@ -324,7 +324,7 @@ function ListRow({
 					</span>
 				</span>
 				{gist && (
-					<span className="line-clamp-2 text-[12px] leading-snug text-muted-foreground">
+					<span className="truncate text-[12px] leading-snug text-muted-foreground">
 						{gist}
 					</span>
 				)}

@@ -180,9 +180,9 @@ export function RepoSidebarSection({ entries }: { entries: SessionEntry[] }) {
 									)}
 								>
 									{isOpen ? (
-										<HiOutlineFolderOpen className="size-[15px] shrink-0 text-faint-foreground" />
+										<HiOutlineFolderOpen className="size-[15px] shrink-0 text-[#5ac8fa]" />
 									) : (
-										<HiOutlineFolder className="size-[15px] shrink-0 text-faint-foreground" />
+										<HiOutlineFolder className="size-[15px] shrink-0 text-[#5ac8fa]/80" />
 									)}
 									<span className="min-w-0 flex-1 truncate">
 										{project.name}
@@ -264,7 +264,7 @@ function SidebarSessionRow({
 	return (
 		<button
 			type="button"
-			title={gist ? `${entry.title}\n${gist}` : entry.title}
+			title={entry.title}
 			onClick={onOpen}
 			className={cn(
 				ROW,

@@ -15,46 +15,46 @@
  * This ensures the app looks correct during initial load before hydration.
  */
 :root {
-	/* Fallbacks = the built-in Charcoal theme (shared/themes/built-in/ember.ts),
+	/* Fallbacks = the built-in Mac theme (shared/themes/built-in/ember.ts),
 	   so the first paint before the theme store hydrates already matches. */
-	--background: #151110;
-	--foreground: #eae8e6;
-	--card: #201e1c;
-	--card-foreground: #eae8e6;
-	--popover: #201e1c;
-	--popover-foreground: #eae8e6;
-	--primary: #eae8e6;
-	--primary-foreground: #151110;
-	--secondary: #2a2827;
-	--secondary-foreground: #eae8e6;
-	--muted: #2a2827;
-	--muted-foreground: #a8a5a3;
-	--accent: #252220;
-	--accent-foreground: #eae8e6;
-	--tertiary: #1a1716;
-	--tertiary-active: #2a2827;
+	--background: #1c1c1e;
+	--foreground: #f5f5f7;
+	--card: #2c2c2e;
+	--card-foreground: #f5f5f7;
+	--popover: #2c2c2e;
+	--popover-foreground: #f5f5f7;
+	--primary: #f5f5f7;
+	--primary-foreground: #1c1c1e;
+	--secondary: #3a3a3c;
+	--secondary-foreground: #f5f5f7;
+	--muted: #3a3a3c;
+	--muted-foreground: #aeaeb2;
+	--accent: #2c2c2e;
+	--accent-foreground: #f5f5f7;
+	--tertiary: #252527;
+	--tertiary-active: #3a3a3c;
 	--destructive: #ff7d92;
 	--destructive-foreground: #fff1f3;
-	--border: #2a2827;
-	--input: #2a2827;
-	--ring: #3a3837;
-	--chart-1: #5b7cf5;
+	--border: #38383a;
+	--input: #3a3a3c;
+	--ring: #48484a;
+	--chart-1: #0a84ff;
 	--chart-2: #2dd4bf;
 	--chart-3: #1ed760;
 	--chart-4: #ffb020;
 	--chart-5: #ff7d92;
 	--radius: 0.5rem;
-	--sidebar: #1a1716;
-	--sidebar-foreground: #eae8e6;
-	--sidebar-primary: #5b7cf5;
+	--sidebar: #252527;
+	--sidebar-foreground: #f5f5f7;
+	--sidebar-primary: #0a84ff;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #2a2827;
-	--sidebar-accent-foreground: #eae8e6;
-	--sidebar-border: #2a2827;
-	--sidebar-ring: #5b7cf5;
-	--highlight-match: rgba(91, 124, 245, 0.2);
-	--highlight-active: rgba(91, 124, 245, 0.45);
-	--highlight: #5b7cf5;
+	--sidebar-accent: #3a3a3c;
+	--sidebar-accent-foreground: #f5f5f7;
+	--sidebar-border: #38383a;
+	--sidebar-ring: #0a84ff;
+	--highlight-match: rgba(10, 132, 255, 0.2);
+	--highlight-active: rgba(10, 132, 255, 0.45);
+	--highlight: #0a84ff;
 	--highlight-foreground: #ffffff;
 	/* Sidebar row fills: low-opacity foreground washes so they track any theme */
 	--fill-hover: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -63,22 +63,22 @@
 	/* Odin's semantic palette. Not theme-store variables: a theme recolours
 	   surfaces, but a state reads the same everywhere. Each hue means one
 	   thing - never use one for decoration:
-	     working   - an agent is running (suit blue)
-	     attention - waiting on you, a warning (soft coral)
+	     working   - an agent is running (Apple blue)
+	     attention - waiting on you, a warning (Apple orange)
 	     success   - finished, done, connected (green)
 	     danger    - failed, overdue, destructive (red)
 	   Chips tint them: bg-<hue>/12 text-<hue>. Two text steps sit between
 	   foreground and muted-foreground: soft (body copy) and faint (tags,
 	   separators, placeholders). */
-	--soft-foreground: #d3d0cd;
-	--faint-foreground: #7f7b78;
-	--working: #6ea8fe;
-	--attention: #f2786f;
-	--success: #5cc98a;
-	--danger: #ff7d92;
+	--soft-foreground: #d1d1d6;
+	--faint-foreground: #8e8e93;
+	--working: #409cff;
+	--attention: #ff9f0a;
+	--success: #30d158;
+	--danger: #ff6961;
 	/* Links: periwinkle, so a link is never mistaken for the accent button
 	   or a teal working status. */
-	--link: #93a8ff;
+	--link: #64d2ff;
 	/* Each hue's "ink": the hue lifted toward white, for text sitting on its
 	   own tint - the light label on a pill, the top of a glossy button. */
 	--primary-ink: color-mix(in oklab, var(--primary) 52%, white);

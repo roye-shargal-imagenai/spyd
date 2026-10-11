@@ -104,12 +104,14 @@ const RAIL_ITEMS = [
 		to: "/home" as const,
 		hotkey: "ODIN_HOME" as const,
 		label: "Home",
+		tint: "#0a84ff",
 		Icon: HiOutlineHome,
 	},
 	{
 		to: "/jira" as const,
 		hotkey: "ODIN_ALL" as const,
 		label: "Tasks",
+		tint: "#ff9f0a",
 		Icon: HiOutlineClipboardDocumentCheck,
 	},
 	// Also its own entry rather than a feed tab. The strip answers "what's
@@ -119,6 +121,7 @@ const RAIL_ITEMS = [
 		to: "/review" as const,
 		hotkey: "ODIN_REVIEW" as const,
 		label: "Review",
+		tint: "#bf5af2",
 		Icon: HiOutlineScale,
 	},
 	// Its own rail entry, not a seventh feed tab: every tab in that strip
@@ -128,6 +131,7 @@ const RAIL_ITEMS = [
 		to: "/automations" as const,
 		hotkey: "ODIN_AUTOMATIONS" as const,
 		label: "Automations",
+		tint: "#ffd60a",
 		Icon: HiOutlineBolt,
 	},
 ];
@@ -141,6 +145,7 @@ const SETTINGS_ITEM = {
 	to: "/settings" as const,
 	hotkey: "OPEN_SETTINGS" as const,
 	label: "Settings",
+	tint: "#98989d",
 	Icon: HiOutlineCog6Tooth,
 };
 
@@ -152,6 +157,7 @@ const BOARD_ITEM = {
 	to: "/board" as const,
 	hotkey: "ODIN_BOARD" as const,
 	label: "Dev Board",
+	tint: "#64d2ff",
 	Icon: HiOutlineViewColumns,
 };
 
@@ -160,6 +166,7 @@ const INSIGHTS_ITEM = {
 	to: "/insights" as const,
 	hotkey: "ODIN_INSIGHTS" as const,
 	label: "Insights",
+	tint: "#30d158",
 	Icon: HiOutlineChartBar,
 };
 
@@ -168,6 +175,7 @@ const HISTORY_ITEM = {
 	to: "/sessions" as const,
 	hotkey: "ODIN_SESSIONS" as const,
 	label: "Archive",
+	tint: "#98989d",
 	Icon: HiOutlineClock,
 };
 
@@ -437,6 +445,7 @@ function OdinShell() {
 		label,
 		hotkey,
 		Icon,
+		tint,
 	}:
 		| (typeof RAIL_ITEMS)[number]
 		| typeof BOARD_ITEM
@@ -459,11 +468,13 @@ function OdinShell() {
 				className={cn(
 					"flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors",
 					isActive
-						? "bg-card font-medium text-foreground"
-						: "text-muted-foreground hover:text-foreground",
+						? "bg-white/[0.08] font-medium text-foreground"
+						: "text-soft-foreground hover:bg-white/[0.04] hover:text-foreground",
 				)}
 			>
-				<Icon className="size-[15px] shrink-0 opacity-80" />
+				{/* Each place keeps its own colour, the way the Mac's sidebars do:
+				    you find Tasks by its orange before you read the word. */}
+				<Icon className="size-[16px] shrink-0" style={{ color: tint }} />
 				<span className="min-w-0 flex-1 truncate text-left">{label}</span>
 			</button>
 		);
@@ -760,7 +771,7 @@ function NightAgentRailButton() {
 						: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
 			)}
 		>
-			<HiOutlineMoon className="size-4 shrink-0" />
+			<HiOutlineMoon className="size-4 shrink-0" style={{ color: "#5e5ce6" }} />
 			<span className="min-w-0 flex-1 truncate text-left">Night Agent</span>
 			{queued > 0 && (
 				<span
