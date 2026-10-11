@@ -12,6 +12,7 @@ import {
 } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
+import { archiveSession } from "../hooks/useDone";
 import { usePendingFocus } from "../hooks/usePendingFocus";
 import { useSessionGist } from "../hooks/useSessionGist";
 import type { SessionEntry } from "../hooks/useSessionSections";
@@ -20,6 +21,7 @@ import {
 	usePendingWorkspaces,
 	useStartWorkspace,
 } from "../hooks/useStartWorkspace";
+import { ArchiveButton } from "./ArchiveButton";
 import {
 	NewWorkspaceDialog,
 	useNewWorkspaceDialog,
@@ -262,31 +264,38 @@ function SidebarSessionRow({
 }) {
 	const gist = useSessionGist(entry);
 	return (
-		<button
-			type="button"
-			title={entry.title}
-			onClick={onOpen}
-			className={cn(
-				ROW,
-				"h-auto min-h-7 items-start py-1 text-[12px] text-soft-foreground",
-			)}
-		>
-			<span
-				aria-hidden
+		<div className="group/row relative">
+			<button
+				type="button"
+				title={entry.title}
+				onClick={onOpen}
 				className={cn(
-					"mt-[5px] size-[7px] shrink-0 rounded-full",
-					SESSION_DOT[entry.column] ?? SESSION_DOT.idle,
+					ROW,
+					"h-auto min-h-7 items-start py-1 pr-6 text-[12px] text-soft-foreground",
 				)}
+			>
+				<span
+					aria-hidden
+					className={cn(
+						"mt-[5px] size-[7px] shrink-0 rounded-full",
+						SESSION_DOT[entry.column] ?? SESSION_DOT.idle,
+					)}
+				/>
+				<span className="flex min-w-0 flex-1 flex-col">
+					<span className="truncate">{entry.title}</span>
+					{gist && (
+						<span className="truncate text-[11px] text-faint-foreground">
+							{gist}
+						</span>
+					)}
+				</span>
+			</button>
+			<ArchiveButton
+				title={entry.title}
+				onArchive={() => archiveSession(entry.pane.id, entry.title)}
+				className="absolute top-[3px] right-1"
 			/>
-			<span className="flex min-w-0 flex-1 flex-col">
-				<span className="truncate">{entry.title}</span>
-				{gist && (
-					<span className="truncate text-[11px] text-faint-foreground">
-						{gist}
-					</span>
-				)}
-			</span>
-		</button>
+		</div>
 	);
 }
 

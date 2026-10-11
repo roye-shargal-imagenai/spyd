@@ -6,6 +6,7 @@ import { HiChevronRight, HiPlus } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { openUrl } from "renderer/stores/in-app-browser";
 import { create } from "zustand";
+import { ArchiveButton } from "../components/ArchiveButton";
 import { InlineAsk } from "../components/InlineAsk";
 import { useNewWorkspaceDialog } from "../components/NewWorkspaceDialog";
 import { PENDING, PendingSession } from "../components/PendingSession";
@@ -18,7 +19,7 @@ import {
 } from "../components/RecentSessions";
 import { StatusGlyph, useSidebarSessions } from "../components/SessionList";
 import { SessionPane, useHomeSelection } from "../components/SessionPane";
-import { endSession } from "../hooks/useDone";
+import { archiveSession, endSession } from "../hooks/useDone";
 import { usePaneMeta } from "../hooks/usePaneMeta";
 import { usePendingFocus } from "../hooks/usePendingFocus";
 import { useSessionGist } from "../hooks/useSessionGist";
@@ -299,44 +300,51 @@ function ListRow({
 	const gist = useSessionGist(entry);
 	const waiting = entry.column === "permission";
 	return (
-		<button
-			type="button"
-			data-pane={entry.pane.id}
-			onClick={onSelect}
-			className={cn(
-				"relative flex w-full gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors duration-150",
-				selected
-					? "bg-secondary before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-highlight"
-					: "hover:bg-accent/35",
-			)}
-		>
-			<StatusGlyph column={entry.column} className="mt-[5px]" />
-			<span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-				<span className="flex items-baseline gap-2">
-					<span
-						className={cn(
-							"min-w-0 flex-1 truncate text-[13px] text-foreground",
-							waiting ? "font-semibold" : "font-medium",
-						)}
-					>
-						{entry.title}
-					</span>
-					<span className="shrink-0 text-[12px] tabular-nums text-faint-foreground">
-						{ago(entry.pane.odinStatusAt)}
-					</span>
-				</span>
-				{gist && (
-					<span className="truncate text-[12px] leading-snug text-muted-foreground">
-						{gist}
-					</span>
+		<div className="group/row relative">
+			<button
+				type="button"
+				data-pane={entry.pane.id}
+				onClick={onSelect}
+				className={cn(
+					"relative flex w-full gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors duration-150",
+					selected
+						? "bg-secondary before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-highlight"
+						: "hover:bg-accent/35",
 				)}
-				<span className="truncate text-[11.5px] text-faint-foreground">
-					{[repo, STATE[entry.column], SOURCE[entry.section]]
-						.filter(Boolean)
-						.join(" · ")}
+			>
+				<StatusGlyph column={entry.column} className="mt-[5px]" />
+				<span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+					<span className="flex items-baseline gap-2">
+						<span
+							className={cn(
+								"min-w-0 flex-1 truncate text-[13px] text-foreground",
+								waiting ? "font-semibold" : "font-medium",
+							)}
+						>
+							{entry.title}
+						</span>
+						<span className="shrink-0 text-[12px] tabular-nums text-faint-foreground group-hover/row:invisible">
+							{ago(entry.pane.odinStatusAt)}
+						</span>
+					</span>
+					{gist && (
+						<span className="truncate text-[12px] leading-snug text-muted-foreground">
+							{gist}
+						</span>
+					)}
+					<span className="truncate text-[11.5px] text-faint-foreground">
+						{[repo, STATE[entry.column], SOURCE[entry.section]]
+							.filter(Boolean)
+							.join(" · ")}
+					</span>
 				</span>
-			</span>
-		</button>
+			</button>
+			<ArchiveButton
+				title={entry.title}
+				onArchive={() => archiveSession(entry.pane.id, entry.title)}
+				className="absolute top-[7px] right-1.5"
+			/>
+		</div>
 	);
 }
 
