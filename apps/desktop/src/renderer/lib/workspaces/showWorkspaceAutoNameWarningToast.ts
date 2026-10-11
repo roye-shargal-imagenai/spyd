@@ -7,6 +7,10 @@ export function showWorkspaceAutoNameWarningToast({
 	description: string;
 	onOpenModelAuthSettings: () => void;
 }) {
+	// Odin fork: the prompt-based title is a fine name, and the model sign-in
+	// it points at is the built-in chat's, which sessions don't use - so the
+	// fallback isn't worth a toast on every new workspace.
+	if (description.startsWith("A prompt-based title was used")) return;
 	toast.warning("Workspace used a fallback name", {
 		description,
 		// Give users time to read the warning and click through to settings.
