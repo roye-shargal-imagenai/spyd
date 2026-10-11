@@ -119,8 +119,12 @@ export function SessionPane({
 			}
 			const diedWorking =
 				useTabsStore.getState().panes[pane.id]?.status === "working";
+			// Same id, so the chat, the card and a later Resume keep pointing at
+			// this conversation.
 			const command = fresh
-				? claudeCli()
+				? sessionId
+					? `${claudeCli()} --session-id ${sessionId}`
+					: claudeCli()
 				: `${
 						sessionId
 							? `${claudeCli()} --resume ${sessionId}`
@@ -164,7 +168,17 @@ export function SessionPane({
 	useEffect(() => {
 		if (daemon === undefined || alive || autoTried || !tab) return;
 		setAutoTried(true);
-		void resume();
+		// The list polls every 5s, so a session launched a moment ago isn't
+		// in it yet. Ask again before treating it as ended - resuming a live
+		// one killed it and restarted it under a new id.
+		void utils.client.terminal.listDaemonSessions
+			.query()
+			.then((fresh) => {
+				if (fresh.sessions.some((s) => s.sessionId === pane.id && s.isAlive))
+					return utils.terminal.listDaemonSessions.invalidate();
+				return resume();
+			})
+			.catch(() => {});
 		// biome-ignore lint/correctness/useExhaustiveDependencies: once per pane, on arrival
 	}, [daemon, alive, tab, autoTried, resume]);
 
