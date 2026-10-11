@@ -177,28 +177,30 @@ function HomePage() {
 					const urgent = group.column === "permission";
 					return (
 						<section key={group.column}>
-							<button
-								type="button"
-								onClick={() => toggleGroup(group.column)}
-								aria-expanded={!folded.includes(group.column)}
-								className={cn(
-									"group/head sticky top-0 z-10 flex w-full items-center gap-1.5 bg-background/95 px-2.5 pt-4 pb-1.5 text-left text-[12px] font-semibold backdrop-blur transition-colors",
-									urgent
-										? "text-attention-ink"
-										: "text-muted-foreground hover:text-foreground",
-								)}
-							>
-								<HiChevronRight
+							<div className="sticky top-0 z-10 bg-background/95 px-1 pt-3 pb-1 backdrop-blur">
+								<button
+									type="button"
+									onClick={() => toggleGroup(group.column)}
+									aria-expanded={!folded.includes(group.column)}
 									className={cn(
-										"size-3 shrink-0 opacity-60 transition-transform duration-150 group-hover/head:opacity-100",
-										!folded.includes(group.column) && "rotate-90",
+										"group/head flex h-6 w-full items-center gap-1.5 rounded-[5px] px-1.5 text-left text-[12px] font-semibold transition-colors hover:bg-white/[0.05]",
+										urgent
+											? "text-attention-ink"
+											: "text-muted-foreground hover:text-foreground",
 									)}
-								/>
-								<span className="flex-1">{group.title}</span>
-								<span className="rounded-[4px] bg-secondary px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground">
-									{items.length}
-								</span>
-							</button>
+								>
+									<HiChevronRight
+										className={cn(
+											"size-3 shrink-0 opacity-60 transition-transform duration-150 group-hover/head:opacity-100",
+											!folded.includes(group.column) && "rotate-90",
+										)}
+									/>
+									<span className="flex-1">{group.title}</span>
+									<span className="rounded-[4px] bg-secondary px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground">
+										{items.length}
+									</span>
+								</button>
+							</div>
 							{!folded.includes(group.column) &&
 								items.map((entry) => (
 									<ListRow
