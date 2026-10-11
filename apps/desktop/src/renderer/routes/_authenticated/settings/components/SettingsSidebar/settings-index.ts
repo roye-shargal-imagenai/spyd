@@ -1,5 +1,6 @@
 import {
 	LuBell,
+	LuHardDrive,
 	LuKeyboard,
 	LuListOrdered,
 	LuPalette,
@@ -24,6 +25,12 @@ export const SCREENS = [
 		label: "Sessions",
 		hint: "Default folder, limits, idle close",
 		icon: LuSquareTerminal,
+	},
+	{
+		to: "/settings/storage",
+		label: "Storage",
+		hint: "Old worktrees, disk space",
+		icon: LuHardDrive,
 	},
 	{
 		to: "/settings/backlog",
@@ -68,6 +75,12 @@ export interface SettingEntry {
  * their label / title); settings-index.test.ts fails when one drifts.
  */
 export const SETTINGS_INDEX: SettingEntry[] = [
+	{
+		label: "Old worktrees",
+		to: "/settings/storage",
+		section: "Old worktrees",
+		keywords: "disk space delete clean cleanup gb storage workspaces",
+	},
 	{
 		label: "Profiles",
 		to: "/settings/connections",
